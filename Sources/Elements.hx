@@ -5,23 +5,15 @@ import kha.Assets;
 import zui.*;
 import zui.Canvas;
 
+@:access(zui.Zui)
 class Elements {
 	var ui: Zui;
 	var cui: Zui;
 	var initialized = false;
-	var itemList:Array<String>;
 
 	var bg:kha.Image = null;
 
-	var canvas:TCanvas = {
-		name: "Untitled",
-		x: 0,
-		y: 0,
-		width: 960,
-		height: 540,
-		elements: [],
-		assets: []
-	};
+	var canvas:TCanvas;
 
 	function onDrop(file:String) {
 		kha.LoaderImpl.loadImageFromDescription({ files: [file] }, function(image:kha.Image) {
@@ -32,7 +24,9 @@ class Elements {
 		});
 	}
 
-	public function new() {
+	public function new(canvas:TCanvas) {
+
+		this.canvas = canvas;
 
 		var _onDrop = onDrop;
 		untyped __js__("
@@ -46,7 +40,6 @@ class Elements {
 		");
 
 		Assets.loadEverything(loadingFinished);
-		itemList = ["Item 1", "Item 2", "Item 3"];
 	}
 
 	function loadingFinished() {
@@ -89,6 +82,8 @@ class Elements {
 	}
 
 	var selectedElem = -1;
+	var handlewin = Id.handle();
+	var handleradio = Id.handle();
 	public function render(framebuffer: Framebuffer): Void {
 		if (!initialized) return;
 
@@ -129,38 +124,49 @@ class Elements {
 		var title = canvas.name + ", " + canvas.width + "x" + canvas.height;
 		var titlew = g.font.width(40, title);
 		var titleh = g.font.height(40);
+		g.color = 0xffffffff;
 		g.drawString(title, kha.System.windowWidth() - titlew - 30, kha.System.windowHeight() - titleh - 10);
 		
 		Canvas.draw(cui, canvas, g);
+
+		// Outline selected elem
+		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
+			var elem = canvas.elements[selectedElem];
+			g.color = 0xffffffff;
+			g.drawRect(canvas.x + elem.x, canvas.y + elem.y, elem.width, elem.height, 1);
+		}
 
 		g.end();
 
 		ui.begin(g);
 		// window() returns true if redraw is needed - windows are cached into textures
-		if (ui.window(Id.handle(), 0, 0, 240, 640, false)) {
+		if (ui.window(handlewin, 0, 0, 240, 640, false)) {
 
 			if (ui.panel(Id.handle({selected: true}), "CANVAS")) {
-				ui.row([1/3, 1/3, 1/3]);
-				if (ui.button("New")) {
-					untyped __js__("const {dialog} = require('electron').remote");
-					untyped __js__("dialog.showMessageBox({type: 'question', buttons: ['Yes', 'No'], title: 'Confirm', message: 'Create new canvas?'})");
-				}
+				// ui.row([1/3, 1/3, 1/3]);
+				// if (ui.button("New")) {
+				// 	untyped __js__("const {dialog} = require('electron').remote");
+				// 	untyped __js__("dialog.showMessageBox({type: 'question', buttons: ['Yes', 'No'], title: 'Confirm', message: 'Create new canvas?'})");
+				// }
 
-				if (ui.button("Open")) {
-					untyped __js__("const {dialog} = require('electron').remote");
-					untyped __js__("console.log(dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']}))");
-				}
+				// if (ui.button("Open")) {
+				// 	untyped __js__("const {dialog} = require('electron').remote");
+				// 	untyped __js__("console.log(dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']}))");
+				// }
 
 				if (ui.button("Save")) {
-					untyped __js__("const {dialog} = require('electron').remote");
-					untyped __js__("console.log(dialog.showSaveDialog({properties: ['saveFile', 'saveDirectory']}))");
+					// untyped __js__("const {dialog} = require('electron').remote");
+					// untyped __js__("console.log(dialog.showSaveDialog({properties: ['saveFile', 'saveDirectory']}))");
+
+					untyped __js__("var fs = require('fs')");
+					untyped __js__("fs.writeFileSync({0}, {1})", Main.prefs.path, haxe.Json.stringify(canvas));
 				}
 				canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
-				ui.row([1/2, 1/2]);
-				var strw = ui.textInput(Id.handle({text: canvas.width + ""}), "Width", Right);
-				var strh = ui.textInput(Id.handle({text: canvas.height + ""}), "Height", Right);
-				canvas.width = Std.parseInt(strw);
-				canvas.height = Std.parseInt(strh);
+				// ui.row([1/2, 1/2]);
+				// var strw = ui.textInput(Id.handle({text: canvas.width + ""}), "Width", Right);
+				// var strh = ui.textInput(Id.handle({text: canvas.height + ""}), "Height", Right);
+				// canvas.width = Std.parseInt(strw);
+				// canvas.height = Std.parseInt(strh);
 			}
 
 			ui.separator();
@@ -170,19 +176,32 @@ class Elements {
 				if (ui.button("Text")) {
 					var elem = makeElem(ElementType.Text);
 					canvas.elements.push(elem);
+					handleradio.position = canvas.elements.length - 1;
 				}
 				if (ui.button("Image")) {
 					var elem = makeElem(ElementType.Image);
 					canvas.elements.push(elem);
+					handleradio.position = canvas.elements.length - 1;
 				}
 				if (ui.button("Button")) {
 					var elem = makeElem(ElementType.Button);
 					canvas.elements.push(elem);
+					handleradio.position = canvas.elements.length - 1;
 				}
 
 				var i = 0;
 				for (elem in canvas.elements) {
-					if (ui.radio(Id.handle(), i++, elem.name)) selectedElem = i - 1;
+					if (ui.radio(handleradio, i++, elem.name)) selectedElem = i - 1;
+				}
+
+				if (canvas.elements.length > 0) {
+					if (ui.button("Remove")) {
+						canvas.elements.splice(selectedElem, 1);
+						if (selectedElem <= canvas.elements.length) {
+							selectedElem--;
+							handleradio.position = selectedElem;
+						}
+					}
 				}
 			}
 
@@ -199,8 +218,14 @@ class Elements {
 					elem.event = ui.textInput(Id.handle().nest(i, {text: elem.event}), "Event", Right);
 					elem.asset = ui.textInput(Id.handle().nest(i, {text: elem.asset}), "Asset", Right);
 					ui.row([1/2, 1/2]);
-					var strx = ui.textInput(Id.handle().nest(i, {text: elem.x + ""}), "X", Right);
-					var stry = ui.textInput(Id.handle().nest(i, {text: elem.y + ""}), "Y", Right);
+					var handlex = Id.handle().nest(i, {text: elem.x + ""});
+					var handley = Id.handle().nest(i, {text: elem.y + ""});
+					// if (drag) {
+						handlex.text = elem.x + "";
+						handley.text = elem.y + "";
+					// }
+					var strx = ui.textInput(handlex, "X", Right);
+					var stry = ui.textInput(handley, "Y", Right);
 					elem.x = Std.parseFloat(strx);
 					elem.y = Std.parseFloat(stry);
 					ui.row([1/2, 1/2]);
@@ -234,7 +259,28 @@ class Elements {
 		ui.end();
 	}
 
-	public function update(): Void {
+	var drag = false;
+	public function update() {
 		if (!initialized) return;
+
+		// Drag selected elem
+		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
+			var elem = canvas.elements[selectedElem];
+
+			if (ui.inputStarted &&
+				ui.inputX > canvas.x + elem.x && ui.inputX < canvas.x + elem.x + elem.width &&
+				ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height) {
+				drag = true;
+			}
+			if (ui.inputReleased && drag) {
+				drag = false;
+			}
+
+			if (drag) {
+				handlewin.redraws = 2;
+				elem.x += ui.inputDX;
+				elem.y += ui.inputDY;
+			}
+		}
 	}
 }
