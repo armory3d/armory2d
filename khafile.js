@@ -1,4 +1,4 @@
-let project = new Project('Elements');
+let project = new Project('ArmorUI');
 
 project.addSources('Sources');
 project.addAssets('Assets/**');

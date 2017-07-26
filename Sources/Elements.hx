@@ -14,13 +14,24 @@ class Elements {
 	static inline var uiw = 240;
 	static inline var coff = 40;
 
+	var dropPath = "";
 	var drag = false;
+	var dragLeft = false;
+	var dragTop = false;
+	var dragRight = false;
+	var dragBottom = false;
 	var assetNames:Array<String> = [];
-	var assetId = 0;
 	var dragAsset:TAsset = null;
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
+
+		// Reimport assets
+		if (canvas.assets.length > 0) {
+			var assets = canvas.assets;
+			canvas.assets = [];
+			for (a in assets) importAsset(a.file);
+		}
 
 		// var _onDrop = onDrop;
 		// untyped __js__("
@@ -42,9 +53,8 @@ class Elements {
 		ui = new Zui({font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
 		cui = new Zui({font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
 
-		kha.System.notifyOnDropFiles(function(filePath:String) {
-			filePath = StringTools.rtrim(filePath);			
-			importAsset(filePath);
+		kha.System.notifyOnDropFiles(function(path:String) {
+			dropPath = StringTools.rtrim(path);			
 		});
 
 		kha.System.notifyOnRender(render);
@@ -54,13 +64,16 @@ class Elements {
 	function importAsset(path:String) {
 		if (!StringTools.endsWith(path, ".jpg") &&
 			!StringTools.endsWith(path, ".png") &&
+			!StringTools.endsWith(path, ".k") &&
 			!StringTools.endsWith(path, ".hdr")) return;
 		
 		kha.LoaderImpl.loadImageFromDescription({ files: [path] }, function(image:kha.Image) {
-			var ar = path.split("/");
+			var ar = kha.System.systemId == "Windows" ? path.split("\\") : path.split("/");
 			var name = ar[ar.length - 1];
-			var asset:TAsset = { name: name, file: path, image: image, id: assetId++ };
+			var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
 			canvas.assets.push(asset);
+			Canvas.assetMap.set(asset.id, image);
+
 			assetNames.push(name);
 			hwin.redraws = 2;
 		});
@@ -110,6 +123,11 @@ class Elements {
 	var hwin = Id.handle();
 	var hradio = Id.handle();
 	public function render(framebuffer: kha.Framebuffer): Void {
+
+		if (dropPath != "") {
+			importAsset(dropPath);
+			dropPath = "";
+		}
 
 		if (bg == null) {
 			var w = kha.System.windowWidth();
@@ -264,10 +282,7 @@ class Elements {
 					hradio.position = selectedElem;
 				}
 				if (ui.button("Remove")) {
-					elems.splice(selectedElem, 1);
-					if (selectedElem == elems.length) selectedElem--;
-					else if (selectedElem < 0) selectedElem++;
-					hradio.position = selectedElem;
+					removeSelectedElem();
 				}
 				ui.t.BUTTON_BG_COL = temp1;
 				ui.t.BUTTON_BG_COL_HOVER = temp2;
@@ -295,12 +310,19 @@ class Elements {
 					elem.x = Std.parseFloat(strx);
 					elem.y = Std.parseFloat(stry);
 					ui.row([1/2, 1/2]);
-					var strw = ui.textInput(Id.handle().nest(id, {text: elem.width + ""}), "Width", Right);
-					var strh = ui.textInput(Id.handle().nest(id, {text: elem.height + ""}), "Height", Right);
+					var handlew = Id.handle().nest(id, {text: elem.width + ""});
+					var handleh = Id.handle().nest(id, {text: elem.height + ""});
+					// if (drag) {
+						handlew.text = elem.width + "";
+						handleh.text = elem.height + "";
+					// }
+					var strw = ui.textInput(handlew, "Width", Right);
+					var strh = ui.textInput(handleh, "Height", Right);
 					elem.width = Std.int(Std.parseFloat(strw));
 					elem.height = Std.int(Std.parseFloat(strh));
 					elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
-					elem.anchor = ui.combo(Id.handle().nest(id), ["None", "Top-Left", "Top-Center", "Top-Right"], "Anchor", true, Right);
+					// elem.anchor = ui.combo(Id.handle().nest(id), ["None", "Top-Left", "Top-Center", "Top-Right"], "Anchor", true, Right);
+					elem.anchor = ui.combo(Id.handle().nest(id), ["None"], "Anchor", true, Right);
 					var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 					elem.asset = getEnumTexts()[assetPos];
 					elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
@@ -315,14 +337,14 @@ class Elements {
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
 						var asset = canvas.assets[i];
-						if (ui.image(asset.image) == State.Started) {
+						if (ui.image(getImage(asset)) == State.Started) {
 							dragAsset = asset;
 						}
 						ui.row([7/8, 1/8]);
 						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
 						assetNames[i] = asset.name;
 						if (ui.button("X")) {
-							asset.image.unload();
+							getImage(asset).unload();
 							canvas.assets.splice(i, 1);
 							assetNames.splice(i, 1);
 						}
@@ -330,7 +352,7 @@ class Elements {
 					}
 				}
 				else {
-					ui.text("(Drag & drop assets)", zui.Zui.Align.Center, 0xff151515);
+					ui.text("(Drop files here)", zui.Zui.Align.Center, 0xff151515);
 					ui.text("(.png .jpg .hdr)", zui.Zui.Align.Center, 0xff151515);
 				}
 			}
@@ -339,11 +361,22 @@ class Elements {
 
 		g.begin(false);
 		if (dragAsset != null) {
-			var ratio = 128 / dragAsset.image.width;
-			var h = dragAsset.image.height * ratio;
-			g.drawScaledImage(dragAsset.image, ui.inputX, ui.inputY, 128, h);
+			var ratio = 128 / getImage(dragAsset).width;
+			var h = getImage(dragAsset).height * ratio;
+			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, 128, h);
 		}
 		g.end();
+	}
+
+	function getImage(asset:TAsset):kha.Image {
+		return Canvas.assetMap.get(asset.id);
+	}
+
+	function removeSelectedElem() {
+		canvas.elements.splice(selectedElem, 1);
+		if (selectedElem == canvas.elements.length) selectedElem--;
+		else if (selectedElem < 0) selectedElem++;
+		hradio.position = selectedElem;
 	}
 
 	function acceptDrag(index:Int) {
@@ -351,12 +384,15 @@ class Elements {
 		elem.asset = assetNames[index];
 		elem.x = ui.inputX - canvas.x;
 		elem.y = ui.inputY - canvas.y;
+		elem.width = getImage(canvas.assets[index]).width;
+		elem.height = getImage(canvas.assets[index]).height;
 		canvas.elements.push(elem);
 		hradio.position = canvas.elements.length - 1;
 	}
 
 	public function update() {
 
+		// Drag from assets panel
 		if (ui.inputReleased && dragAsset != null) {
 			if (ui.inputX < kha.System.windowWidth() - uiw) {
 				var index = 0;
@@ -369,24 +405,32 @@ class Elements {
 
 		// Select elem
 		if (ui.inputStarted && ui.inputDownR) {
-			for (i in 0...canvas.elements.length) {
+			var i = canvas.elements.length;
+			while (--i >= 0) {
 				var elem = canvas.elements[i];
 				if (ui.inputX > canvas.x + elem.x && ui.inputX < canvas.x + elem.x + elem.width &&
-					ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height) {
+					ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height &&
+					selectedElem != i) {
 					selectedElem = hradio.position = i;
 					break;
 				}
 			}
 		}
 
-		// Drag selected elem
 		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
 			var elem = canvas.elements[selectedElem];
 
+			// Drag selected elem
 			if (ui.inputStarted &&
-				ui.inputX > canvas.x + elem.x && ui.inputX < canvas.x + elem.x + elem.width &&
-				ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height) {
+				ui.inputX >= canvas.x + elem.x - 3 && ui.inputX <= canvas.x + elem.x + elem.width + 3 &&
+				ui.inputY >= canvas.y + elem.y - 3 && ui.inputY <= canvas.y + elem.y + elem.height + 3) {
 				drag = true;
+				dragLeft = dragRight = dragTop = dragBottom = false;
+				if (ui.inputX > canvas.x + elem.x + elem.width - 3) dragRight = true;
+				else if (ui.inputX < canvas.x + elem.x + 3) dragLeft = true;
+				if (ui.inputY > canvas.y + elem.y + elem.height - 3) dragBottom = true;
+				else if (ui.inputY < canvas.y + elem.y + 3) dragTop = true;
+
 			}
 			if (ui.inputReleased && drag) {
 				drag = false;
@@ -394,8 +438,28 @@ class Elements {
 
 			if (drag) {
 				hwin.redraws = 2;
-				elem.x += ui.inputDX;
-				elem.y += ui.inputDY;
+
+				if (dragRight) elem.width += Std.int(ui.inputDX);
+				else if (dragLeft) { elem.x += Std.int(ui.inputDX); elem.width -= Std.int(ui.inputDX); }
+				if (dragBottom) elem.height += Std.int(ui.inputDY);
+				else if (dragTop) { elem.y += Std.int(ui.inputDY); elem.height -= Std.int(ui.inputDY); }
+			
+				if (!dragLeft && !dragRight && !dragBottom && !dragTop) {
+					elem.x += ui.inputDX;
+					elem.y += ui.inputDY;
+				}
+			}
+
+			// Move with arrows
+			if (ui.isKeyDown) {
+				if (ui.key == kha.input.KeyCode.Left) elem.x--;
+				if (ui.key == kha.input.KeyCode.Right) elem.x++;
+				if (ui.key == kha.input.KeyCode.Up) elem.y--;
+				if (ui.key == kha.input.KeyCode.Down) elem.y++;
+
+				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
+
+				hwin.redraws = 2;
 			}
 		}
 	}
