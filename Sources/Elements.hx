@@ -333,6 +333,7 @@ class Elements {
 
 			if (ui.panel(Id.handle({selected: true}), "ASSETS")) {
 				if (canvas.assets.length > 0) {
+					ui.text("(Drag images to canvas)", zui.Zui.Align.Center, 0xff151515);
 
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
