@@ -204,6 +204,15 @@ class Elements {
 				#if kha_krom
 				Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
 				#end
+
+				var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
+				filesPath += '.files';
+				var filesList = '';
+				for (a in canvas.assets) filesList += a.file + '\n';
+				#if kha_krom
+				Krom.fileSaveBytes(filesPath, haxe.io.Bytes.ofString(filesList).getData());
+				#end
+
 				canvas.x = coff;
 				canvas.y = coff;
 			}
