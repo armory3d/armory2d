@@ -467,7 +467,9 @@ class Elements {
 				if (ui.key == kha.input.KeyCode.Up) elem.y--;
 				if (ui.key == kha.input.KeyCode.Down) elem.y++;
 
-				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
+				if (!ui.isTyping) {
+					if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
+				}
 
 				hwin.redraws = 2;
 			}
