@@ -336,23 +336,21 @@ class Elements {
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
 						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
-						if (ui.check(Id.handle().nest(id, {selected: elem.anchor > 0}), "Anchor")) {
-							var hanch = Id.handle().nest(id, {position: elem.anchor - 1});
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 0, "Top-Left");
-							ui.radio(hanch, 1, "Top");
-							ui.radio(hanch, 2, "Top-Right");
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 3, "Left");
-							ui.radio(hanch, 4, "Center");
-							ui.radio(hanch, 5, "Right");
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 6, "Bot-Left");
-							ui.radio(hanch, 7, "Bottom");
-							ui.radio(hanch, 8, "Bot-Right");
-							elem.anchor = hanch.position + 1;
-						}
-						else elem.anchor = 0;
+						ui.text("Anchor");
+						var hanch = Id.handle().nest(id, {position: elem.anchor});
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 0, "Top-Left");
+						ui.radio(hanch, 1, "Top");
+						ui.radio(hanch, 2, "Top-Right");
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 3, "Left");
+						ui.radio(hanch, 4, "Center");
+						ui.radio(hanch, 5, "Right");
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 6, "Bot-Left");
+						ui.radio(hanch, 7, "Bottom");
+						ui.radio(hanch, 8, "Bot-Right");
+						elem.anchor = hanch.position;
 					}
 				}
 			}
