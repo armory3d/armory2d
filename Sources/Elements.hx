@@ -103,7 +103,7 @@ class Elements {
 			height: height,
 			text: name,
 			asset: "",
-			color: 0xffffff,
+			color: 0xffffffff,
 			anchor: 0,
 			children: []
 		};
@@ -192,155 +192,172 @@ class Elements {
 		ui.begin(g);
 		if (ui.window(hwin, kha.System.windowWidth() - uiw, 0, uiw, kha.System.windowHeight(), false)) {
 
-			if (ui.button("Save")) {
-				// untyped __js__("const {dialog} = require('electron').remote");
-				// untyped __js__("console.log(dialog.showSaveDialog({properties: ['saveFile', 'saveDirectory']}))");
-				// untyped __js__("var fs = require('fs')");
-				// untyped __js__("fs.writeFileSync({0}, {1})", Main.prefs.path, haxe.Json.stringify(canvas));
-				
-				// Unpan
-				canvas.x = 0;
-				canvas.y = 0;
-				#if kha_krom
-				Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
-				#end
+			var htab = Id.handle();
+			if (ui.tab(htab, "Project")) {
 
-				var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
-				filesPath += '.files';
-				var filesList = '';
-				for (a in canvas.assets) filesList += a.file + '\n';
-				#if kha_krom
-				Krom.fileSaveBytes(filesPath, haxe.io.Bytes.ofString(filesList).getData());
-				#end
+				if (ui.button("Save")) {
+					// untyped __js__("const {dialog} = require('electron').remote");
+					// untyped __js__("console.log(dialog.showSaveDialog({properties: ['saveFile', 'saveDirectory']}))");
+					// untyped __js__("var fs = require('fs')");
+					// untyped __js__("fs.writeFileSync({0}, {1})", Main.prefs.path, haxe.Json.stringify(canvas));
+					
+					// Unpan
+					canvas.x = 0;
+					canvas.y = 0;
+					#if kha_krom
+					Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
+					#end
 
-				canvas.x = coff;
-				canvas.y = coff;
-			}
+					var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
+					filesPath += '.files';
+					var filesList = '';
+					for (a in canvas.assets) filesList += a.file + '\n';
+					#if kha_krom
+					Krom.fileSaveBytes(filesPath, haxe.io.Bytes.ofString(filesList).getData());
+					#end
 
-			if (ui.panel(Id.handle({selected: false}), "CANVAS")) {
-				// ui.row([1/3, 1/3, 1/3]);
-				// if (ui.button("New")) {
-				// 	untyped __js__("const {dialog} = require('electron').remote");
-				// 	untyped __js__("dialog.showMessageBox({type: 'question', buttons: ['Yes', 'No'], title: 'Confirm', message: 'Create new canvas?'})");
-				// }
-
-				// if (ui.button("Open")) {
-				// 	untyped __js__("const {dialog} = require('electron').remote");
-				// 	untyped __js__("console.log(dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']}))");
-				// }
-
-				if (ui.button("New")) {
-					canvas.elements = [];
-					selectedElem = -1;
+					canvas.x = coff;
+					canvas.y = coff;
 				}
 
-				canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
-				ui.row([1/2, 1/2]);
-				var strw = ui.textInput(Id.handle({text: canvas.width + ""}), "Width", Right);
-				var strh = ui.textInput(Id.handle({text: canvas.height + ""}), "Height", Right);
-				canvas.width = Std.parseInt(strw);
-				canvas.height = Std.parseInt(strh);
-			}
-
-			ui.separator();
-
-			if (ui.panel(Id.handle({selected: true}), "TREE")) {
-				ui.row([1/3, 1/3, 1/3]);
-				if (ui.button("Text")) {
-					var elem = makeElem(ElementType.Text);
-					canvas.elements.push(elem);
-					hradio.position = canvas.elements.length - 1;
-				}
-				if (ui.button("Image")) {
-					var elem = makeElem(ElementType.Image);
-					canvas.elements.push(elem);
-					hradio.position = canvas.elements.length - 1;
-				}
-				if (ui.button("Button")) {
-					var elem = makeElem(ElementType.Button);
-					canvas.elements.push(elem);
-					hradio.position = canvas.elements.length - 1;
-				}
-
-				var i = canvas.elements.length - 1;
-				while (i >= 0) {
-					var elem = canvas.elements[i];
-					if (ui.radio(hradio, i, elem.name)) selectedElem = i;
-					i--;
-				}
-				ui.row([1/3, 1/3, 1/3]);
-				var temp1 = ui.t.BUTTON_BG_COL;
-				var temp2 = ui.t.BUTTON_BG_COL_HOVER;
-				var temp3 = ui.t.BUTTON_BG_COL_PRESSED;
-				ui.t.BUTTON_BG_COL = 0xff343436;
-				ui.t.BUTTON_BG_COL_HOVER = 0xff444446;
-				ui.t.BUTTON_BG_COL_PRESSED = 0xff303030;
-				var elems = canvas.elements;
-				if (ui.button("Up") && selectedElem < elems.length - 1) {
-					var t = canvas.elements[selectedElem];
-					canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
-					canvas.elements[selectedElem + 1] = t;
-					selectedElem++;
-					hradio.position = selectedElem;
-				}
-				if (ui.button("Down") && selectedElem > 0) {
-					var t = canvas.elements[selectedElem];
-					canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
-					canvas.elements[selectedElem - 1] = t;
-					selectedElem--;
-					hradio.position = selectedElem;
-				}
-				if (ui.button("Remove")) {
-					removeSelectedElem();
-				}
-				ui.t.BUTTON_BG_COL = temp1;
-				ui.t.BUTTON_BG_COL_HOVER = temp2;
-				ui.t.BUTTON_BG_COL_PRESSED = temp3;
-			}
-
-			ui.separator();
-
-			if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
-				if (selectedElem >= 0) {
-					var elem = canvas.elements[selectedElem];
-					var id = elem.id;
-					ui.row([1/2, 1/2]);
-					elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
-					elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
-					ui.row([1/2, 1/2]);
-					var handlex = Id.handle().nest(id, {text: elem.x + ""});
-					var handley = Id.handle().nest(id, {text: elem.y + ""});
-					// if (drag) {
-						handlex.text = elem.x + "";
-						handley.text = elem.y + "";
+				if (ui.panel(Id.handle({selected: false}), "CANVAS")) {
+					// ui.row([1/3, 1/3, 1/3]);
+					// if (ui.button("New")) {
+					// 	untyped __js__("const {dialog} = require('electron').remote");
+					// 	untyped __js__("dialog.showMessageBox({type: 'question', buttons: ['Yes', 'No'], title: 'Confirm', message: 'Create new canvas?'})");
 					// }
-					var strx = ui.textInput(handlex, "X", Right);
-					var stry = ui.textInput(handley, "Y", Right);
-					elem.x = Std.parseFloat(strx);
-					elem.y = Std.parseFloat(stry);
-					ui.row([1/2, 1/2]);
-					var handlew = Id.handle().nest(id, {text: elem.width + ""});
-					var handleh = Id.handle().nest(id, {text: elem.height + ""});
-					// if (drag) {
-						handlew.text = elem.width + "";
-						handleh.text = elem.height + "";
+
+					// if (ui.button("Open")) {
+					// 	untyped __js__("const {dialog} = require('electron').remote");
+					// 	untyped __js__("console.log(dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']}))");
 					// }
-					var strw = ui.textInput(handlew, "Width", Right);
-					var strh = ui.textInput(handleh, "Height", Right);
-					elem.width = Std.int(Std.parseFloat(strw));
-					elem.height = Std.int(Std.parseFloat(strh));
-					elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
-					// elem.anchor = ui.combo(Id.handle().nest(id), ["None", "Top-Left", "Top-Center", "Top-Right"], "Anchor", true, Right);
-					elem.anchor = ui.combo(Id.handle().nest(id), ["None"], "Anchor", true, Right);
-					var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
-					elem.asset = getEnumTexts()[assetPos];
-					elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
+
+					if (ui.button("New")) {
+						canvas.elements = [];
+						selectedElem = -1;
+					}
+
+					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
+					ui.row([1/2, 1/2]);
+					var strw = ui.textInput(Id.handle({text: canvas.width + ""}), "Width", Right);
+					var strh = ui.textInput(Id.handle({text: canvas.height + ""}), "Height", Right);
+					canvas.width = Std.parseInt(strw);
+					canvas.height = Std.parseInt(strh);
+				}
+
+				ui.separator();
+
+				if (ui.panel(Id.handle({selected: true}), "TREE")) {
+					ui.row([1/3, 1/3, 1/3]);
+					if (ui.button("Text")) {
+						var elem = makeElem(ElementType.Text);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
+					if (ui.button("Image")) {
+						var elem = makeElem(ElementType.Image);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
+					if (ui.button("Button")) {
+						var elem = makeElem(ElementType.Button);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
+
+					var i = canvas.elements.length - 1;
+					while (i >= 0) {
+						var elem = canvas.elements[i];
+						if (ui.radio(hradio, i, elem.name)) selectedElem = i;
+						i--;
+					}
+					ui.row([1/3, 1/3, 1/3]);
+					var temp1 = ui.t.BUTTON_BG_COL;
+					var temp2 = ui.t.BUTTON_BG_COL_HOVER;
+					var temp3 = ui.t.BUTTON_BG_COL_PRESSED;
+					ui.t.BUTTON_BG_COL = 0xff343436;
+					ui.t.BUTTON_BG_COL_HOVER = 0xff444446;
+					ui.t.BUTTON_BG_COL_PRESSED = 0xff303030;
+					var elems = canvas.elements;
+					if (ui.button("Up") && selectedElem < elems.length - 1) {
+						var t = canvas.elements[selectedElem];
+						canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
+						canvas.elements[selectedElem + 1] = t;
+						selectedElem++;
+						hradio.position = selectedElem;
+					}
+					if (ui.button("Down") && selectedElem > 0) {
+						var t = canvas.elements[selectedElem];
+						canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
+						canvas.elements[selectedElem - 1] = t;
+						selectedElem--;
+						hradio.position = selectedElem;
+					}
+					if (ui.button("Remove")) {
+						removeSelectedElem();
+					}
+					ui.t.BUTTON_BG_COL = temp1;
+					ui.t.BUTTON_BG_COL_HOVER = temp2;
+					ui.t.BUTTON_BG_COL_PRESSED = temp3;
+				}
+
+				ui.separator();
+
+				if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
+					if (selectedElem >= 0) {
+						var elem = canvas.elements[selectedElem];
+						var id = elem.id;
+						ui.row([1/2, 1/2]);
+						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
+						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
+						ui.row([1/2, 1/2]);
+						var handlex = Id.handle().nest(id, {text: elem.x + ""});
+						var handley = Id.handle().nest(id, {text: elem.y + ""});
+						// if (drag) {
+							handlex.text = elem.x + "";
+							handley.text = elem.y + "";
+						// }
+						var strx = ui.textInput(handlex, "X", Right);
+						var stry = ui.textInput(handley, "Y", Right);
+						elem.x = Std.parseFloat(strx);
+						elem.y = Std.parseFloat(stry);
+						ui.row([1/2, 1/2]);
+						var handlew = Id.handle().nest(id, {text: elem.width + ""});
+						var handleh = Id.handle().nest(id, {text: elem.height + ""});
+						// if (drag) {
+							handlew.text = elem.width + "";
+							handleh.text = elem.height + "";
+						// }
+						var strw = ui.textInput(handlew, "Width", Right);
+						var strh = ui.textInput(handleh, "Height", Right);
+						elem.width = Std.int(Std.parseFloat(strw));
+						elem.height = Std.int(Std.parseFloat(strh));
+						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
+						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
+						elem.asset = getEnumTexts()[assetPos];
+						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
+						elem.anchor = 0;
+						if (ui.check(Id.handle().nest(id), "Anchor")) {
+							var hanch = Id.handle().nest(id);
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 0, "Top-Left");
+							ui.radio(hanch, 1, "Top");
+							ui.radio(hanch, 2, "Top-Right");
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 3, "Left");
+							ui.radio(hanch, 4, "Center");
+							ui.radio(hanch, 5, "Right");
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 6, "Bot-Left");
+							ui.radio(hanch, 7, "Bottom");
+							ui.radio(hanch, 8, "Bot-Right");
+							elem.anchor = hanch.position;
+						}
+					}
 				}
 			}
 
-			ui.separator();
-
-			if (ui.panel(Id.handle({selected: true}), "ASSETS")) {
+			if (ui.tab(htab, "Assets")) {
 				if (canvas.assets.length > 0) {
 					ui.text("(Drag images to canvas)", zui.Zui.Align.Center, 0xff151515);
 
@@ -371,9 +388,10 @@ class Elements {
 
 		g.begin(false);
 		if (dragAsset != null) {
-			var ratio = 128 / getImage(dragAsset).width;
+			var w = Math.min(128, getImage(dragAsset).width);
+			var ratio = w / getImage(dragAsset).width;
 			var h = getImage(dragAsset).height * ratio;
-			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, 128, h);
+			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, w, h);
 		}
 		g.end();
 	}
@@ -397,7 +415,7 @@ class Elements {
 		elem.width = getImage(canvas.assets[index]).width;
 		elem.height = getImage(canvas.assets[index]).height;
 		canvas.elements.push(elem);
-		hradio.position = canvas.elements.length - 1;
+		selectedElem = hradio.position = canvas.elements.length - 1;
 	}
 
 	public function update() {
@@ -461,15 +479,13 @@ class Elements {
 			}
 
 			// Move with arrows
-			if (ui.isKeyDown) {
+			if (ui.isKeyDown && !ui.isTyping) {
 				if (ui.key == kha.input.KeyCode.Left) elem.x--;
 				if (ui.key == kha.input.KeyCode.Right) elem.x++;
 				if (ui.key == kha.input.KeyCode.Up) elem.y--;
 				if (ui.key == kha.input.KeyCode.Down) elem.y++;
 
-				if (!ui.isTyping) {
-					if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
-				}
+				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
 
 				hwin.redraws = 2;
 			}
