@@ -94,7 +94,7 @@ class Elements {
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
 		kha.LoaderImpl.loadImageFromDescription({ files: [abspath] }, function(image:kha.Image) {
-			var ar = kha.System.systemId == "Windows" ? path.split("\\") : path.split("/");
+			var ar = path.split("/");
 			var name = ar[ar.length - 1];
 			var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
 			canvas.assets.push(asset);
