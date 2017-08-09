@@ -47,6 +47,28 @@ class Elements {
 		kha.Assets.loadEverything(loaded);
 	}
 
+	static function toRelative(path:String, cwd:String):String {
+        path = haxe.io.Path.normalize(path);
+        cwd = haxe.io.Path.normalize(cwd);
+        
+        var ar:Array<String> = [];
+        var ar1 = path.split("/");
+        var ar2 = cwd.split("/");
+        
+        var index = 0;
+        while (ar1[index] == ar2[index]) index++;
+        
+        for (i in 0...ar2.length - index) ar.push("..");
+        
+        for (i in index...ar1.length) ar.push(ar1[i]);
+        
+        return ar.join("/");
+    }
+
+    static function toAbsolute(path:String, cwd:String):String {
+        return haxe.io.Path.normalize(cwd + "/" + path);
+    }
+
 	function loaded() {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
@@ -54,7 +76,8 @@ class Elements {
 		cui = new Zui({font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
 
 		kha.System.notifyOnDropFiles(function(path:String) {
-			dropPath = StringTools.rtrim(path);			
+			dropPath = StringTools.rtrim(path);
+			dropPath = toRelative(dropPath, Main.cwd);
 		});
 
 		kha.System.notifyOnRender(render);
@@ -67,7 +90,10 @@ class Elements {
 			!StringTools.endsWith(path, ".k") &&
 			!StringTools.endsWith(path, ".hdr")) return;
 		
-		kha.LoaderImpl.loadImageFromDescription({ files: [path] }, function(image:kha.Image) {
+		var abspath = toAbsolute(path, Main.cwd);
+		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
+
+		kha.LoaderImpl.loadImageFromDescription({ files: [abspath] }, function(image:kha.Image) {
 			var ar = kha.System.systemId == "Windows" ? path.split("\\") : path.split("/");
 			var name = ar[ar.length - 1];
 			var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
