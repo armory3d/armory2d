@@ -170,6 +170,8 @@ class Elements {
 		g.color = 0xffffffff;
 		g.drawString(title, kha.System.windowWidth() - titlew - 30 - uiw, kha.System.windowHeight() - titleh - 10);
 		
+		Canvas.screenW = canvas.width;
+		Canvas.screenH = canvas.height;
 		Canvas.draw(cui, canvas, g);
 
 		// Outline selected elem
