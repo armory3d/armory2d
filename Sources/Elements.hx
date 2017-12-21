@@ -300,12 +300,12 @@ class Elements {
 						i--;
 					}
 					ui.row([1/3, 1/3, 1/3]);
-					var temp1 = ui.t.BUTTON_BG_COL;
-					var temp2 = ui.t.BUTTON_BG_COL_HOVER;
-					var temp3 = ui.t.BUTTON_BG_COL_PRESSED;
-					ui.t.BUTTON_BG_COL = 0xff343436;
-					ui.t.BUTTON_BG_COL_HOVER = 0xff444446;
-					ui.t.BUTTON_BG_COL_PRESSED = 0xff303030;
+					var temp1 = ui.t.BUTTON_COL;
+					var temp2 = ui.t.BUTTON_HOVER_COL;
+					var temp3 = ui.t.BUTTON_PRESSED_COL;
+					ui.t.BUTTON_COL = 0xff343436;
+					ui.t.BUTTON_HOVER_COL = 0xff444446;
+					ui.t.BUTTON_PRESSED_COL = 0xff303030;
 					var elems = canvas.elements;
 					if (ui.button("Up") && selectedElem < elems.length - 1) {
 						var t = canvas.elements[selectedElem];
@@ -324,9 +324,9 @@ class Elements {
 					if (ui.button("Remove")) {
 						removeSelectedElem();
 					}
-					ui.t.BUTTON_BG_COL = temp1;
-					ui.t.BUTTON_BG_COL_HOVER = temp2;
-					ui.t.BUTTON_BG_COL_PRESSED = temp3;
+					ui.t.BUTTON_COL = temp1;
+					ui.t.BUTTON_HOVER_COL = temp2;
+					ui.t.BUTTON_PRESSED_COL = temp3;
 				}
 
 				ui.separator();
