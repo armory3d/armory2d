@@ -1,1 +1,0 @@
-{"name":"untitled","x":0,"y":0,"width":960,"height":540,"elements":[{"id":1,"type":2,"name":"Button","event":"button","x":99,"y":83,"width":150,"height":40,"text":"Test","asset":"","color":-1,"anchor":0,"children":[]},{"id":3,"type":0,"name":"Text","event":"","x":12,"y":15,"width":320,"height":48,"text":"Hello, World!","asset":"","color":-1,"anchor":0,"children":[]}],"assets":[]}

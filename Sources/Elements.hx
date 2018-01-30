@@ -8,7 +8,6 @@ import zui.Canvas;
 class Elements {
 	var ui: Zui;
 	var cui: Zui;
-	var bg:kha.Image = null;
 	var canvas:TCanvas;
 
 	static inline var uiw = 240;
@@ -145,9 +144,49 @@ class Elements {
 		return 0;
 	}
 
+	function resize() {
+		if (grid != null) {
+			grid.unload();
+			grid = null;
+		}
+	}
+
+	static var grid:kha.Image = null;
+	function drawGrid() {
+		var ww = kha.System.windowWidth(0);
+		var wh = kha.System.windowHeight(0);
+		var w = ww + 40 * 2;
+		var h = wh + 40 * 2;
+		grid = kha.Image.createRenderTarget(w, h);
+		grid.g2.begin(true, 0xff242424);
+		for (i in 0...Std.int(h / 40) + 1) {
+			grid.g2.color = 0xff282828;
+			grid.g2.drawLine(0, i * 40, w, i * 40);
+			grid.g2.color = 0xff323232;
+			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
+		}
+		for (i in 0...Std.int(w / 40) + 1) {
+			grid.g2.color = 0xff282828;
+			grid.g2.drawLine(i * 40, 0, i * 40, h);
+			grid.g2.color = 0xff323232;
+			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
+		}
+
+		grid.g2.color = 0xffffffff;
+		canvas.x = coff;
+		canvas.y = coff;
+		grid.g2.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
+
+		grid.g2.end();
+	}
+
 	var selectedElem = -1;
 	var hwin = Id.handle();
 	var hradio = Id.handle();
+	var lastW = 0;
+	var lastH = 0;
+	var lastCanvasW = 0;
+	var lastCanvasH = 0;
 	public function render(framebuffer: kha.Framebuffer): Void {
 
 		if (dropPath != "") {
@@ -155,38 +194,15 @@ class Elements {
 			dropPath = "";
 		}
 
-		if (bg == null) {
-			var w = kha.System.windowWidth();
-			var h = kha.System.windowHeight();
-			bg = kha.Image.createRenderTarget(w, h);
-			bg.g2.begin(true, 0xff141414);
-			for (i in 0...Std.int(h / 40) + 1) {
-				bg.g2.color = 0xff303030;
-				bg.g2.drawLine(0, i * 40, w, i * 40);
-				bg.g2.color = 0xff202020;
-				bg.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
-			}
-			for (i in 0...Std.int(w / 40) + 1) {
-				bg.g2.color = 0xff303030;
-				bg.g2.drawLine(i * 40, 0, i * 40, h);
-				bg.g2.color = 0xff202020;
-				bg.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
-			}
-
-			bg.g2.color = 0xffffffff;
-			canvas.x = coff;
-			canvas.y = coff;
-			bg.g2.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
-
-			bg.g2.end();
-		}
+		// Grid
+		if (grid == null) drawGrid();
 
 		var g = framebuffer.g2;
 
 		g.begin();
 
 		g.color = 0xffffffff;
-		g.drawImage(bg, 0, 0);
+		g.drawImage(grid, 0, 0);
 
 		g.font = kha.Assets.fonts.DroidSans;
 		g.fontSize = 40;
@@ -420,6 +436,17 @@ class Elements {
 			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, w, h);
 		}
 		g.end();
+
+		if (lastW > 0 && (lastW != kha.System.windowWidth() || lastH != kha.System.windowHeight())) {
+			resize();
+		}
+		else if (lastCanvasW > 0 && (lastCanvasW != canvas.width || lastCanvasH != canvas.height)) {
+			resize();
+		}
+		lastW = kha.System.windowWidth();
+		lastH = kha.System.windowHeight();
+		lastCanvasW = canvas.width;
+		lastCanvasH = canvas.height;
 	}
 
 	function getImage(asset:TAsset):kha.Image {
