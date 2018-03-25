@@ -6,12 +6,15 @@ import zui.Canvas;
 
 @:access(zui.Zui)
 class Elements {
-	var ui: Zui;
-	var cui: Zui;
+	var ui:Zui;
+	var cui:Zui;
 	var canvas:TCanvas;
 
-	static inline var uiw = 240;
-	static inline var coff = 40;
+	static var uiw(get, null):Int;
+	static function get_uiw():Int {
+		return Std.int(240 * Main.prefs.scaleFactor);
+	}
+	static var coff = 40;
 
 	var dropPath = "";
 	var drag = false;
@@ -71,8 +74,8 @@ class Elements {
 	function loaded() {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
-		ui = new Zui({font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		cui = new Zui({font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
+		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
 
 		kha.System.notifyOnDropFiles(function(path:String) {
 			dropPath = StringTools.rtrim(path);
@@ -401,7 +404,7 @@ class Elements {
 
 			if (ui.tab(htab, "Assets")) {
 				if (canvas.assets.length > 0) {
-					ui.text("(Drag images to canvas)", zui.Zui.Align.Center, 0xff151515);
+					ui.text("Drag images to canvas", zui.Zui.Align.Center, 0xff151515);
 
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
@@ -421,8 +424,7 @@ class Elements {
 					}
 				}
 				else {
-					ui.text("(Drop files here)", zui.Zui.Align.Center, 0xff151515);
-					ui.text("(.png .jpg .hdr)", zui.Zui.Align.Center, 0xff151515);
+					ui.text("Drop images  here", zui.Zui.Align.Center, 0xff151515);
 				}
 			}
 		}

@@ -19,6 +19,12 @@ class Main {
 	
 	static function initialized() {
 
+		// Debug
+		// prefs = { scaleFactor: 2.0 };
+		// var raw:TCanvas = { name: "debug", x: 0, y: 0, width: 960, height: 540, elements: [], assets: [] };
+		// inst = new Elements(raw);
+		// return;
+
 		kha.LoaderImpl.loadBlobFromDescription({ files: ["prefs.json"] }, function(blob:kha.Blob) {
 			prefs = haxe.Json.parse(blob.toString());
 
