@@ -25,7 +25,7 @@ class Main {
 		// inst = new Elements(raw);
 		// return;
 
-		kha.LoaderImpl.loadBlobFromDescription({ files: ["prefs.json"] }, function(blob:kha.Blob) {
+		kha.Assets.loadBlobFromPath("prefs.json", function(blob:kha.Blob) {
 			prefs = haxe.Json.parse(blob.toString());
 
 			var ar = prefs.path.split("/");
@@ -33,7 +33,7 @@ class Main {
 			cwd = ar.join("/");
 
 			var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
-			kha.LoaderImpl.loadBlobFromDescription({ files: [path] }, function(cblob:kha.Blob) {
+			kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
 				var raw:TCanvas = haxe.Json.parse(cblob.toString());
 				inst = new Elements(raw);
 			});

@@ -95,7 +95,7 @@ class Elements {
 		var abspath = toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
-		kha.LoaderImpl.loadImageFromDescription({ files: [abspath] }, function(image:kha.Image) {
+		kha.Assets.loadImageFromPath(abspath, false, function(image:kha.Image) {
 			var ar = path.split("/");
 			var name = ar[ar.length - 1];
 			var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
