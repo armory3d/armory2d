@@ -340,7 +340,7 @@ class Elements {
 						selectedElem--;
 						hradio.position = selectedElem;
 					}
-					if (ui.button("Remove")) {
+					if (ui.button("Remove") && canvas.elements.length > 0) {
 						removeSelectedElem();
 					}
 					ui.t.BUTTON_COL = temp1;
