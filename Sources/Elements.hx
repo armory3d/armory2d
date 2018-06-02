@@ -24,6 +24,8 @@ class Elements {
 	var dragBottom = false;
 	var assetNames:Array<String> = [];
 	var dragAsset:TAsset = null;
+	var comboCounter = 0;
+	var maxComboSize = 25;
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
@@ -110,6 +112,8 @@ class Elements {
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = 100;
+		var p_id = Canvas.getElementId(canvas);
+		var modifiers:haxe.DynamicAccess<Dynamic> = {};
 		if (type == ElementType.Text) {
 			name = "Text";
 			height = 48;
@@ -120,8 +124,15 @@ class Elements {
 		else if (type == ElementType.Image) {
 			name = "Image";
 		}
+		else if(type == ElementType.Combo){
+			name = "Combo";
+			modifiers.set('texts',['None','None']);
+			modifiers.set('showLabel', false);
+			p_id += comboCounter *maxComboSize;
+			comboCounter+=1;
+		}
 		var elem:TElement = {
-			id: Canvas.getElementId(canvas),
+			id: p_id,
 			type: type,
 			name: name,
 			event: "",
@@ -133,7 +144,9 @@ class Elements {
 			asset: "",
 			color: 0xffffffff,
 			anchor: 0,
-			children: []
+			children: [],
+			modifiers: modifiers
+
 		};
 		return elem;
 	}
@@ -181,6 +194,34 @@ class Elements {
 		grid.g2.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
 
 		grid.g2.end();
+	}
+	function drawModifier(p_id: Int, p_ui: Zui, p_key: String, p_elem: TElement ):Void
+	{
+		var modifier = p_elem.modifiers.get(p_key);
+
+		if(Std.is(modifier,Array) && Std.is(modifier[0],String)){// Is an Array of strings
+
+			var myarr:Array<String> = modifier;
+			var strLen = Math.floor(zui.Zui.clamp(Std.parseInt(p_ui.textInput(Id.handle().nest(p_id, {text: zui.Zui.clamp(myarr.length, 2,maxComboSize) +""} ), "Length", Right)), 2,maxComboSize));
+
+			if( strLen != myarr.length){// Reset combo indexes if needed
+				p_elem.modifiers[p_key] = [];
+				myarr = [];
+				for( y in 0...strLen){
+					p_elem.modifiers[p_key].push("None");
+				}
+			}
+
+			for( i in 0...p_elem.modifiers[p_key].length){ 
+				var handle = Id.handle().nest(p_id+i, {text: p_elem.modifiers[p_key][i]} );
+				p_elem.modifiers[p_key][i] =p_ui.textInput(handle, "",Right) ;
+			}
+		}
+		else if(Std.is(modifier,Bool)){
+			var handle = Id.handle().nest(p_id, {text: Std.string(modifier)} );
+			p_elem.modifiers[p_key] = 1 == p_ui.inlineRadio(handle, ['false','true']);
+		}
+
 	}
 
 	var selectedElem = -1;
@@ -311,6 +352,11 @@ class Elements {
 						canvas.elements.push(elem);
 						hradio.position = canvas.elements.length - 1;
 					}
+					if (ui.button("Combo")){
+						var elem = makeElem(ElementType.Combo);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
 
 					var i = canvas.elements.length - 1;
 					while (i >= 0) {
@@ -398,6 +444,11 @@ class Elements {
 						ui.radio(hanch, 7, "Bottom");
 						ui.radio(hanch, 8, "Bot-Right");
 						elem.anchor = hanch.position;
+						for(key in elem.modifiers.keys()){
+							ui.text(key);
+							drawModifier(id,ui,key,elem);
+
+						}
 					}
 				}
 			}
