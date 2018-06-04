@@ -5,6 +5,7 @@ import zui.Zui;
 import zui.Canvas;
 
 @:access(zui.Zui)
+
 class Elements {
 	var ui:Zui;
 	var cui:Zui;
@@ -26,6 +27,9 @@ class Elements {
 	var dragAsset:TAsset = null;
 	var comboCounter = 0;
 	var maxComboSize = 25;
+	var defaultSliderRange = 1000.0;//Will be positive value(to) and negative value(from)
+	var sliderCounter = 0;
+	var maxGroupSize = 15;
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
@@ -131,6 +135,41 @@ class Elements {
 			p_id += comboCounter *maxComboSize;
 			comboCounter+=1;
 		}
+		else if(type == ElementType.Slider){
+			name = "Slider";
+			modifiers.set('from',0.0);
+			modifiers.set('to',1.0);
+			modifiers.set('filled', false);
+			modifiers.set('displayValue', false);
+			modifiers.set('precision', 100);
+			p_id += sliderCounter*modifiers.keys().length;
+			sliderCounter +=1; 
+		}
+		else if(type == ElementType.Check){
+			name = 'Check';
+		}
+		else if(type == ElementType.Radio){
+			name = 'Check';
+		}
+		else if(type == ElementType.InlineRadio){
+			name = 'InlineRadio';
+			modifiers.set('texts',['None','None']);
+		}
+		else if(type == ElementType.CheckGroup){
+			name = 'CheckGroup';
+			modifiers.set('elements', [makeElem(ElementType.Check),makeElem(ElementType.Check),makeElem(ElementType.Check)]);
+			type = ElementGroup;
+		}
+		else if(type == ElementType.ButtonGroup){
+			name = 'ButtonGroup';
+			modifiers.set('elements', [makeElem(ElementType.Button),makeElem(ElementType.Button),makeElem(ElementType.Button)]);
+			type = ElementGroup;
+		}
+		else if(type == ElementType.RadioGroup){
+			name = 'RadioGroup';
+			modifiers.set('elements', [makeElem(ElementType.Radio),makeElem(ElementType.Radio),makeElem(ElementType.Radio)]);
+			type = ElementGroup;
+		}
 		var elem:TElement = {
 			id: p_id,
 			type: type,
@@ -213,14 +252,38 @@ class Elements {
 			}
 
 			for( i in 0...p_elem.modifiers[p_key].length){ 
-				var handle = Id.handle().nest(p_id+i, {text: p_elem.modifiers[p_key][i]} );
+				var handle = Id.handle().nest(p_id-i, {text: p_elem.modifiers[p_key][i]} );
 				p_elem.modifiers[p_key][i] =p_ui.textInput(handle, "",Right) ;
 			}
 		}
 		else if(Std.is(modifier,Bool)){
-			var handle = Id.handle().nest(p_id, {text: Std.string(modifier)} );
-			p_elem.modifiers[p_key] = 1 == p_ui.inlineRadio(handle, ['false','true']);
+			var handle = Id.handle().nest(p_id );
+			p_elem.modifiers[p_key] =  p_ui.check(handle, p_key);
 		}
+		else if(Std.is(modifier,Float) || Std.is(modifier,Int)){
+			var handle = Id.handle().nest(p_id, {text: Std.string(modifier)} );
+			p_elem.modifiers[p_key] = Std.is(modifier,Int) ? Math.floor(p_ui.slider(handle,p_elem.text,-defaultSliderRange,defaultSliderRange,false,100,true))
+			:p_ui.slider(handle,p_elem.text,-defaultSliderRange,defaultSliderRange,false,100,true);
+		}
+		else if(Std.is(modifier,Array) && Type.getClassName(modifier[0]) == 'TElement'){// Is an Array of Elements
+
+			var myarr = p_elem.modifiers[p_key];
+			var strLen = Math.floor(zui.Zui.clamp(Std.parseInt(p_ui.textInput(Id.handle().nest(p_id), "Length", Right)),2,maxGroupSize));
+
+			if( strLen != myarr.length){// Reset combo indexes if needed
+				p_elem.modifiers[p_key] = [];
+				myarr = [];
+				for( y in 0...strLen){
+					p_elem.modifiers[p_key].push(Type.createEnum(ElementType,p_elem.name));
+				}
+			}
+
+			for( i in 0...myarr.length){ 
+				var handle = Id.handle().nest(myarr[i].id);
+				p_elem.modifiers[p_key][i] =p_ui.textInput(handle, "",Right) ;
+			}
+		}
+
 
 	}
 
@@ -352,8 +415,19 @@ class Elements {
 						canvas.elements.push(elem);
 						hradio.position = canvas.elements.length - 1;
 					}
+					ui.row([1/3, 1/3, 1/3]);
 					if (ui.button("Combo")){
 						var elem = makeElem(ElementType.Combo);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
+					if (ui.button("Slider")){
+						var elem = makeElem(ElementType.Slider);
+						canvas.elements.push(elem);
+						hradio.position = canvas.elements.length - 1;
+					}
+					if (ui.button("Check")){
+						var elem = makeElem(ElementType.Check);
 						canvas.elements.push(elem);
 						hradio.position = canvas.elements.length - 1;
 					}
@@ -444,9 +518,11 @@ class Elements {
 						ui.radio(hanch, 7, "Bottom");
 						ui.radio(hanch, 8, "Bot-Right");
 						elem.anchor = hanch.position;
+						var p_id = -1*id;
 						for(key in elem.modifiers.keys()){
 							ui.text(key);
-							drawModifier(id,ui,key,elem);
+							drawModifier(p_id,ui,key,elem);
+							p_id += -1;
 
 						}
 					}
@@ -501,6 +577,7 @@ class Elements {
 		lastCanvasW = canvas.width;
 		lastCanvasH = canvas.height;
 	}
+
 
 	function getImage(asset:TAsset):kha.Image {
 		return Canvas.assetMap.get(asset.id);
