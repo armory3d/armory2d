@@ -4,6 +4,7 @@ import zui.*;
 import zui.Zui;
 import zui.Canvas;
 
+
 @:access(zui.Zui)
 
 class Elements {
@@ -30,10 +31,15 @@ class Elements {
 	var defaultSliderRange = 1000.0;//Will be positive value(to) and negative value(from)
 	var sliderCounter = 0;
 	var maxGroupSize = 15;
+	var elementAddGroup:TElement;
+	var buttonNames = ['Text', 'Image','Button', 'Check','Radio', 'Combo', 'Slider','ButtonGroup','CheckGroup','RadioGroup'];
+	var elementNavGroup:TElement;
+	var navButnNames = ['Up','Down', 'Remove'];
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
 
+		initializeButtonGroups();
 		// Reimport assets
 		if (canvas.assets.length > 0) {
 			var assets = canvas.assets;
@@ -113,6 +119,56 @@ class Elements {
 		});
 	}
 
+	function initializeButtonGroups(){
+		
+		//Buttons for Adding elements
+		var onAddEvent = function (str: String){
+			var elem = makeElem(ElementType.getType(str));
+			canvas.elements.push(elem);
+			hradio.position = canvas.elements.length - 1;
+		}
+		elementAddGroup= makeElem(ElementType.ButtonGroup);
+		elementAddGroup.name = 'TREE';
+		elementAddGroup.modifiers.set('elements', []);
+		elementAddGroup.modifiers.set('elementType', 'Button');
+		var i = buttonNames.length;
+		while(i-- > 0){
+			var elem = makeElem(ElementType.Button);
+			elem.text = buttonNames[i];
+			elem.modifiers.set('callback', onAddEvent);
+			elementAddGroup.modifiers['elements'].push(elem);
+		}
+
+		// Buttons for Nav and remove of elements
+		var onNavEvent = function (str: String){
+			var t = canvas.elements[selectedElem];
+			if(str == 'Up' && selectedElem < canvas.elements.length-1){
+				canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
+				canvas.elements[selectedElem + 1] = t;
+				selectedElem++;
+			}
+			else if(str == 'Down' && selectedElem > 0){
+				canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
+				canvas.elements[selectedElem - 1] = t;
+				selectedElem--;
+			}
+			else if(str == 'Remove' && canvas.elements.length > 0){
+				removeSelectedElem();
+			}
+			hradio.position = selectedElem;
+		}
+		elementNavGroup= makeElem(ElementType.ButtonGroup);
+		elementNavGroup.name = 'TREE';
+		elementNavGroup.modifiers.set('elements', []);
+		elementNavGroup.modifiers.set('elementType', 'Button');
+		i = navButnNames.length;
+		while(i-- > 0){
+			var elem = makeElem(ElementType.Button);
+			elem.text = navButnNames[i];
+			elem.modifiers.set('callback', onNavEvent);
+			elementNavGroup.modifiers['elements'].push(elem);
+		}
+	}
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = 100;
@@ -149,7 +205,8 @@ class Elements {
 			name = 'Check';
 		}
 		else if(type == ElementType.Radio){
-			name = 'Check';
+			name = 'Radio';
+			modifiers.set('currentValue', 0);
 		}
 		else if(type == ElementType.InlineRadio){
 			name = 'InlineRadio';
@@ -158,16 +215,19 @@ class Elements {
 		else if(type == ElementType.CheckGroup){
 			name = 'CheckGroup';
 			modifiers.set('elements', [makeElem(ElementType.Check),makeElem(ElementType.Check),makeElem(ElementType.Check)]);
+			modifiers.set('elementType', 'Check');
 			type = ElementGroup;
 		}
 		else if(type == ElementType.ButtonGroup){
 			name = 'ButtonGroup';
 			modifiers.set('elements', [makeElem(ElementType.Button),makeElem(ElementType.Button),makeElem(ElementType.Button)]);
+			modifiers.set('elementType', 'Button');
 			type = ElementGroup;
 		}
 		else if(type == ElementType.RadioGroup){
 			name = 'RadioGroup';
 			modifiers.set('elements', [makeElem(ElementType.Radio),makeElem(ElementType.Radio),makeElem(ElementType.Radio)]);
+			modifiers.set('elementType', 'Radio');
 			type = ElementGroup;
 		}
 		var elem:TElement = {
@@ -265,26 +325,85 @@ class Elements {
 			p_elem.modifiers[p_key] = Std.is(modifier,Int) ? Math.floor(p_ui.slider(handle,p_elem.text,-defaultSliderRange,defaultSliderRange,false,100,true))
 			:p_ui.slider(handle,p_elem.text,-defaultSliderRange,defaultSliderRange,false,100,true);
 		}
-		else if(Std.is(modifier,Array) && Type.getClassName(modifier[0]) == 'TElement'){// Is an Array of Elements
+		else if(Std.is(modifier,Array) && p_elem.type == ElementGroup){// Is an Array of Elements
 
 			var myarr = p_elem.modifiers[p_key];
-			var strLen = Math.floor(zui.Zui.clamp(Std.parseInt(p_ui.textInput(Id.handle().nest(p_id), "Length", Right)),2,maxGroupSize));
+			var strLen = Math.floor(zui.Zui.clamp(Std.parseInt(p_ui.textInput(Id.handle().nest(p_id,{text: modifier.length+""}), "Length", Right)),2,maxGroupSize));
 
-			if( strLen != myarr.length){// Reset combo indexes if needed
+			if( strLen != myarr.length){// Reset element list indexes if needed
 				p_elem.modifiers[p_key] = [];
 				myarr = [];
 				for( y in 0...strLen){
-					p_elem.modifiers[p_key].push(Type.createEnum(ElementType,p_elem.name));
+					p_elem.modifiers[p_key].push(makeElem(ElementType.getType(p_elem.modifiers['elementType'])));
 				}
 			}
 
-			for( i in 0...myarr.length){ 
-				var handle = Id.handle().nest(myarr[i].id);
-				p_elem.modifiers[p_key][i] =p_ui.textInput(handle, "",Right) ;
+			for( i in 0...myarr.length){
+				if(p_ui.panel(Id.handle().nest(myarr[i].id),myarr[i].name,5,false)){
+					drawElementProperties(myarr[i], p_ui, true);
+				} 
 			}
 		}
 
 
+	}
+	function drawElementProperties(elem: TElement, ui: Zui, isSubElement = false){
+		var id = elem.id;
+		if(isSubElement){
+			ui.row([1/2, 1/2]);
+		}
+		elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
+		elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
+		ui.row([1/2, 1/2]);
+		var handlex = Id.handle().nest(id, {text: elem.x + ""});
+		var handley = Id.handle().nest(id, {text: elem.y + ""});
+		// if (drag) {
+			handlex.text = elem.x + "";
+			handley.text = elem.y + "";
+		// }
+		var strx = ui.textInput(handlex, "X", Right);
+		var stry = ui.textInput(handley, "Y", Right);
+		elem.x = Std.parseFloat(strx);
+		elem.y = Std.parseFloat(stry);
+		ui.row([1/2, 1/2]);
+		var handlew = Id.handle().nest(id, {text: elem.width + ""});
+		var handleh = Id.handle().nest(id, {text: elem.height + ""});
+		// if (drag) {
+			handlew.text = elem.width + "";
+			handleh.text = elem.height + "";
+		// }
+		var strw = ui.textInput(handlew, "Width", Right);
+		var strh = ui.textInput(handleh, "Height", Right);
+		elem.width = Std.int(Std.parseFloat(strw));
+		elem.height = Std.int(Std.parseFloat(strh));
+		elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
+		var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
+		elem.asset = getEnumTexts()[assetPos];
+		if (!isSubElement){
+			elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
+			ui.text("Anchor");
+			var hanch = Id.handle().nest(id, {position: elem.anchor});
+			ui.row([4/11,3/11,4/11]);
+			ui.radio(hanch, 0, "Top-Left");
+			ui.radio(hanch, 1, "Top");
+			ui.radio(hanch, 2, "Top-Right");
+			ui.row([4/11,3/11,4/11]);
+			ui.radio(hanch, 3, "Left");
+			ui.radio(hanch, 4, "Center");
+			ui.radio(hanch, 5, "Right");
+			ui.row([4/11,3/11,4/11]);
+			ui.radio(hanch, 6, "Bot-Left");
+			ui.radio(hanch, 7, "Bottom");
+			ui.radio(hanch, 8, "Bot-Right");
+			elem.anchor = hanch.position;
+		}
+		var p_id = -1*id;
+		for(key in elem.modifiers.keys()){
+			ui.text(key);
+			drawModifier(p_id,ui,key,elem);
+			p_id += -1;
+
+		}
 	}
 
 	var selectedElem = -1;
@@ -399,70 +518,20 @@ class Elements {
 				ui.separator();
 
 				if (ui.panel(Id.handle({selected: true}), "TREE")) {
-					ui.row([1/3, 1/3, 1/3]);
-					if (ui.button("Text")) {
-						var elem = makeElem(ElementType.Text);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Image")) {
-						var elem = makeElem(ElementType.Image);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Button")) {
-						var elem = makeElem(ElementType.Button);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					ui.row([1/3, 1/3, 1/3]);
-					if (ui.button("Combo")){
-						var elem = makeElem(ElementType.Combo);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Slider")){
-						var elem = makeElem(ElementType.Slider);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Check")){
-						var elem = makeElem(ElementType.Check);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-
+					Ext.elementGroup(ui,elementAddGroup);
 					var i = canvas.elements.length - 1;
 					while (i >= 0) {
 						var elem = canvas.elements[i];
 						if (ui.radio(hradio, i, elem.name)) selectedElem = i;
 						i--;
 					}
-					ui.row([1/3, 1/3, 1/3]);
 					var temp1 = ui.t.BUTTON_COL;
 					var temp2 = ui.t.BUTTON_HOVER_COL;
 					var temp3 = ui.t.BUTTON_PRESSED_COL;
 					ui.t.BUTTON_COL = 0xff343436;
 					ui.t.BUTTON_HOVER_COL = 0xff444446;
 					ui.t.BUTTON_PRESSED_COL = 0xff303030;
-					var elems = canvas.elements;
-					if (ui.button("Up") && selectedElem < elems.length - 1) {
-						var t = canvas.elements[selectedElem];
-						canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
-						canvas.elements[selectedElem + 1] = t;
-						selectedElem++;
-						hradio.position = selectedElem;
-					}
-					if (ui.button("Down") && selectedElem > 0) {
-						var t = canvas.elements[selectedElem];
-						canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
-						canvas.elements[selectedElem - 1] = t;
-						selectedElem--;
-						hradio.position = selectedElem;
-					}
-					if (ui.button("Remove") && canvas.elements.length > 0) {
-						removeSelectedElem();
-					}
+					Ext.elementGroup(ui,elementNavGroup);
 					ui.t.BUTTON_COL = temp1;
 					ui.t.BUTTON_HOVER_COL = temp2;
 					ui.t.BUTTON_PRESSED_COL = temp3;
@@ -473,58 +542,7 @@ class Elements {
 				if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
 					if (selectedElem >= 0) {
 						var elem = canvas.elements[selectedElem];
-						var id = elem.id;
-						ui.row([1/2, 1/2]);
-						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
-						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
-						ui.row([1/2, 1/2]);
-						var handlex = Id.handle().nest(id, {text: elem.x + ""});
-						var handley = Id.handle().nest(id, {text: elem.y + ""});
-						// if (drag) {
-							handlex.text = elem.x + "";
-							handley.text = elem.y + "";
-						// }
-						var strx = ui.textInput(handlex, "X", Right);
-						var stry = ui.textInput(handley, "Y", Right);
-						elem.x = Std.parseFloat(strx);
-						elem.y = Std.parseFloat(stry);
-						ui.row([1/2, 1/2]);
-						var handlew = Id.handle().nest(id, {text: elem.width + ""});
-						var handleh = Id.handle().nest(id, {text: elem.height + ""});
-						// if (drag) {
-							handlew.text = elem.width + "";
-							handleh.text = elem.height + "";
-						// }
-						var strw = ui.textInput(handlew, "Width", Right);
-						var strh = ui.textInput(handleh, "Height", Right);
-						elem.width = Std.int(Std.parseFloat(strw));
-						elem.height = Std.int(Std.parseFloat(strh));
-						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
-						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
-						elem.asset = getEnumTexts()[assetPos];
-						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
-						ui.text("Anchor");
-						var hanch = Id.handle().nest(id, {position: elem.anchor});
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 0, "Top-Left");
-						ui.radio(hanch, 1, "Top");
-						ui.radio(hanch, 2, "Top-Right");
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 3, "Left");
-						ui.radio(hanch, 4, "Center");
-						ui.radio(hanch, 5, "Right");
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 6, "Bot-Left");
-						ui.radio(hanch, 7, "Bottom");
-						ui.radio(hanch, 8, "Bot-Right");
-						elem.anchor = hanch.position;
-						var p_id = -1*id;
-						for(key in elem.modifiers.keys()){
-							ui.text(key);
-							drawModifier(p_id,ui,key,elem);
-							p_id += -1;
-
-						}
+						drawElementProperties(elem,ui);
 					}
 				}
 			}
