@@ -25,6 +25,11 @@ class Elements {
 	var assetNames:Array<String> = [];
 	var dragAsset:TAsset = null;
 
+	var showFiles = false;
+	var foldersOnly = false;
+	var filesDone:String->Void = null;
+	var uimodal:Zui;
+
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
 
@@ -34,17 +39,6 @@ class Elements {
 			canvas.assets = [];
 			for (a in assets) importAsset(a.file);
 		}
-
-		// var _onDrop = onDrop;
-		// untyped __js__("
-		// document.ondragover = document.ondrop = (ev) => {
-		// 	ev.preventDefault()
-		// }
-		// document.body.ondrop = (ev) => {
-		// 	_onDrop(ev.dataTransfer.files[0].path);
-		// 	ev.preventDefault()
-		// }
-		// ");
 
 		kha.Assets.loadEverything(loaded);
 	}
@@ -76,6 +70,7 @@ class Elements {
 		t.FILL_WINDOW_BG = true;
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
 		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
+		uimodal = new Zui( { font: kha.Assets.fonts.DroidSans, scaleFactor: Main.prefs.scaleFactor } );
 
 		kha.System.notifyOnDropFiles(function(path:String) {
 			dropPath = StringTools.rtrim(path);
@@ -185,7 +180,6 @@ class Elements {
 
 	var selectedElem = -1;
 	var hwin = Id.handle();
-	var hradio = Id.handle();
 	var lastW = 0;
 	var lastH = 0;
 	var lastCanvasW = 0;
@@ -207,13 +201,13 @@ class Elements {
 		g.color = 0xffffffff;
 		g.drawImage(grid, 0, 0);
 
-		g.font = kha.Assets.fonts.DroidSans;
-		g.fontSize = 40;
-		var title = canvas.name + ", " + canvas.width + "x" + canvas.height;
-		var titlew = g.font.width(40, title);
-		var titleh = g.font.height(40);
-		g.color = 0xffffffff;
-		g.drawString(title, kha.System.windowWidth() - titlew - 30 - uiw, kha.System.windowHeight() - titleh - 10);
+		// g.font = kha.Assets.fonts.DroidSans;
+		// g.fontSize = 40;
+		// var title = canvas.name + ", " + canvas.width + "x" + canvas.height;
+		// var titlew = g.font.width(40, title);
+		// var titleh = g.font.height(40);
+		// g.color = 0xffffffff;
+		// g.drawString(title, kha.System.windowWidth() - titlew - 30 - uiw, kha.System.windowHeight() - titleh - 10);
 		
 		Canvas.screenW = canvas.width;
 		Canvas.screenH = canvas.height;
@@ -243,11 +237,7 @@ class Elements {
 			if (ui.tab(htab, "Project")) {
 
 				if (ui.button("Save")) {
-					// untyped __js__("const {dialog} = require('electron').remote");
-					// untyped __js__("console.log(dialog.showSaveDialog({properties: ['saveFile', 'saveDirectory']}))");
-					// untyped __js__("var fs = require('fs')");
-					// untyped __js__("fs.writeFileSync({0}, {1})", Main.prefs.path, haxe.Json.stringify(canvas));
-					
+
 					// Unpan
 					canvas.x = 0;
 					canvas.y = 0;
@@ -267,7 +257,24 @@ class Elements {
 					canvas.y = coff;
 				}
 
-				if (ui.panel(Id.handle({selected: false}), "CANVAS")) {
+				ui.row([1/3, 1/3, 1/3]);
+				if (ui.button("Text")) {
+					var elem = makeElem(ElementType.Text);
+					canvas.elements.push(elem);
+					selectedElem = canvas.elements.length - 1;
+				}
+				if (ui.button("Image")) {
+					var elem = makeElem(ElementType.Image);
+					canvas.elements.push(elem);
+					selectedElem = canvas.elements.length - 1;
+				}
+				if (ui.button("Button")) {
+					var elem = makeElem(ElementType.Button);
+					canvas.elements.push(elem);
+					selectedElem = canvas.elements.length - 1;
+				}
+
+				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
 					// ui.row([1/3, 1/3, 1/3]);
 					// if (ui.button("New")) {
 					// 	untyped __js__("const {dialog} = require('electron').remote");
@@ -292,32 +299,23 @@ class Elements {
 					canvas.height = Std.parseInt(strh);
 				}
 
-				ui.separator();
-
-				if (ui.panel(Id.handle({selected: true}), "TREE")) {
-					ui.row([1/3, 1/3, 1/3]);
-					if (ui.button("Text")) {
-						var elem = makeElem(ElementType.Text);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Image")) {
-						var elem = makeElem(ElementType.Image);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
-					if (ui.button("Button")) {
-						var elem = makeElem(ElementType.Button);
-						canvas.elements.push(elem);
-						hradio.position = canvas.elements.length - 1;
-					}
+				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
 
 					var i = canvas.elements.length - 1;
 					while (i >= 0) {
 						var elem = canvas.elements[i];
-						if (ui.radio(hradio, i, elem.name)) selectedElem = i;
+						if (selectedElem == i) {
+							ui.g.color = 0xff205d9c;
+							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
+							ui.g.color = 0xffffffff;
+						}
+						ui.text(elem.name);
+						if (ui.isReleased) {
+							selectedElem = i;
+						}
 						i--;
 					}
+
 					ui.row([1/3, 1/3, 1/3]);
 					var temp1 = ui.t.BUTTON_COL;
 					var temp2 = ui.t.BUTTON_HOVER_COL;
@@ -331,14 +329,12 @@ class Elements {
 						canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
 						canvas.elements[selectedElem + 1] = t;
 						selectedElem++;
-						hradio.position = selectedElem;
 					}
 					if (ui.button("Down") && selectedElem > 0) {
 						var t = canvas.elements[selectedElem];
 						canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
 						canvas.elements[selectedElem - 1] = t;
 						selectedElem--;
-						hradio.position = selectedElem;
 					}
 					if (ui.button("Remove") && canvas.elements.length > 0) {
 						removeSelectedElem();
@@ -348,9 +344,7 @@ class Elements {
 					ui.t.BUTTON_PRESSED_COL = temp3;
 				}
 
-				ui.separator();
-
-				if (ui.panel(Id.handle({selected: true}), "PROPERTIES")) {
+				if (ui.panel(Id.handle({selected: true}), "Properties")) {
 					if (selectedElem >= 0) {
 						var elem = canvas.elements[selectedElem];
 						var id = elem.id;
@@ -383,28 +377,40 @@ class Elements {
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
 						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
-						ui.text("Anchor");
-						var hanch = Id.handle().nest(id, {position: elem.anchor});
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 0, "Top-Left");
-						ui.radio(hanch, 1, "Top");
-						ui.radio(hanch, 2, "Top-Right");
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 3, "Left");
-						ui.radio(hanch, 4, "Center");
-						ui.radio(hanch, 5, "Right");
-						ui.row([4/11,3/11,4/11]);
-						ui.radio(hanch, 6, "Bot-Left");
-						ui.radio(hanch, 7, "Bottom");
-						ui.radio(hanch, 8, "Bot-Right");
-						elem.anchor = hanch.position;
+						
+						if (ui.panel(Id.handle({selected: false}), "Anchor")) {
+							var hanch = Id.handle().nest(id, {position: elem.anchor});
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 0, "Top-Left");
+							ui.radio(hanch, 1, "Top");
+							ui.radio(hanch, 2, "Top-Right");
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 3, "Left");
+							ui.radio(hanch, 4, "Center");
+							ui.radio(hanch, 5, "Right");
+							ui.row([4/11,3/11,4/11]);
+							ui.radio(hanch, 6, "Bot-Left");
+							ui.radio(hanch, 7, "Bottom");
+							ui.radio(hanch, 8, "Bot-Right");
+							elem.anchor = hanch.position;
+						}
 					}
 				}
 			}
 
-			if (ui.tab(htab, "Assets")) {
+			if (ui.tab(htab, "Import")) {
+				if (ui.button("Import image")) {
+					showFiles = true;
+					foldersOnly = false;
+					filesDone = function(path:String) {
+						path = StringTools.rtrim(path);
+						path = toRelative(path, Main.cwd);
+						importAsset(path);
+					}
+				}
+				
 				if (canvas.assets.length > 0) {
-					ui.text("Drag images to canvas", zui.Zui.Align.Center, 0xff151515);
+					ui.text("(Drag adnd drop images to canvas)", zui.Zui.Align.Center);
 
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
@@ -424,7 +430,7 @@ class Elements {
 					}
 				}
 				else {
-					ui.text("Drop images  here", zui.Zui.Align.Center, 0xff151515);
+					ui.text("(Drag and drop images here)", zui.Zui.Align.Center);
 				}
 			}
 		}
@@ -449,6 +455,8 @@ class Elements {
 		lastH = kha.System.windowHeight();
 		lastCanvasW = canvas.width;
 		lastCanvasH = canvas.height;
+
+		if (showFiles) renderFiles(g);
 	}
 
 	function getImage(asset:TAsset):kha.Image {
@@ -459,7 +467,6 @@ class Elements {
 		canvas.elements.splice(selectedElem, 1);
 		if (selectedElem == canvas.elements.length) selectedElem--;
 		else if (selectedElem < 0) selectedElem++;
-		hradio.position = selectedElem;
 	}
 
 	function acceptDrag(index:Int) {
@@ -470,7 +477,7 @@ class Elements {
 		elem.width = getImage(canvas.assets[index]).width;
 		elem.height = getImage(canvas.assets[index]).height;
 		canvas.elements.push(elem);
-		selectedElem = hradio.position = canvas.elements.length - 1;
+		selectedElem = canvas.elements.length - 1;
 	}
 
 	public function update() {
@@ -494,7 +501,7 @@ class Elements {
 				if (ui.inputX > canvas.x + elem.x && ui.inputX < canvas.x + elem.x + elem.width &&
 					ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height &&
 					selectedElem != i) {
-					selectedElem = hradio.position = i;
+					selectedElem = i;
 					break;
 				}
 			}
@@ -545,5 +552,70 @@ class Elements {
 				hwin.redraws = 2;
 			}
 		}
+
+		updateFiles();
+	}
+
+	function updateFiles() {
+		if (!showFiles) return;
+
+		if (ui.inputReleased) {
+			var appw = kha.System.windowWidth();
+			var apph = kha.System.windowHeight();
+			var left = appw / 2 - modalRectW / 2;
+			var right = appw / 2 + modalRectW / 2;
+			var top = apph / 2 - modalRectH / 2;
+			var bottom = apph / 2 + modalRectH / 2;
+			if (ui.inputX < left || ui.inputX > right || ui.inputY < top + modalHeaderH || ui.inputY > bottom) {
+				showFiles = false;
+			}
+		}
+	}
+
+	static var modalW = 625;
+	static var modalH = 545;
+	static var modalHeaderH = 66;
+	static var modalRectW = 625; // No shadow
+	static var modalRectH = 545;
+
+	static var path = '/';
+	function renderFiles(g:kha.graphics2.Graphics) {
+		var appw = kha.System.windowWidth();
+		var apph = kha.System.windowHeight();
+		var left = appw / 2 - modalW / 2;
+		var top = apph / 2 - modalH / 2;
+		g.color = 0xff202020;
+		g.fillRect(left, top, modalW, modalH);
+
+		var leftRect = Std.int(appw / 2 - modalRectW / 2);
+		var rightRect = Std.int(appw / 2 + modalRectW / 2);
+		var topRect = Std.int(apph / 2 - modalRectH / 2);
+		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
+		topRect += modalHeaderH;
+		
+		g.end();
+		uimodal.begin(g);
+		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
+			var pathHandle = Id.handle();
+			pathHandle.text = uimodal.textInput(pathHandle);
+			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
+		}
+		uimodal.end(false);
+		g.begin(false);
+
+		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
+		if (uimodal.button("OK")) {
+			showFiles = false;
+			filesDone(path);
+		}
+		uimodal.endLayout(false);
+
+		uimodal.beginLayout(g, rightRect - 200, bottomRect - 30, 100);
+		if (uimodal.button("Cancel")) {
+			showFiles = false;
+		}
+		uimodal.endLayout();
+
+		g.begin(false);
 	}
 }
