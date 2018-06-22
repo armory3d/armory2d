@@ -14,7 +14,8 @@ class Elements {
 	static function get_uiw():Int {
 		return Std.int(240 * Main.prefs.scaleFactor);
 	}
-	static var coff = 40;
+	static var coffX = 40;
+	static var coffY = 40;
 
 	var dropPath = "";
 	var drag = false;
@@ -170,11 +171,6 @@ class Elements {
 			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
 		}
 
-		grid.g2.color = 0xffffffff;
-		canvas.x = coff;
-		canvas.y = coff;
-		grid.g2.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
-
 		grid.g2.end();
 	}
 
@@ -200,6 +196,10 @@ class Elements {
 
 		g.color = 0xffffffff;
 		g.drawImage(grid, 0, 0);
+
+		canvas.x = coffX;
+		canvas.y = coffY;
+		g.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
 
 		// g.font = kha.Assets.fonts.DroidSans;
 		// g.fontSize = 40;
@@ -253,8 +253,8 @@ class Elements {
 					Krom.fileSaveBytes(filesPath, haxe.io.Bytes.ofString(filesList).getData());
 					#end
 
-					canvas.x = coff;
-					canvas.y = coff;
+					canvas.x = coffX;
+					canvas.y = coffY;
 				}
 
 				ui.row([1/3, 1/3, 1/3]);
@@ -505,6 +505,12 @@ class Elements {
 					break;
 				}
 			}
+		}
+
+		// Drag canvas
+		if (ui.inputDownR) {
+			coffX += Std.int(ui.inputDX);
+			coffY += Std.int(ui.inputDY);
 		}
 
 		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
