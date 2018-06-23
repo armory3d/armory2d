@@ -25,6 +25,7 @@ class Elements {
 	var dragBottom = false;
 	var assetNames:Array<String> = [];
 	var dragAsset:TAsset = null;
+	var resizeCanvas = false;
 
 	var showFiles = false;
 	var foldersOnly = false;
@@ -33,6 +34,8 @@ class Elements {
 
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
+
+	var selectedFrame = 0;
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
@@ -106,18 +109,28 @@ class Elements {
 		});
 	}
 
+	function unique(s:String):String {
+		// for (e in canvas.elements) {
+			// if (s == e.name) {
+				// return unique(s + '.001')
+			// }
+		// }
+		return s;
+	}
+
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = 100;
 		if (type == ElementType.Text) {
-			name = "Text";
-			height = 48;
+			name = unique("Text");
+			height = 40;
 		}
 		else if (type == ElementType.Button) {
-			name = "Button";
+			name = unique("Button");
+			height = 20;
 		}
 		else if (type == ElementType.Image) {
-			name = "Image";
+			name = unique("Image");
 		}
 		var elem:TElement = {
 			id: Canvas.getElementId(canvas),
@@ -128,7 +141,7 @@ class Elements {
 			y: 0,
 			width: 150,
 			height: height,
-			text: name,
+			text: "My " + name,
 			asset: "",
 			color: 0xffffffff,
 			anchor: 0,
@@ -178,8 +191,23 @@ class Elements {
 
 	function drawTimeline() {
 		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw, 60);
-		timeline.g2.begin(true, 0xff222222);
-		timeline.g2.end();
+		var g = timeline.g2;
+		g.begin(true, 0xff222222);
+		g.font = kha.Assets.fonts.DroidSans;
+		g.fontSize = 16;
+
+		// Labels
+		for (i in 0...Std.int(125 / 5) + 1) {
+			g.drawString(i * 5 + "", i * 55, 0);
+		}
+
+		// Frames
+		for (i in 0...125) {
+			g.color = i % 5 == 0 ? 0xff444444 : 0xff333333;
+			g.fillRect(i * 11, 30, 10, 30);
+		}
+
+		g.end();
 	}
 
 	var selectedElem = -1;
@@ -209,6 +237,8 @@ class Elements {
 		canvas.x = coffX;
 		canvas.y = coffY;
 		g.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
+		// Canvas resize
+		g.drawRect(canvas.x + canvas.width - 3, canvas.y + canvas.height - 3, 6, 6, 1);
 
 		// g.font = kha.Assets.fonts.DroidSans;
 		// g.fontSize = 40;
@@ -226,6 +256,7 @@ class Elements {
 		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
 			var elem = canvas.elements[selectedElem];
 			g.color = 0xffffffff;
+			// Resize rects
 			g.drawRect(canvas.x + elem.x, canvas.y + elem.y, elem.width, elem.height, 1);
 			g.drawRect(canvas.x + elem.x - 3, canvas.y + elem.y - 3, 6, 6, 1);
 			g.drawRect(canvas.x + elem.x - 3 + elem.width / 2, canvas.y + elem.y - 3, 6, 6, 1);
@@ -353,14 +384,14 @@ class Elements {
 					ui.t.BUTTON_PRESSED_COL = temp3;
 				}
 
-				if (ui.panel(Id.handle({selected: true}), "Properties")) {
-					if (selectedElem >= 0) {
-						var elem = canvas.elements[selectedElem];
-						var id = elem.id;
-						ui.row([1/2, 1/2]);
+				if (selectedElem >= 0) {
+					var elem = canvas.elements[selectedElem];
+					var id = elem.id;
+
+					if (ui.panel(Id.handle({selected: true}), "Properties")) {
 						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
-						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
-						ui.row([1/2, 1/2]);
+						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
+						ui.row([1/4, 1/4, 1/4, 1/4]);
 						var handlex = Id.handle().nest(id, {text: elem.x + ""});
 						var handley = Id.handle().nest(id, {text: elem.y + ""});
 						// if (drag) {
@@ -371,38 +402,47 @@ class Elements {
 						var stry = ui.textInput(handley, "Y", Right);
 						elem.x = Std.parseFloat(strx);
 						elem.y = Std.parseFloat(stry);
-						ui.row([1/2, 1/2]);
+						// ui.row([1/2, 1/2]);
 						var handlew = Id.handle().nest(id, {text: elem.width + ""});
 						var handleh = Id.handle().nest(id, {text: elem.height + ""});
 						// if (drag) {
 							handlew.text = elem.width + "";
 							handleh.text = elem.height + "";
 						// }
-						var strw = ui.textInput(handlew, "Width", Right);
-						var strh = ui.textInput(handleh, "Height", Right);
+						var strw = ui.textInput(handlew, "W", Right);
+						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
-						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
 						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
-						
-						if (ui.panel(Id.handle({selected: false}), "Anchor")) {
-							var hanch = Id.handle().nest(id, {position: elem.anchor});
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 0, "Top-Left");
-							ui.radio(hanch, 1, "Top");
-							ui.radio(hanch, 2, "Top-Right");
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 3, "Left");
-							ui.radio(hanch, 4, "Center");
-							ui.radio(hanch, 5, "Right");
-							ui.row([4/11,3/11,4/11]);
-							ui.radio(hanch, 6, "Bot-Left");
-							ui.radio(hanch, 7, "Bottom");
-							ui.radio(hanch, 8, "Bot-Right");
-							elem.anchor = hanch.position;
-						}
+					}
+
+					if (ui.panel(Id.handle({selected: false}), "Anchor")) {
+						var hanch = Id.handle().nest(id, {position: elem.anchor});
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 0, "Top-Left");
+						ui.radio(hanch, 1, "Top");
+						ui.radio(hanch, 2, "Top-Right");
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 3, "Left");
+						ui.radio(hanch, 4, "Center");
+						ui.radio(hanch, 5, "Right");
+						ui.row([4/11,3/11,4/11]);
+						ui.radio(hanch, 6, "Bot-Left");
+						ui.radio(hanch, 7, "Bottom");
+						ui.radio(hanch, 8, "Bot-Right");
+						elem.anchor = hanch.position;
+					}
+
+					if (ui.panel(Id.handle({selected: false}), "Script")) {
+						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
+					}
+
+					if (ui.panel(Id.handle({selected: false}), "Timeline")) {
+						ui.row([1/2,1/2]);
+						ui.button("Insert");
+						ui.button("Remove");
 					}
 				}
 			}
@@ -457,7 +497,11 @@ class Elements {
 		var showTimeline = true;
 		if (showTimeline) {
 			g.color = 0xffffffff;
-			g.drawImage(timeline, 0, kha.System.windowHeight() - timeline.height);
+			var ty = kha.System.windowHeight() - timeline.height;
+			g.drawImage(timeline, 0, ty);
+
+			g.color = 0xff205d9c;
+			g.fillRect(selectedFrame * 11, ty + 30, 10, 30);
 		}
 
 		g.end();
@@ -497,6 +541,10 @@ class Elements {
 		selectedElem = canvas.elements.length - 1;
 	}
 
+	function hitbox(x:Float, y:Float, w:Float, h:Float):Bool {
+		return ui.inputX > x && ui.inputX < x + w && ui.inputY > y && ui.inputY < y + h;
+	}
+
 	public function update() {
 
 		// Drag from assets panel
@@ -515,8 +563,7 @@ class Elements {
 			var i = canvas.elements.length;
 			while (--i >= 0) {
 				var elem = canvas.elements[i];
-				if (ui.inputX > canvas.x + elem.x && ui.inputX < canvas.x + elem.x + elem.width &&
-					ui.inputY > canvas.y + elem.y && ui.inputY < canvas.y + elem.y + elem.height &&
+				if (hitbox(canvas.x + elem.x, canvas.y + elem.y, elem.width, elem.height) &&
 					selectedElem != i) {
 					selectedElem = i;
 					break;
@@ -530,14 +577,22 @@ class Elements {
 			coffY += Std.int(ui.inputDY);
 		}
 
+		// Select frame
+		if (timeline != null) {
+			var ty = kha.System.windowHeight() - timeline.height;
+			if (ui.inputDown && ui.inputY > ty && ui.inputX < kha.System.windowWidth() - uiw) {
+				selectedFrame = Std.int(ui.inputX / 11);
+			}
+		}
+
 		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
 			var elem = canvas.elements[selectedElem];
 
 			// Drag selected elem
 			if (ui.inputStarted &&
-				ui.inputX >= canvas.x + elem.x - 3 && ui.inputX <= canvas.x + elem.x + elem.width + 3 &&
-				ui.inputY >= canvas.y + elem.y - 3 && ui.inputY <= canvas.y + elem.y + elem.height + 3) {
+				hitbox(canvas.x + elem.x - 3, canvas.y + elem.y - 3, elem.width + 3, elem.height + 3)) {
 				drag = true;
+				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
 				if (ui.inputX > canvas.x + elem.x + elem.width - 3) dragRight = true;
 				else if (ui.inputX < canvas.x + elem.x + 3) dragLeft = true;
@@ -574,6 +629,20 @@ class Elements {
 
 				hwin.redraws = 2;
 			}
+		}
+
+		// Canvas resize
+		if (ui.inputStarted && hitbox(canvas.x + canvas.width - 3, canvas.y + canvas.height - 3, 6, 6)) {
+			resizeCanvas = true;
+		}
+		if (ui.inputReleased && resizeCanvas) {
+			resizeCanvas = false;
+		}
+		if (resizeCanvas) {
+			canvas.width += Std.int(ui.inputDX);
+			canvas.height += Std.int(ui.inputDY);
+			if (canvas.width < 1) canvas.width = 1;
+			if (canvas.height < 1) canvas.height = 1;
 		}
 
 		updateFiles();
