@@ -31,6 +31,9 @@ class Elements {
 	var filesDone:String->Void = null;
 	var uimodal:Zui;
 
+	static var grid:kha.Image = null;
+	static var timeline:kha.Image = null;
+
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
 
@@ -150,10 +153,9 @@ class Elements {
 		}
 	}
 
-	static var grid:kha.Image = null;
 	function drawGrid() {
-		var ww = kha.System.windowWidth(0);
-		var wh = kha.System.windowHeight(0);
+		var ww = kha.System.windowWidth();
+		var wh = kha.System.windowHeight();
 		var w = ww + 40 * 2;
 		var h = wh + 40 * 2;
 		grid = kha.Image.createRenderTarget(w, h);
@@ -174,6 +176,12 @@ class Elements {
 		grid.g2.end();
 	}
 
+	function drawTimeline() {
+		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw, 60);
+		timeline.g2.begin(true, 0xff222222);
+		timeline.g2.end();
+	}
+
 	var selectedElem = -1;
 	var hwin = Id.handle();
 	var lastW = 0;
@@ -187,16 +195,17 @@ class Elements {
 			dropPath = "";
 		}
 
-		// Grid
+		// Bake
 		if (grid == null) drawGrid();
+		if (timeline == null) drawTimeline();
 
 		var g = framebuffer.g2;
-
 		g.begin();
 
 		g.color = 0xffffffff;
-		g.drawImage(grid, 0, 0);
+		g.drawImage(grid, coffX % 40 - 40, coffY % 40 - 40);
 
+		// Canvas outline
 		canvas.x = coffX;
 		canvas.y = coffY;
 		g.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
@@ -437,12 +446,20 @@ class Elements {
 		ui.end();
 
 		g.begin(false);
+
 		if (dragAsset != null) {
 			var w = Math.min(128, getImage(dragAsset).width);
 			var ratio = w / getImage(dragAsset).width;
 			var h = getImage(dragAsset).height * ratio;
 			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, w, h);
 		}
+
+		var showTimeline = true;
+		if (showTimeline) {
+			g.color = 0xffffffff;
+			g.drawImage(timeline, 0, kha.System.windowHeight() - timeline.height);
+		}
+
 		g.end();
 
 		if (lastW > 0 && (lastW != kha.System.windowWidth() || lastH != kha.System.windowHeight())) {

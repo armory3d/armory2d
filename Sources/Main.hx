@@ -10,8 +10,8 @@ class Main {
 
 	public static function main() {
 
-		var w = 1280;
-		var h = 690;
+		var w = 1600;
+		var h = 900;
 		if (w > kha.Display.width(0)) w = kha.Display.width(0);
 		if (h > kha.Display.height(0)) h = kha.Display.height(0);
 		kha.System.init({ title : "ArmorUI", width : w, height : h, resizable: true, maximizable: true }, initialized);
