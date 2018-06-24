@@ -51,26 +51,29 @@ class Elements {
 	}
 
 	static function toRelative(path:String, cwd:String):String {
-        path = haxe.io.Path.normalize(path);
-        cwd = haxe.io.Path.normalize(cwd);
-        
-        var ar:Array<String> = [];
-        var ar1 = path.split("/");
-        var ar2 = cwd.split("/");
-        
-        var index = 0;
-        while (ar1[index] == ar2[index]) index++;
-        
-        for (i in 0...ar2.length - index) ar.push("..");
-        
-        for (i in index...ar1.length) ar.push(ar1[i]);
-        
-        return ar.join("/");
-    }
+		path = haxe.io.Path.normalize(path);
+		cwd = haxe.io.Path.normalize(cwd);
+		
+		var ar:Array<String> = [];
+		var ar1 = path.split("/");
+		var ar2 = cwd.split("/");
+		
+		var index = 0;
+		while (ar1[index] == ar2[index]) index++;
+		
+		for (i in 0...ar2.length - index) ar.push("..");
+		
+		for (i in index...ar1.length) ar.push(ar1[i]);
+		
+		return ar.join("/");
+	}
 
-    static function toAbsolute(path:String, cwd:String):String {
-        return haxe.io.Path.normalize(cwd + "/" + path);
-    }
+	static function toAbsolute(path:String, cwd:String):String {
+		return haxe.io.Path.normalize(cwd + "/" + path);
+	}
+
+	static inline function toDegrees(radians:Float):Float { return radians * 57.29578; }
+	static inline function toRadians(degrees:Float):Float { return degrees * 0.0174532924; }
 
 	function loaded() {
 		var t = Reflect.copy(Themes.dark);
@@ -141,6 +144,7 @@ class Elements {
 			y: 0,
 			width: 150,
 			height: height,
+			rotation: 0,
 			text: "My " + name,
 			asset: "",
 			color: 0xffffffff,
@@ -413,6 +417,8 @@ class Elements {
 						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
+						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation)});
+						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
 						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
