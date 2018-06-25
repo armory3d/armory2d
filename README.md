@@ -1,8 +1,8 @@
 # armorui
 
-![](armui.jpg)
+![](img.jpg)
 
-Stand-alone UI editor focused on games and simulations. Used in Armory, written in Haxe and Kha.
+Stand-alone 2D editor focused on games. Used in Armory, written in Haxe and Kha.
 
 ArmorUI outputs a json (or binary) file representing the scene components. This file can be rendered through [Zui library](https://github.com/armory3d/zui/tree/master/examples/Canvas). Alternatively, it is possible to implement and read the [Canvas](https://github.com/armory3d/zui/blob/master/Sources/zui/Canvas.hx#L68) structure manually in any application.
 

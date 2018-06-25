@@ -14,8 +14,8 @@ class Elements {
 	static function get_uiw():Int {
 		return Std.int(240 * Main.prefs.scaleFactor);
 	}
-	static var coffX = 40;
-	static var coffY = 40;
+	static var coffX = 40.0;
+	static var coffY = 40.0;
 
 	var dropPath = "";
 	var drag = false;
@@ -26,6 +26,7 @@ class Elements {
 	var assetNames:Array<String> = [];
 	var dragAsset:TAsset = null;
 	var resizeCanvas = false;
+	var zoom = 1.0;
 
 	var showFiles = false;
 	var foldersOnly = false;
@@ -240,18 +241,10 @@ class Elements {
 		// Canvas outline
 		canvas.x = coffX;
 		canvas.y = coffY;
-		g.drawRect(canvas.x, canvas.y, canvas.width, canvas.height, 1.0);
+		g.drawRect(canvas.x, canvas.y, scaled(canvas.width), scaled(canvas.height), 1.0);
 		// Canvas resize
-		g.drawRect(canvas.x + canvas.width - 3, canvas.y + canvas.height - 3, 6, 6, 1);
+		g.drawRect(canvas.x + scaled(canvas.width) - 3, canvas.y + scaled(canvas.height) - 3, 6, 6, 1);
 
-		// g.font = kha.Assets.fonts.DroidSans;
-		// g.fontSize = 40;
-		// var title = canvas.name + ", " + canvas.width + "x" + canvas.height;
-		// var titlew = g.font.width(40, title);
-		// var titleh = g.font.height(40);
-		// g.color = 0xffffffff;
-		// g.drawString(title, kha.System.windowWidth() - titlew - 30 - uiw, kha.System.windowHeight() - titleh - 10);
-		
 		Canvas.screenW = canvas.width;
 		Canvas.screenH = canvas.height;
 		Canvas.draw(cui, canvas, g);
@@ -261,20 +254,25 @@ class Elements {
 			var elem = canvas.elements[selectedElem];
 			g.color = 0xffffffff;
 			// Resize rects
-			g.drawRect(canvas.x + elem.x, canvas.y + elem.y, elem.width, elem.height, 1);
-			g.drawRect(canvas.x + elem.x - 3, canvas.y + elem.y - 3, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3 + elem.width / 2, canvas.y + elem.y - 3, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3 + elem.width, canvas.y + elem.y - 3, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3, canvas.y + elem.y - 3 + elem.height / 2, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3 + elem.width, canvas.y + elem.y - 3 + elem.height / 2, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3, canvas.y + elem.y - 3 + elem.height, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3 + elem.width / 2, canvas.y + elem.y - 3 + elem.height, 6, 6, 1);
-			g.drawRect(canvas.x + elem.x - 3 + elem.width, canvas.y + elem.y - 3 + elem.height, 6, 6, 1);
+			var ex = scaled(elem.x);
+			var ey = scaled(elem.y);
+			var ew = scaled(elem.width);
+			var eh = scaled(elem.height);
+			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
+			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3, 6, 6);
+			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3, 6, 6);
+			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3, 6, 6);
+			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh / 2, 6, 6);
+			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh / 2, 6, 6);
+			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh, 6, 6);
+			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3 + eh, 6, 6);
+			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh, 6, 6);
 		}
 
 		g.end();
 
 		ui.begin(g);
+
 		if (ui.window(hwin, kha.System.windowWidth() - uiw, 0, uiw, kha.System.windowHeight(), false)) {
 
 			var htab = Id.handle();
@@ -569,7 +567,11 @@ class Elements {
 			var i = canvas.elements.length;
 			while (--i >= 0) {
 				var elem = canvas.elements[i];
-				if (hitbox(canvas.x + elem.x, canvas.y + elem.y, elem.width, elem.height) &&
+				var ex = scaled(elem.x);
+				var ey = scaled(elem.y);
+				var ew = scaled(elem.width);
+				var eh = scaled(elem.height);
+				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
 					selectedElem != i) {
 					selectedElem = i;
 					break;
@@ -577,10 +579,19 @@ class Elements {
 			}
 		}
 
-		// Drag canvas
+		// Pan canvas
 		if (ui.inputDownR) {
 			coffX += Std.int(ui.inputDX);
 			coffY += Std.int(ui.inputDY);
+		}
+
+		// Zoom canvas
+		if (ui.inputWheelDelta != 0) {
+			zoom += -ui.inputWheelDelta / 10;
+			if (zoom < 0.4) zoom = 0.4;
+			else if (zoom > 1.0) zoom = 1.0;
+			zoom = Math.round(zoom * 10) / 10;
+			cui.SCALE = cui.ops.scaleFactor * zoom;
 		}
 
 		// Select frame
@@ -593,17 +604,21 @@ class Elements {
 
 		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
 			var elem = canvas.elements[selectedElem];
+			var ex = scaled(elem.x);
+			var ey = scaled(elem.y);
+			var ew = scaled(elem.width);
+			var eh = scaled(elem.height);
 
 			// Drag selected elem
-			if (ui.inputStarted &&
-				hitbox(canvas.x + elem.x - 3, canvas.y + elem.y - 3, elem.width + 3, elem.height + 3)) {
+			if (ui.inputStarted && ui.inputDown &&
+				hitbox(canvas.x + ex - 3, canvas.y + ey - 3, ew + 3, eh + 3)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (ui.inputX > canvas.x + elem.x + elem.width - 3) dragRight = true;
-				else if (ui.inputX < canvas.x + elem.x + 3) dragLeft = true;
-				if (ui.inputY > canvas.y + elem.y + elem.height - 3) dragBottom = true;
-				else if (ui.inputY < canvas.y + elem.y + 3) dragTop = true;
+				if (ui.inputX > canvas.x + ex + ew - 3) dragRight = true;
+				else if (ui.inputX < canvas.x + ex + 3) dragLeft = true;
+				if (ui.inputY > canvas.y + ey + eh - 3) dragBottom = true;
+				else if (ui.inputY < canvas.y + ey + 3) dragTop = true;
 
 			}
 			if (ui.inputReleased && drag) {
@@ -638,7 +653,7 @@ class Elements {
 		}
 
 		// Canvas resize
-		if (ui.inputStarted && hitbox(canvas.x + canvas.width - 3, canvas.y + canvas.height - 3, 6, 6)) {
+		if (ui.inputStarted && hitbox(canvas.x + scaled(canvas.width) - 3, canvas.y + scaled(canvas.height) - 3, 6, 6)) {
 			resizeCanvas = true;
 		}
 		if (ui.inputReleased && resizeCanvas) {
@@ -716,4 +731,6 @@ class Elements {
 
 		g.begin(false);
 	}
+
+	inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE); }
 }
