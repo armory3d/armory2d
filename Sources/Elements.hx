@@ -10,9 +10,11 @@ class Elements {
 	var cui:Zui;
 	var canvas:TCanvas;
 
+	static var defaultWindowW = 240;
+	static var windowW = defaultWindowW;
 	static var uiw(get, null):Int;
 	static function get_uiw():Int {
-		return Std.int(240 * Main.prefs.scaleFactor);
+		return Std.int(windowW * Main.prefs.scaleFactor);
 	}
 	static var coffX = 40.0;
 	static var coffY = 40.0;
@@ -37,6 +39,13 @@ class Elements {
 	static var timeline:kha.Image = null;
 
 	var selectedFrame = 0;
+
+	var selectedElem:TElement = null;
+	var hwin = Id.handle();
+	var lastW = 0;
+	var lastH = 0;
+	var lastCanvasW = 0;
+	var lastCanvasH = 0;
 
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
@@ -150,7 +159,8 @@ class Elements {
 			asset: "",
 			color: 0xffffffff,
 			anchor: 0,
-			children: []
+			children: [],
+			visible: true
 		};
 		return elem;
 	}
@@ -215,12 +225,6 @@ class Elements {
 		g.end();
 	}
 
-	var selectedElem = -1;
-	var hwin = Id.handle();
-	var lastW = 0;
-	var lastH = 0;
-	var lastCanvasW = 0;
-	var lastCanvasH = 0;
 	public function render(framebuffer: kha.Framebuffer): Void {
 
 		if (dropPath != "") {
@@ -250,14 +254,13 @@ class Elements {
 		Canvas.draw(cui, canvas, g);
 
 		// Outline selected elem
-		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
-			var elem = canvas.elements[selectedElem];
+		if (selectedElem != null) {
 			g.color = 0xffffffff;
 			// Resize rects
-			var ex = scaled(elem.x);
-			var ey = scaled(elem.y);
-			var ew = scaled(elem.width);
-			var eh = scaled(elem.height);
+			var ex = scaled(selectedElem.x);
+			var ey = scaled(selectedElem.y);
+			var ew = scaled(selectedElem.width);
+			var eh = scaled(selectedElem.height);
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3, 6, 6);
@@ -267,6 +270,17 @@ class Elements {
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh, 6, 6);
+		}
+
+		// Timeline
+		var showTimeline = true;
+		if (showTimeline) {
+			g.color = 0xffffffff;
+			var ty = kha.System.windowHeight() - timeline.height;
+			g.drawImage(timeline, 0, ty);
+
+			g.color = 0xff205d9c;
+			g.fillRect(selectedFrame * 11, ty + 30, 10, 30);
 		}
 
 		g.end();
@@ -301,19 +315,16 @@ class Elements {
 
 				ui.row([1/3, 1/3, 1/3]);
 				if (ui.button("Text")) {
-					var elem = makeElem(ElementType.Text);
-					canvas.elements.push(elem);
-					selectedElem = canvas.elements.length - 1;
+					selectedElem = makeElem(ElementType.Text);
+					canvas.elements.push(selectedElem);
 				}
 				if (ui.button("Image")) {
-					var elem = makeElem(ElementType.Image);
-					canvas.elements.push(elem);
-					selectedElem = canvas.elements.length - 1;
+					selectedElem = makeElem(ElementType.Image);
+					canvas.elements.push(selectedElem);
 				}
 				if (ui.button("Button")) {
-					var elem = makeElem(ElementType.Button);
-					canvas.elements.push(elem);
-					selectedElem = canvas.elements.length - 1;
+					selectedElem = makeElem(ElementType.Button);
+					canvas.elements.push(selectedElem);
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
@@ -330,7 +341,7 @@ class Elements {
 
 					if (ui.button("New")) {
 						canvas.elements = [];
-						selectedElem = -1;
+						selectedElem = null;
 					}
 
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
@@ -343,54 +354,76 @@ class Elements {
 
 				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
 
-					var i = canvas.elements.length - 1;
-					while (i >= 0) {
-						var elem = canvas.elements[i];
-						if (selectedElem == i) {
+					var i = 0;
+					function drawList(h:zui.Zui.Handle, elem:TElement) {
+						var b = false;
+						// Highlight
+						if (selectedElem == elem) {
 							ui.g.color = 0xff205d9c;
 							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
 							ui.g.color = 0xffffffff;
 						}
-						ui.text(elem.name);
-						if (ui.isReleased) {
-							selectedElem = i;
+						var started = ui.getStarted();
+						// Select
+						if (started && !ui.inputDownR) {
+							selectedElem = elem;
 						}
-						i--;
+						// Parenting
+						if (started && ui.inputDownR) {
+							getSelectedArray(canvas.elements).remove(selectedElem);
+							if (elem == selectedElem) {
+								// Unparent
+								canvas.elements.push(selectedElem);
+							}
+							else {
+								if (elem.children == null) elem.children = [];
+								elem.children.push(selectedElem);
+							}
+						}
+						// Draw
+						if (elem.children != null && elem.children.length > 0) {
+							ui.row([1/13, 12/13]);
+							b = ui.panel(h.nest(i, {selected: true}), "", 0, true);
+							ui.text(elem.name);
+						}
+						else {
+							ui._x += 18; // Sign offset
+							ui.text(elem.name);
+							ui._x -= 18;
+						}
+						// Draw children
+						i++;
+						if (b) {
+							for (c in elem.children) {
+								ui.indent();
+								drawList(h, c);
+								ui.unindent();
+							}
+						}
+					}
+					for (elem in canvas.elements) {
+						drawList(Id.handle(), elem);
 					}
 
 					ui.row([1/3, 1/3, 1/3]);
-					var temp1 = ui.t.BUTTON_COL;
-					var temp2 = ui.t.BUTTON_HOVER_COL;
-					var temp3 = ui.t.BUTTON_PRESSED_COL;
-					ui.t.BUTTON_COL = 0xff343436;
-					ui.t.BUTTON_HOVER_COL = 0xff444446;
-					ui.t.BUTTON_PRESSED_COL = 0xff303030;
 					var elems = canvas.elements;
-					if (ui.button("Up") && selectedElem < elems.length - 1) {
-						var t = canvas.elements[selectedElem];
-						canvas.elements[selectedElem] = canvas.elements[selectedElem + 1];
-						canvas.elements[selectedElem + 1] = t;
-						selectedElem++;
+					if (ui.button("Up") && selectedElem != null) {
+						moveElem(1);
 					}
-					if (ui.button("Down") && selectedElem > 0) {
-						var t = canvas.elements[selectedElem];
-						canvas.elements[selectedElem] = canvas.elements[selectedElem - 1];
-						canvas.elements[selectedElem - 1] = t;
-						selectedElem--;
+					if (ui.button("Down") && selectedElem != null) {
+						moveElem(-1);
 					}
-					if (ui.button("Remove") && canvas.elements.length > 0) {
+					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
 					}
-					ui.t.BUTTON_COL = temp1;
-					ui.t.BUTTON_HOVER_COL = temp2;
-					ui.t.BUTTON_PRESSED_COL = temp3;
 				}
 
-				if (selectedElem >= 0) {
-					var elem = canvas.elements[selectedElem];
+				if (selectedElem != null) {
+					var elem = selectedElem;
 					var id = elem.id;
 
 					if (ui.panel(Id.handle({selected: true}), "Properties")) {
+						elem.visible = ui.check(Id.handle().nest(id, {selected: elem.visible}), "Visible");
 						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
 						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
 						ui.row([1/4, 1/4, 1/4, 1/4]);
@@ -444,9 +477,9 @@ class Elements {
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Timeline")) {
-						ui.row([1/2,1/2]);
-						ui.button("Insert");
-						ui.button("Remove");
+						// ui.row([1/2,1/2]);
+						// ui.button("Insert");
+						// ui.button("Remove");
 					}
 				}
 			}
@@ -486,6 +519,26 @@ class Elements {
 					ui.text("(Drag and drop images here)", zui.Zui.Align.Center);
 				}
 			}
+
+			if (ui.tab(htab, "Preferences")) {
+				var hscale = Id.handle({value: 1.0});
+				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+				if (ui.changed && !ui.inputDown) {
+					ui.setScale(hscale.value);
+					windowW = Std.int(defaultWindowW * hscale.value);
+				}
+				Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
+				// if (ui.button("Save")) {
+				// 	#if kha_krom
+				// 	Krom.fileSaveBytes("config.arm", haxe.io.Bytes.ofString(haxe.Json.stringify(armory.data.Config.raw)).getData());
+				// 	#end
+				// }
+				// ui.text("armory2d");
+
+				if (ui.panel(Id.handle({selected: true}), "Console")) {
+					// ui.text(lastTrace);
+				}
+			}
 		}
 		ui.end();
 
@@ -496,16 +549,6 @@ class Elements {
 			var ratio = w / getImage(dragAsset).width;
 			var h = getImage(dragAsset).height * ratio;
 			g.drawScaledImage(getImage(dragAsset), ui.inputX, ui.inputY, w, h);
-		}
-
-		var showTimeline = true;
-		if (showTimeline) {
-			g.color = 0xffffffff;
-			var ty = kha.System.windowHeight() - timeline.height;
-			g.drawImage(timeline, 0, ty);
-
-			g.color = 0xff205d9c;
-			g.fillRect(selectedFrame * 11, ty + 30, 10, 30);
 		}
 
 		g.end();
@@ -524,14 +567,34 @@ class Elements {
 		if (showFiles) renderFiles(g);
 	}
 
+	function getSelectedArray(ar:Array<TElement>):Array<TElement> {
+		if (ar == null) return null;
+		for (e in ar) {
+			if (e == selectedElem) return ar;
+			var res = getSelectedArray(e.children);
+			if (res != null) return res;
+		}
+		return null;
+	}
+
+	function moveElem(d:Int) {
+		var ar = getSelectedArray(canvas.elements);
+		if (ar.length <= 1) return;
+
+		var i = ar.indexOf(selectedElem) + d;
+		if (i < 0 || i >= ar.length) return;
+
+		ar.remove(selectedElem);
+		ar.insert(i, selectedElem);
+	}
+
 	function getImage(asset:TAsset):kha.Image {
 		return Canvas.assetMap.get(asset.id);
 	}
 
 	function removeSelectedElem() {
-		canvas.elements.splice(selectedElem, 1);
-		if (selectedElem == canvas.elements.length) selectedElem--;
-		else if (selectedElem < 0) selectedElem++;
+		canvas.elements.remove(selectedElem);
+		selectedElem = null;
 	}
 
 	function acceptDrag(index:Int) {
@@ -542,7 +605,7 @@ class Elements {
 		elem.width = getImage(canvas.assets[index]).width;
 		elem.height = getImage(canvas.assets[index]).height;
 		canvas.elements.push(elem);
-		selectedElem = canvas.elements.length - 1;
+		selectedElem = elem;
 	}
 
 	function hitbox(x:Float, y:Float, w:Float, h:Float):Bool {
@@ -565,15 +628,14 @@ class Elements {
 		// Select elem
 		if (ui.inputStarted && ui.inputDownR) {
 			var i = canvas.elements.length;
-			while (--i >= 0) {
-				var elem = canvas.elements[i];
+			for (elem in canvas.elements) {
 				var ex = scaled(elem.x);
 				var ey = scaled(elem.y);
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
 				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
-					selectedElem != i) {
-					selectedElem = i;
+					selectedElem != elem) {
+					selectedElem = elem;
 					break;
 				}
 			}
@@ -602,8 +664,8 @@ class Elements {
 			}
 		}
 
-		if (selectedElem >= 0 && selectedElem < canvas.elements.length) {
-			var elem = canvas.elements[selectedElem];
+		if (selectedElem != null) {
+			var elem = selectedElem;
 			var ex = scaled(elem.x);
 			var ey = scaled(elem.y);
 			var ew = scaled(elem.width);

@@ -14,7 +14,7 @@ class Main {
 		var h = 900;
 		if (w > kha.Display.width(0)) w = kha.Display.width(0);
 		if (h > kha.Display.height(0)) h = kha.Display.height(0);
-		kha.System.init({ title : "ArmorUI", width : w, height : h, resizable: true, maximizable: true }, initialized);
+		kha.System.init({ title : "Armory2D Editor", width : w, height : h, resizable: true, maximizable: true }, initialized);
 	}
 	
 	static function initialized() {
