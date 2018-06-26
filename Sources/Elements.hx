@@ -16,8 +16,9 @@ class Elements {
 	static function get_uiw():Int {
 		return Std.int(windowW * Main.prefs.scaleFactor);
 	}
-	static var coffX = 40.0;
-	static var coffY = 40.0;
+	static var toolbarw = 60;
+	static var coffX = 70.0;
+	static var coffY = 50.0;
 
 	var dropPath = "";
 	var drag = false;
@@ -150,16 +151,17 @@ class Elements {
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = 100;
-		if (type == ElementType.Text) {
+		switch (type) {
+		case ElementType.Text:
 			name = unique("Text");
 			height = 40;
-		}
-		else if (type == ElementType.Button) {
+		case ElementType.Button:
 			name = unique("Button");
 			height = 20;
-		}
-		else if (type == ElementType.Image) {
+		case ElementType.Image:
 			name = unique("Image");
+		case ElementType.Empty:
+			name = unique("Empty");
 		}
 		var elem:TElement = {
 			id: Canvas.getElementId(canvas),
@@ -179,6 +181,7 @@ class Elements {
 			children: [],
 			visible: true
 		};
+		canvas.elements.push(elem);
 		return elem;
 	}
 
@@ -226,7 +229,7 @@ class Elements {
 	}
 
 	function drawTimeline() {
-		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw, 60);
+		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, 60);
 		var g = timeline.g2;
 		g.begin(true, 0xff222222);
 		g.font = kha.Assets.fonts.DroidSans;
@@ -299,17 +302,45 @@ class Elements {
 		if (showTimeline) {
 			g.color = 0xffffffff;
 			var ty = kha.System.windowHeight() - timeline.height;
-			g.drawImage(timeline, 0, ty);
+			g.drawImage(timeline, toolbarw, ty);
 
 			g.color = 0xff205d9c;
-			g.fillRect(selectedFrame * 11, ty + 30, 10, 30);
+			g.fillRect(toolbarw + selectedFrame * 11, ty + 30, 10, 30);
 		}
 
 		g.end();
 
 		ui.begin(g);
 
-		if (ui.window(hwin, kha.System.windowWidth() - uiw, 0, uiw, kha.System.windowHeight(), false)) {
+		if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
+			ui._y = 50;
+			if (ui.button("Empty")) {
+				selectedElem = makeElem(ElementType.Empty);
+			}
+			ui.button("VLayout");
+			ui.button("HLayout");
+			if (ui.button("Text")) {
+				selectedElem = makeElem(ElementType.Text);
+			}
+			ui.button("Shape");
+			if (ui.button("Image")) {
+				selectedElem = makeElem(ElementType.Image);
+			}
+			if (ui.button("Button")) {
+				selectedElem = makeElem(ElementType.Button);
+			}
+			ui.button("Check");
+			ui.button("Radio");
+			ui.button("Combo");
+			ui.button("Slider");
+			ui.button("Input");
+		}
+
+		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, ui.t.ELEMENT_H + 2)) {
+			ui.tab(Id.handle(), canvas.name);
+		}
+
+		if (ui.window(hwin, kha.System.windowWidth() - uiw, 0, uiw, kha.System.windowHeight())) {
 
 			var htab = Id.handle();
 			if (ui.tab(htab, "Project")) {
@@ -335,31 +366,7 @@ class Elements {
 					canvas.y = coffY;
 				}
 
-				ui.row([1/3, 1/3, 1/3]);
-				if (ui.button("Text")) {
-					selectedElem = makeElem(ElementType.Text);
-					canvas.elements.push(selectedElem);
-				}
-				if (ui.button("Image")) {
-					selectedElem = makeElem(ElementType.Image);
-					canvas.elements.push(selectedElem);
-				}
-				if (ui.button("Button")) {
-					selectedElem = makeElem(ElementType.Button);
-					canvas.elements.push(selectedElem);
-				}
-
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
-					// ui.row([1/3, 1/3, 1/3]);
-					// if (ui.button("New")) {
-					// 	untyped __js__("const {dialog} = require('electron').remote");
-					// 	untyped __js__("dialog.showMessageBox({type: 'question', buttons: ['Yes', 'No'], title: 'Confirm', message: 'Create new canvas?'})");
-					// }
-
-					// if (ui.button("Open")) {
-					// 	untyped __js__("const {dialog} = require('electron').remote");
-					// 	untyped __js__("console.log(dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']}))");
-					// }
 
 					if (ui.button("New")) {
 						canvas.elements = [];
@@ -368,8 +375,14 @@ class Elements {
 
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
 					ui.row([1/2, 1/2]);
-					var strw = ui.textInput(Id.handle({text: canvas.width + ""}), "Width", Right);
-					var strh = ui.textInput(Id.handle({text: canvas.height + ""}), "Height", Right);
+
+					
+					var handlecw = Id.handle({text: canvas.width + ""});
+					var handlech = Id.handle({text: canvas.height + ""});
+					handlecw.text = canvas.width + "";
+					handlech.text = canvas.height + "";
+					var strw = ui.textInput(handlecw, "Width", Right);
+					var strh = ui.textInput(handlech, "Height", Right);
 					canvas.width = Std.parseInt(strw);
 					canvas.height = Std.parseInt(strh);
 				}
@@ -637,12 +650,11 @@ class Elements {
 
 	function acceptDrag(index:Int) {
 		var elem = makeElem(ElementType.Image);
-		elem.asset = assetNames[index];
+		elem.asset = assetNames[index + 1]; // assetNames[0] == ""
 		elem.x = ui.inputX - canvas.x;
 		elem.y = ui.inputY - canvas.y;
 		elem.width = getImage(canvas.assets[index]).width;
 		elem.height = getImage(canvas.assets[index]).height;
-		canvas.elements.push(elem);
 		selectedElem = elem;
 	}
 
@@ -663,42 +675,13 @@ class Elements {
 		}
 		if (dragAsset != null) return;
 
-		// Select elem
-		if (ui.inputStarted && ui.inputDownR) {
-			var i = canvas.elements.length;
-			for (elem in canvas.elements) {
-				var ex = scaled(absx(elem));
-				var ey = scaled(absy(elem));
-				var ew = scaled(elem.width);
-				var eh = scaled(elem.height);
-				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
-					selectedElem != elem) {
-					selectedElem = elem;
-					break;
-				}
-			}
-		}
-
-		// Pan canvas
-		if (ui.inputDownR) {
-			coffX += Std.int(ui.inputDX);
-			coffY += Std.int(ui.inputDY);
-		}
-
-		// Zoom canvas
-		if (ui.inputWheelDelta != 0) {
-			zoom += -ui.inputWheelDelta / 10;
-			if (zoom < 0.4) zoom = 0.4;
-			else if (zoom > 1.0) zoom = 1.0;
-			zoom = Math.round(zoom * 10) / 10;
-			cui.SCALE = cui.ops.scaleFactor * zoom;
-		}
+		updateCanvas();
 
 		// Select frame
 		if (timeline != null) {
 			var ty = kha.System.windowHeight() - timeline.height;
-			if (ui.inputDown && ui.inputY > ty && ui.inputX < kha.System.windowWidth() - uiw) {
-				selectedFrame = Std.int(ui.inputX / 11);
+			if (ui.inputDown && ui.inputY > ty && ui.inputX < kha.System.windowWidth() - uiw && ui.inputX > toolbarw) {
+				selectedFrame = Std.int((ui.inputX - toolbarw) / 11);
 			}
 		}
 
@@ -711,14 +694,14 @@ class Elements {
 
 			// Drag selected elem
 			if (ui.inputStarted && ui.inputDown &&
-				hitbox(canvas.x + ex - 3, canvas.y + ey - 3, ew + 3, eh + 3)) {
+				hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (ui.inputX > canvas.x + ex + ew - 3) dragRight = true;
-				else if (ui.inputX < canvas.x + ex + 3) dragLeft = true;
-				if (ui.inputY > canvas.y + ey + eh - 3) dragBottom = true;
-				else if (ui.inputY < canvas.y + ey + 3) dragTop = true;
+				if (ui.inputX > canvas.x + ex + ew - 4) dragRight = true;
+				else if (ui.inputX < canvas.x + ex + 4) dragLeft = true;
+				if (ui.inputY > canvas.y + ey + eh - 4) dragBottom = true;
+				else if (ui.inputY < canvas.y + ey + 4) dragTop = true;
 
 			}
 			if (ui.inputReleased && drag) {
@@ -757,6 +740,43 @@ class Elements {
 			}
 		}
 
+		updateFiles();
+	}
+
+	function updateCanvas() {
+		if (showFiles || ui.inputX > kha.System.windowWidth() - uiw) return;
+
+		// Select elem
+		if (ui.inputStarted && ui.inputDownR) {
+			var i = canvas.elements.length;
+			for (elem in canvas.elements) {
+				var ex = scaled(absx(elem));
+				var ey = scaled(absy(elem));
+				var ew = scaled(elem.width);
+				var eh = scaled(elem.height);
+				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
+					selectedElem != elem) {
+					selectedElem = elem;
+					break;
+				}
+			}
+		}
+
+		// Pan canvas
+		if (ui.inputDownR) {
+			coffX += Std.int(ui.inputDX);
+			coffY += Std.int(ui.inputDY);
+		}
+
+		// Zoom canvas
+		if (ui.inputWheelDelta != 0) {
+			zoom += -ui.inputWheelDelta / 10;
+			if (zoom < 0.4) zoom = 0.4;
+			else if (zoom > 1.0) zoom = 1.0;
+			zoom = Math.round(zoom * 10) / 10;
+			cui.SCALE = cui.ops.scaleFactor * zoom;
+		}
+
 		// Canvas resize
 		if (ui.inputStarted && hitbox(canvas.x + scaled(canvas.width) - 3, canvas.y + scaled(canvas.height) - 3, 6, 6)) {
 			resizeCanvas = true;
@@ -770,8 +790,6 @@ class Elements {
 			if (canvas.width < 1) canvas.width = 1;
 			if (canvas.height < 1) canvas.height = 1;
 		}
-
-		updateFiles();
 	}
 
 	function updateFiles() {
