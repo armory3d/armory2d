@@ -124,9 +124,9 @@ class Elements {
 
 	function unique(s:String):String {
 		// for (e in canvas.elements) {
-			// if (s == e.name) {
-				// return unique(s + '.001')
-			// }
+		// 	if (s == e.name) {
+		// 		return unique(s + '.001');
+		// 	}
 		// }
 		return s;
 	}
@@ -159,6 +159,7 @@ class Elements {
 			asset: "",
 			color: 0xffffffff,
 			anchor: 0,
+			parent: null,
 			children: [],
 			visible: true
 		};
@@ -178,6 +179,10 @@ class Elements {
 		if (grid != null) {
 			grid.unload();
 			grid = null;
+		}
+		if (timeline != null) {
+			timeline.unload();
+			timeline = null;
 		}
 	}
 
@@ -212,12 +217,13 @@ class Elements {
 		g.fontSize = 16;
 
 		// Labels
-		for (i in 0...Std.int(125 / 5) + 1) {
+		var frames = Std.int(timeline.width / 11);
+		for (i in 0...Std.int(frames / 5) + 1) {
 			g.drawString(i * 5 + "", i * 55, 0);
 		}
 
 		// Frames
-		for (i in 0...125) {
+		for (i in 0...frames) {
 			g.color = i % 5 == 0 ? 0xff444444 : 0xff333333;
 			g.fillRect(i * 11, 30, 10, 30);
 		}
@@ -257,8 +263,8 @@ class Elements {
 		if (selectedElem != null) {
 			g.color = 0xffffffff;
 			// Resize rects
-			var ex = scaled(selectedElem.x);
-			var ey = scaled(selectedElem.y);
+			var ex = scaled(absx(selectedElem));
+			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
@@ -354,7 +360,6 @@ class Elements {
 
 				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
 
-					var i = 0;
 					function drawList(h:zui.Zui.Handle, elem:TElement) {
 						var b = false;
 						// Highlight
@@ -370,20 +375,27 @@ class Elements {
 						}
 						// Parenting
 						if (started && ui.inputDownR) {
-							getSelectedArray(canvas.elements).remove(selectedElem);
-							if (elem == selectedElem) {
-								// Unparent
-								canvas.elements.push(selectedElem);
+							if (elem == selectedElem) { // Unparent
+								if (elem.parent != null) {
+									var p = elemById(elem.parent);
+									p.children.remove(elem.id);
+									elem.parent = null;
+									elem.x += absx(p);
+									elem.y += absy(p);
+								}
 							}
 							else {
 								if (elem.children == null) elem.children = [];
-								elem.children.push(selectedElem);
+								elem.children.push(selectedElem.id);
+								selectedElem.parent = elem.id;
+								selectedElem.x -= absx(elem);
+								selectedElem.y -= absy(elem);
 							}
 						}
 						// Draw
 						if (elem.children != null && elem.children.length > 0) {
 							ui.row([1/13, 12/13]);
-							b = ui.panel(h.nest(i, {selected: true}), "", 0, true);
+							b = ui.panel(h.nest(elem.id, {selected: true}), "", 0, true);
 							ui.text(elem.name);
 						}
 						else {
@@ -392,26 +404,25 @@ class Elements {
 							ui._x -= 18;
 						}
 						// Draw children
-						i++;
 						if (b) {
-							for (c in elem.children) {
+							for (id in elem.children) {
 								ui.indent();
-								drawList(h, c);
+								drawList(h, elemById(id));
 								ui.unindent();
 							}
 						}
 					}
 					for (elem in canvas.elements) {
-						drawList(Id.handle(), elem);
+						if (elem.parent == null) drawList(Id.handle(), elem);
 					}
 
 					ui.row([1/3, 1/3, 1/3]);
 					var elems = canvas.elements;
 					if (ui.button("Up") && selectedElem != null) {
-						moveElem(1);
+						moveElem(-1);
 					}
 					if (ui.button("Down") && selectedElem != null) {
-						moveElem(-1);
+						moveElem(1);
 					}
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
@@ -567,33 +578,43 @@ class Elements {
 		if (showFiles) renderFiles(g);
 	}
 
-	function getSelectedArray(ar:Array<TElement>):Array<TElement> {
-		if (ar == null) return null;
-		for (e in ar) {
-			if (e == selectedElem) return ar;
-			var res = getSelectedArray(e.children);
-			if (res != null) return res;
-		}
+	function elemById(id: Int): TElement {
+		for (e in canvas.elements) if (e.id == id) return e;
 		return null;
 	}
 
 	function moveElem(d:Int) {
-		var ar = getSelectedArray(canvas.elements);
-		if (ar.length <= 1) return;
+		var ar = canvas.elements;
+		var i = ar.indexOf(selectedElem);
+		var p = selectedElem.parent;
 
-		var i = ar.indexOf(selectedElem) + d;
-		if (i < 0 || i >= ar.length) return;
+		while (true) {
+			i += d;
+			if (i < 0 || i >= ar.length) break;
 
-		ar.remove(selectedElem);
-		ar.insert(i, selectedElem);
+			if (ar[i].parent == p) {
+				ar.remove(selectedElem);
+				ar.insert(i, selectedElem);
+				break;
+			}
+		}
 	}
 
 	function getImage(asset:TAsset):kha.Image {
 		return Canvas.assetMap.get(asset.id);
 	}
 
+	function removeElem(elem:TElement) {
+		if (elem.children != null) for (id in elem.children) removeElem(elemById(id));
+		canvas.elements.remove(elem);
+		if (elem.parent != null) {
+			elemById(elem.parent).children.remove(elem.id);
+			elem.parent = null;
+		}
+	}
+
 	function removeSelectedElem() {
-		canvas.elements.remove(selectedElem);
+		removeElem(selectedElem);
 		selectedElem = null;
 	}
 
@@ -629,8 +650,8 @@ class Elements {
 		if (ui.inputStarted && ui.inputDownR) {
 			var i = canvas.elements.length;
 			for (elem in canvas.elements) {
-				var ex = scaled(elem.x);
-				var ey = scaled(elem.y);
+				var ex = scaled(absx(elem));
+				var ey = scaled(absy(elem));
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
 				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
@@ -666,8 +687,8 @@ class Elements {
 
 		if (selectedElem != null) {
 			var elem = selectedElem;
-			var ex = scaled(elem.x);
-			var ey = scaled(elem.y);
+			var ex = scaled(absx(elem));
+			var ey = scaled(absy(elem));
 			var ew = scaled(elem.width);
 			var eh = scaled(elem.height);
 
@@ -695,6 +716,11 @@ class Elements {
 				if (dragBottom) elem.height += Std.int(ui.inputDY);
 				else if (dragTop) { elem.y += Std.int(ui.inputDY); elem.height -= Std.int(ui.inputDY); }
 			
+				if (elem.type != ElementType.Image) {
+					if (elem.width < 1) elem.width = 1;
+					if (elem.height < 1) elem.height = 1;
+				}
+
 				if (!dragLeft && !dragRight && !dragBottom && !dragTop) {
 					elem.x += ui.inputDX;
 					elem.y += ui.inputDY;
@@ -792,6 +818,16 @@ class Elements {
 		uimodal.endLayout();
 
 		g.begin(false);
+	}
+
+	function absx(e:TElement):Float {
+		if (e == null) return 0;
+		return e.x + absx(elemById(e.parent));
+	}
+
+	function absy(e:TElement):Float {
+		if (e == null) return 0;
+		return e.y + absy(elemById(e.parent));
 	}
 
 	inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE); }
