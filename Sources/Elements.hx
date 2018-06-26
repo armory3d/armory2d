@@ -25,7 +25,7 @@ class Elements {
 	var dragTop = false;
 	var dragRight = false;
 	var dragBottom = false;
-	var assetNames:Array<String> = [];
+	var assetNames:Array<String> = [""];
 	var dragAsset:TAsset = null;
 	var resizeCanvas = false;
 	var zoom = 1.0;
@@ -102,24 +102,40 @@ class Elements {
 	}
 
 	function importAsset(path:String) {
-		if (!StringTools.endsWith(path, ".jpg") &&
-			!StringTools.endsWith(path, ".png") &&
-			!StringTools.endsWith(path, ".k") &&
-			!StringTools.endsWith(path, ".hdr")) return;
+		var isImage = StringTools.endsWith(path, ".jpg") ||
+					  StringTools.endsWith(path, ".png") ||
+					  StringTools.endsWith(path, ".k") ||
+					  StringTools.endsWith(path, ".hdr");
+
+		var isFont = StringTools.endsWith(path, ".ttf");
 		
 		var abspath = toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
-		kha.Assets.loadImageFromPath(abspath, false, function(image:kha.Image) {
-			var ar = path.split("/");
-			var name = ar[ar.length - 1];
-			var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
-			canvas.assets.push(asset);
-			Canvas.assetMap.set(asset.id, image);
+		if (isImage) {
+			kha.Assets.loadImageFromPath(abspath, false, function(image:kha.Image) {
+				var ar = path.split("/");
+				var name = ar[ar.length - 1];
+				var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
+				canvas.assets.push(asset);
+				Canvas.assetMap.set(asset.id, image);
 
-			assetNames.push(name);
-			hwin.redraws = 2;
-		});
+				assetNames.push(name);
+				hwin.redraws = 2;
+			});
+		}
+		else if (isFont) {
+			kha.Assets.loadFontFromPath(abspath, function(font:kha.Font) {
+				var ar = path.split("/");
+				var name = ar[ar.length - 1];
+				var asset:TAsset = { name: name, file: path, id: Canvas.getAssetId(canvas) };
+				canvas.assets.push(asset);
+				Canvas.assetMap.set(asset.id, font);
+
+				assetNames.push(name);
+				hwin.redraws = 2;
+			});
+		}
 	}
 
 	function unique(s:String):String {
@@ -496,7 +512,7 @@ class Elements {
 			}
 
 			if (ui.tab(htab, "Import")) {
-				if (ui.button("Import image")) {
+				if (ui.button("Import Asset")) {
 					showFiles = true;
 					foldersOnly = false;
 					filesDone = function(path:String) {
@@ -507,27 +523,28 @@ class Elements {
 				}
 				
 				if (canvas.assets.length > 0) {
-					ui.text("(Drag adnd drop images to canvas)", zui.Zui.Align.Center);
+					ui.text("(Drag and drop assets to canvas)", zui.Zui.Align.Center);
 
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
 						var asset = canvas.assets[i];
-						if (ui.image(getImage(asset)) == State.Started) {
+						var isFont = StringTools.endsWith(asset.name, ".ttf");
+						if (!isFont && ui.image(getImage(asset)) == State.Started) {
 							dragAsset = asset;
 						}
 						ui.row([7/8, 1/8]);
 						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-						assetNames[i] = asset.name;
+						assetNames[i + 1] = asset.name; // assetNames[0] == ""
 						if (ui.button("X")) {
 							getImage(asset).unload();
 							canvas.assets.splice(i, 1);
-							assetNames.splice(i, 1);
+							assetNames.splice(i + 1, 1);
 						}
 						i--;
 					}
 				}
 				else {
-					ui.text("(Drag and drop images here)", zui.Zui.Align.Center);
+					ui.text("(Drag and drop images and fonts here)", zui.Zui.Align.Center);
 				}
 			}
 
