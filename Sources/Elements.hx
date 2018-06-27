@@ -160,6 +160,8 @@ class Elements {
 			height = 20;
 		case ElementType.Image:
 			name = unique("Image");
+		case ElementType.Shape:
+			name = unique("Shape");
 		case ElementType.Empty:
 			name = unique("Empty");
 		}
@@ -322,7 +324,9 @@ class Elements {
 			if (ui.button("Text")) {
 				selectedElem = makeElem(ElementType.Text);
 			}
-			ui.button("Shape");
+			if (ui.button("Shape")) {
+				selectedElem = makeElem(ElementType.Shape);
+			}
 			if (ui.button("Image")) {
 				selectedElem = makeElem(ElementType.Image);
 			}
@@ -434,24 +438,26 @@ class Elements {
 						}
 						// Draw children
 						if (b) {
-							for (id in elem.children) {
+							for (i in 0...elem.children.length) {
+								var id = elem.children[elem.children.length - 1 - i];
 								ui.indent();
 								drawList(h, elemById(id));
 								ui.unindent();
 							}
 						}
 					}
-					for (elem in canvas.elements) {
+					for (i in 0...canvas.elements.length) {
+						var elem = canvas.elements[canvas.elements.length - 1 - i];
 						if (elem.parent == null) drawList(Id.handle(), elem);
 					}
 
 					ui.row([1/3, 1/3, 1/3]);
 					var elems = canvas.elements;
 					if (ui.button("Up") && selectedElem != null) {
-						moveElem(-1);
+						moveElem(1);
 					}
 					if (ui.button("Down") && selectedElem != null) {
-						moveElem(1);
+						moveElem(-1);
 					}
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
