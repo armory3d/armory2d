@@ -93,8 +93,7 @@ class Elements {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		// cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
-		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: true});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: true, theme: zui.Themes.light});
 		uimodal = new Zui( { font: kha.Assets.fonts.DroidSans, scaleFactor: Main.prefs.scaleFactor } );
 
 		kha.System.notifyOnDropFiles(function(path:String) {
@@ -154,35 +153,31 @@ class Elements {
 
 	function makeElem(type:ElementType) {
 		var name = "";
-		var height = 100;
+		var height = cui.t.ELEMENT_H;
 		switch (type) {
 		case ElementType.Text:
 			name = unique("Text");
-			height = 40;
 		case ElementType.Button:
 			name = unique("Button");
-			height = 20;
 		case ElementType.Image:
 			name = unique("Image");
+			height = 100;
 		case ElementType.Shape:
 			name = unique("Shape");
+			height = 100;
 		case ElementType.Check:
 			name = unique("Check");
-			height = 20;
 		case ElementType.Radio:
 			name = unique("Radio");
-			height = 20;
 		case ElementType.Combo:
 			name = unique("Combo");
-			height = 20;
 		case ElementType.Slider:
 			name = unique("Slider");
-			height = 20;
 		case ElementType.Input:
 			name = unique("Input");
-			height = 20;
 		case ElementType.Empty:
 			name = unique("Empty");
+			height = 100;
 		}
 		var elem:TElement = {
 			id: Canvas.getElementId(canvas),
@@ -532,6 +527,9 @@ class Elements {
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
 						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
+					}
+
+					if (ui.panel(Id.handle({selected: false}), "Align")) {
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Anchor")) {
