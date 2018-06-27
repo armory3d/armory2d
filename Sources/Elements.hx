@@ -16,7 +16,10 @@ class Elements {
 	static function get_uiw():Int {
 		return Std.int(windowW * Main.prefs.scaleFactor);
 	}
-	static var toolbarw = 60;
+	var toolbarw(get, null):Int;
+	function get_toolbarw():Int {
+		return Std.int(60 * ui.SCALE);
+	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
 
@@ -208,7 +211,7 @@ class Elements {
 	}
 
 	function getAssetIndex(asset:String):Int {
-		for (i in 0...canvas.assets.length) if (asset == canvas.assets[i].name) return i;
+		for (i in 0...canvas.assets.length) if (asset == canvas.assets[i].name) return i + 1; // assetNames[0] = ""
 		return 0;
 	}
 
@@ -247,22 +250,23 @@ class Elements {
 	}
 
 	function drawTimeline() {
-		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, 60);
+		var sc = ui.SCALE;
+		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, Std.int(60 * sc));
 		var g = timeline.g2;
 		g.begin(true, 0xff222222);
 		g.font = kha.Assets.fonts.DroidSans;
-		g.fontSize = 16;
+		g.fontSize = Std.int(16 * sc);
 
 		// Labels
-		var frames = Std.int(timeline.width / 11);
+		var frames = Std.int(timeline.width / (11 * sc));
 		for (i in 0...Std.int(frames / 5) + 1) {
-			g.drawString(i * 5 + "", i * 55, 0);
+			g.drawString(i * 5 + "", i * 55 * sc, 0);
 		}
 
 		// Frames
 		for (i in 0...frames) {
 			g.color = i % 5 == 0 ? 0xff444444 : 0xff333333;
-			g.fillRect(i * 11, 30, 10, 30);
+			g.fillRect(i * 11 * sc, 30 * sc, 10 * sc, 30 * sc);
 		}
 
 		g.end();
@@ -323,7 +327,8 @@ class Elements {
 			g.drawImage(timeline, toolbarw, ty);
 
 			g.color = 0xff205d9c;
-			g.fillRect(toolbarw + selectedFrame * 11, ty + 30, 10, 30);
+			var sc = ui.SCALE;
+			g.fillRect(toolbarw + selectedFrame * 11 * sc, ty + 30 * sc, 10 * sc, 30 * sc);
 		}
 
 		g.end();
@@ -368,7 +373,7 @@ class Elements {
 			}
 		}
 
-		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, ui.t.ELEMENT_H + 2)) {
+		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
 			ui.tab(Id.handle(), canvas.name);
 		}
 
@@ -426,7 +431,7 @@ class Elements {
 						// Highlight
 						if (selectedElem == elem) {
 							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H);
+							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE);
 							ui.g.color = 0xffffffff;
 						}
 						var started = ui.getStarted();
@@ -497,7 +502,7 @@ class Elements {
 					var id = elem.id;
 
 					if (ui.panel(Id.handle({selected: true}), "Properties")) {
-						elem.visible = ui.check(Id.handle().nest(id, {selected: elem.visible}), "Visible");
+						elem.visible = ui.check(Id.handle().nest(id, {selected: elem.visible == null ? true : elem.visible}), "Visible");
 						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
 						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
 						ui.row([1/4, 1/4, 1/4, 1/4]);
@@ -522,7 +527,7 @@ class Elements {
 						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
-						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation)});
+						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
@@ -715,7 +720,7 @@ class Elements {
 		if (timeline != null) {
 			var ty = kha.System.windowHeight() - timeline.height;
 			if (ui.inputDown && ui.inputY > ty && ui.inputX < kha.System.windowWidth() - uiw && ui.inputX > toolbarw) {
-				selectedFrame = Std.int((ui.inputX - toolbarw) / 11);
+				selectedFrame = Std.int((ui.inputX - toolbarw) / 11 / ui.SCALE);
 			}
 		}
 
