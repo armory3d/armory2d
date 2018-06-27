@@ -90,7 +90,8 @@ class Elements {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
+		// cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: false});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: true});
 		uimodal = new Zui( { font: kha.Assets.fonts.DroidSans, scaleFactor: Main.prefs.scaleFactor } );
 
 		kha.System.notifyOnDropFiles(function(path:String) {
@@ -162,6 +163,21 @@ class Elements {
 			name = unique("Image");
 		case ElementType.Shape:
 			name = unique("Shape");
+		case ElementType.Check:
+			name = unique("Check");
+			height = 20;
+		case ElementType.Radio:
+			name = unique("Radio");
+			height = 20;
+		case ElementType.Combo:
+			name = unique("Combo");
+			height = 20;
+		case ElementType.Slider:
+			name = unique("Slider");
+			height = 20;
+		case ElementType.Input:
+			name = unique("Input");
+			height = 20;
 		case ElementType.Empty:
 			name = unique("Empty");
 		}
@@ -315,29 +331,41 @@ class Elements {
 		ui.begin(g);
 
 		if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
-			ui._y = 50;
-			if (ui.button("Empty")) {
-				selectedElem = makeElem(ElementType.Empty);
+			if (ui.tab(Id.handle(), "Tools")) {
+				ui._y = 50;
+				if (ui.button("Empty")) {
+					selectedElem = makeElem(ElementType.Empty);
+				}
+				// ui.button("VLayout");
+				// ui.button("HLayout");
+				if (ui.button("Text")) {
+					selectedElem = makeElem(ElementType.Text);
+				}
+				if (ui.button("Shape")) {
+					selectedElem = makeElem(ElementType.Shape);
+				}
+				if (ui.button("Image")) {
+					selectedElem = makeElem(ElementType.Image);
+				}
+				if (ui.button("Button")) {
+					selectedElem = makeElem(ElementType.Button);
+				}
+				if (ui.button("Check")) {
+					selectedElem = makeElem(ElementType.Check);
+				}
+				if (ui.button("Radio")) {
+					selectedElem = makeElem(ElementType.Radio);
+				}
+				if (ui.button("Combo")) {
+					selectedElem = makeElem(ElementType.Combo);
+				}
+				if (ui.button("Slider")) {
+					selectedElem = makeElem(ElementType.Slider);
+				}
+				if (ui.button("Input")) {
+					selectedElem = makeElem(ElementType.Input);
+				}
 			}
-			ui.button("VLayout");
-			ui.button("HLayout");
-			if (ui.button("Text")) {
-				selectedElem = makeElem(ElementType.Text);
-			}
-			if (ui.button("Shape")) {
-				selectedElem = makeElem(ElementType.Shape);
-			}
-			if (ui.button("Image")) {
-				selectedElem = makeElem(ElementType.Image);
-			}
-			if (ui.button("Button")) {
-				selectedElem = makeElem(ElementType.Button);
-			}
-			ui.button("Check");
-			ui.button("Radio");
-			ui.button("Combo");
-			ui.button("Slider");
-			ui.button("Input");
 		}
 
 		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, ui.t.ELEMENT_H + 2)) {
@@ -530,7 +558,7 @@ class Elements {
 				}
 			}
 
-			if (ui.tab(htab, "Import")) {
+			if (ui.tab(htab, "Assets")) {
 				if (ui.button("Import Asset")) {
 					showFiles = true;
 					foldersOnly = false;
