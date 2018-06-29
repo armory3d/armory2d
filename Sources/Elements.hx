@@ -384,6 +384,12 @@ class Elements {
 					canvas.y = 0;
 					#if kha_krom
 					Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
+					#elseif kha_debug_html5
+					var fs = untyped __js__('require("fs");');
+					var path = untyped __js__('require("path")');
+					var filePath = path.resolve(untyped __js__('__dirname'), Main.prefs.path);
+					try { fs.writeFileSync(filePath, haxe.Json.stringify(canvas)); }
+					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
 					var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
@@ -392,6 +398,12 @@ class Elements {
 					for (a in canvas.assets) filesList += a.file + '\n';
 					#if kha_krom
 					Krom.fileSaveBytes(filesPath, haxe.io.Bytes.ofString(filesList).getData());
+					#elseif kha_debug_html5
+					var fs = untyped __js__('require("fs")');
+					var path = untyped __js__('require("path")');
+					var filePath = path.resolve(untyped __js__('__dirname'), filesPath);
+					try { fs.writeFileSync(filePath, filesList); }
+					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
 					canvas.x = coffX;
