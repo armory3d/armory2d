@@ -4,7 +4,7 @@ import zui.Canvas;
 
 class Main {
 
-	public static var prefs:Dynamic = null;
+	public static var prefs:TPrefs = null;
 	public static var cwd = ""; // Canvas path
 	static var inst:Elements;
 
@@ -19,24 +19,36 @@ class Main {
 	
 	static function initialized() {
 
-		// Debug
-		// prefs = { scaleFactor: 2.0 };
-		// var raw:TCanvas = { name: "debug", x: 0, y: 0, width: 960, height: 540, elements: [], assets: [] };
-		// inst = new Elements(raw);
-		// return;
+		prefs = { path: "", scaleFactor: 1.0 };
 
-		kha.Assets.loadBlobFromPath("prefs.json", function(blob:kha.Blob) {
-			prefs = haxe.Json.parse(blob.toString());
+		#if kha_krom
+		
+		var c = Krom.getArgCount();
+		// ./krom . . --nosound canvas_path scale_factor
+		if (c > 4) prefs.path = Krom.getArg(4);
+		if (c > 5) prefs.scaleFactor = Std.parseFloat(Krom.getArg(5));
 
-			var ar = prefs.path.split("/");
-			ar.pop();
-			cwd = ar.join("/");
+		var ar = prefs.path.split("/");
+		ar.pop();
+		cwd = ar.join("/");
 
-			var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
-			kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
-				var raw:TCanvas = haxe.Json.parse(cblob.toString());
-				inst = new Elements(raw);
-			});
+		var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
+		kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
+			var raw:TCanvas = haxe.Json.parse(cblob.toString());
+			inst = new Elements(raw);
 		});
+		
+		#else
+
+		var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, elements: [], assets: [] };
+		inst = new Elements(raw);
+
+		#end		
 	}
+}
+
+typedef TPrefs = {
+	var path:String;
+	var scaleFactor:Float;
+	@:optional var window_vsync:Bool;
 }
