@@ -101,7 +101,7 @@ class Elements {
 			dropPath = toRelative(dropPath, Main.cwd);
 		});
 
-		kha.System.notifyOnRender(render);
+		kha.System.notifyOnFrames(onFrames);
 		kha.Scheduler.addTimeTask(update, 0, 1 / 60);
 	}
 
@@ -267,7 +267,8 @@ class Elements {
 		g.end();
 	}
 
-	public function render(framebuffer: kha.Framebuffer): Void {
+	public function onFrames(framebuffers: Array<kha.Framebuffer>): Void {
+		var framebuffer = framebuffers[0];
 
 		if (dropPath != "") {
 			importAsset(dropPath);
