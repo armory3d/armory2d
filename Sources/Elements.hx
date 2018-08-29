@@ -539,7 +539,7 @@ class Elements {
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
-						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: 0xffffff}), true, null, true);
+						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
