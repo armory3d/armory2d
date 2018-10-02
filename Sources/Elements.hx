@@ -201,8 +201,9 @@ class Elements {
 		return elem;
 	}
 
-	function duplicateElem(elem:TElement):TElement {
+	function duplicateElem(elem:TElement, parentId:Null<Int> = null):TElement {
 		if (elem != null) {
+			if (parentId == null) parentId = elem.parent;
 			var dupe:TElement = {
 				id: Canvas.getElementId(canvas),
 				type: elem.type,
@@ -217,11 +218,23 @@ class Elements {
 				asset: elem.asset,
 				color: elem.color,
 				anchor: elem.anchor,
-				parent: elem.parent,
-				children: [], //TODO: Deal with children
+				parent: parentId,
+				children: [],
 				visible: elem.visible
 			};
 			canvas.elements.push(dupe);
+			if (parentId != null) {
+				var parentElem = canvas.elements[parentId];
+				parentElem.children.push(dupe.id);
+				if (elem.parent != parentId) {
+					dupe.x = elem.x;
+					dupe.y = elem.y;
+				}
+			}
+			for(child in elem.children) {
+				duplicateElem(canvas.elements[child], dupe.id);
+			}
+			
 			return dupe;
 		}
 		return null;
