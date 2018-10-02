@@ -201,6 +201,45 @@ class Elements {
 		return elem;
 	}
 
+	function duplicateElem(elem:TElement, parentId:Null<Int> = null):TElement {
+		if (elem != null) {
+			if (parentId == null) parentId = elem.parent;
+			var dupe:TElement = {
+				id: Canvas.getElementId(canvas),
+				type: elem.type,
+				name: elem.name,
+				event: elem.event,
+				x: elem.x + 10,
+				y: elem.y + 10,
+				width: elem.width,
+				height: elem.height,
+				rotation: elem.rotation,
+				text: elem.text,
+				asset: elem.asset,
+				color: elem.color,
+				anchor: elem.anchor,
+				parent: parentId,
+				children: [],
+				visible: elem.visible
+			};
+			canvas.elements.push(dupe);
+			if (parentId != null) {
+				var parentElem = canvas.elements[parentId];
+				parentElem.children.push(dupe.id);
+				if (elem.parent != parentId) {
+					dupe.x = elem.x;
+					dupe.y = elem.y;
+				}
+			}
+			for(child in elem.children) {
+				duplicateElem(canvas.elements[child], dupe.id);
+			}
+			
+			return dupe;
+		}
+		return null;
+	}
+
 	function getEnumTexts():Array<String> {
 		return assetNames.length > 0 ? assetNames : [""];
 	}
@@ -492,7 +531,7 @@ class Elements {
 						if (elem.parent == null) drawList(Id.handle(), elem);
 					}
 
-					ui.row([1/3, 1/3, 1/3]);
+					ui.row([1/4, 1/4, 1/4, 1/4]);
 					var elems = canvas.elements;
 					if (ui.button("Up") && selectedElem != null) {
 						moveElem(1);
@@ -502,6 +541,9 @@ class Elements {
 					}
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
+					}
+					if (ui.button("Duplicate") && selectedElem != null) {
+						selectedElem = duplicateElem(selectedElem);
 					}
 				}
 
