@@ -201,6 +201,32 @@ class Elements {
 		return elem;
 	}
 
+	function duplicateElem(elem:TElement):TElement {
+		if (elem != null) {
+			var dupe:TElement = {
+				id: Canvas.getElementId(canvas),
+				type: elem.type,
+				name: elem.name,
+				event: elem.event,
+				x: elem.x + 10,
+				y: elem.y + 10,
+				width: elem.width,
+				height: elem.height,
+				rotation: elem.rotation,
+				text: elem.text,
+				asset: elem.asset,
+				color: elem.color,
+				anchor: elem.anchor,
+				parent: elem.parent,
+				children: [], //TODO: Deal with children
+				visible: elem.visible
+			};
+			canvas.elements.push(dupe);
+			return dupe;
+		}
+		return null;
+	}
+
 	function getEnumTexts():Array<String> {
 		return assetNames.length > 0 ? assetNames : [""];
 	}
@@ -492,7 +518,7 @@ class Elements {
 						if (elem.parent == null) drawList(Id.handle(), elem);
 					}
 
-					ui.row([1/3, 1/3, 1/3]);
+					ui.row([1/4, 1/4, 1/4, 1/4]);
 					var elems = canvas.elements;
 					if (ui.button("Up") && selectedElem != null) {
 						moveElem(1);
@@ -502,6 +528,9 @@ class Elements {
 					}
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
+					}
+					if (ui.button("Duplicate") && selectedElem != null) {
+						selectedElem = duplicateElem(selectedElem);
 					}
 				}
 
