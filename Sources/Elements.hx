@@ -201,6 +201,30 @@ class Elements {
 		return elem;
 	}
 
+	function unparent(elem:TElement) {
+		var parent = elemById(elem.parent);
+		if (parent != null) {
+			elem.x += absx(parent);
+			elem.y += absy(parent);
+			elem.parent = null;
+			parent.children.remove(elem.id);
+		}
+	}
+
+	function setParent(elem:TElement, parent:TElement) {
+		var oldParent = elemById(elem.parent);
+		if (oldParent == parent) return;
+		unparent(elem); //Unparent first if we already have a parent
+
+		if (parent != null) { //Parent
+			if (parent.children == null) elem.children = [];
+			parent.children.push(elem.id);
+			elem.parent = parent.id;
+			elem.x -= absx(parent);
+			elem.y -= absy(parent);
+		}
+	}
+
 	function duplicateElem(elem:TElement, parentId:Null<Int> = null):TElement {
 		if (elem != null) {
 			if (parentId == null) parentId = elem.parent;
@@ -224,7 +248,7 @@ class Elements {
 			};
 			canvas.elements.push(dupe);
 			if (parentId != null) {
-				var parentElem = canvas.elements[parentId];
+				var parentElem = elemById(parentId);
 				parentElem.children.push(dupe.id);
 				if (elem.parent != parentId) {
 					dupe.x = elem.x;
@@ -232,7 +256,7 @@ class Elements {
 				}
 			}
 			for(child in elem.children) {
-				duplicateElem(canvas.elements[child], dupe.id);
+				duplicateElem(elemById(child), dupe.id);
 			}
 			
 			return dupe;
@@ -488,21 +512,12 @@ class Elements {
 						}
 						// Parenting
 						if (started && ui.inputDownR) {
-							if (elem == selectedElem) { // Unparent
-								if (elem.parent != null) {
-									var p = elemById(elem.parent);
-									p.children.remove(elem.id);
-									elem.parent = null;
-									elem.x += absx(p);
-									elem.y += absy(p);
-								}
+							//FIXME: This fires again for lower children after the tree is updated. This causes accidental parenting with a higher child in longer tree views
+							if (elem == selectedElem) {
+								unparent(elem);
 							}
 							else {
-								if (elem.children == null) elem.children = [];
-								elem.children.push(selectedElem.id);
-								selectedElem.parent = elem.id;
-								selectedElem.x -= absx(elem);
-								selectedElem.y -= absy(elem);
+								setParent(selectedElem, elem);
 							}
 						}
 						// Draw
@@ -826,7 +841,7 @@ class Elements {
 				if (ui.key == kha.input.KeyCode.Up) elem.y--;
 				if (ui.key == kha.input.KeyCode.Down) elem.y++;
 
-				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x") removeSelectedElem();
+				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x" || ui.key == kha.input.KeyCode.Delete) removeSelectedElem();
 
 				hwin.redraws = 2;
 			}
