@@ -512,7 +512,6 @@ class Elements {
 						}
 						// Parenting
 						if (started && ui.inputDownR) {
-							//FIXME: This fires again for lower children after the tree is updated. This causes accidental parenting with a higher child in longer tree views
 							if (elem == selectedElem) {
 								unparent(elem);
 							}
@@ -533,7 +532,9 @@ class Elements {
 						}
 						// Draw children
 						if (b) {
-							for (i in 0...elem.children.length) {
+							var i = elem.children.length;
+							while(i > 0) {
+								i--; //Iterate backwards to avoid reparenting issues.
 								var id = elem.children[elem.children.length - 1 - i];
 								ui.indent();
 								drawList(h, elemById(id));
