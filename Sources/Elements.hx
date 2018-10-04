@@ -39,6 +39,7 @@ class Elements {
 	var filesDone:String->Void = null;
 	var uimodal:Zui;
 
+	var gridSize:Int = 20;
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
 
@@ -285,23 +286,24 @@ class Elements {
 	}
 
 	function drawGrid() {
+		var doubleGridSize = gridSize * 2;
 		var ww = kha.System.windowWidth();
 		var wh = kha.System.windowHeight();
-		var w = ww + 40 * 2;
-		var h = wh + 40 * 2;
+		var w = ww + doubleGridSize * 2;
+		var h = wh + doubleGridSize * 2;
 		grid = kha.Image.createRenderTarget(w, h);
 		grid.g2.begin(true, 0xff242424);
-		for (i in 0...Std.int(h / 40) + 1) {
+		for (i in 0...Std.int(h / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(0, i * 40, w, i * 40);
+			grid.g2.drawLine(0, i * doubleGridSize, w, i * doubleGridSize);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
+			grid.g2.drawLine(0, i * doubleGridSize + gridSize, w, i * doubleGridSize + gridSize);
 		}
-		for (i in 0...Std.int(w / 40) + 1) {
+		for (i in 0...Std.int(w / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(i * 40, 0, i * 40, h);
+			grid.g2.drawLine(i * doubleGridSize, 0, i * doubleGridSize, h);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
+			grid.g2.drawLine(i * doubleGridSize + gridSize, 0, i * doubleGridSize + gridSize, h);
 		}
 
 		grid.g2.end();
@@ -672,7 +674,10 @@ class Elements {
 			if (ui.tab(htab, "Preferences")) {
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+				var gsize = Id.handle({value: 20});
+				ui.slider(gsize, "Grid Size", 1, 128, true, 1);
 				if (ui.changed && !ui.inputDown) {
+					gridSize = Std.int(gsize.value);
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
 				}
@@ -690,6 +695,10 @@ class Elements {
 			}
 		}
 		ui.end();
+
+		if (ui.changed && !ui.inputDown) {
+			drawGrid();
+		}
 
 		g.begin(false);
 
