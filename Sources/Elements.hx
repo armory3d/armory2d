@@ -858,10 +858,10 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
-				if (ui.key == kha.input.KeyCode.Left) elem.x--;
-				if (ui.key == kha.input.KeyCode.Right) elem.x++;
-				if (ui.key == kha.input.KeyCode.Up) elem.y--;
-				if (ui.key == kha.input.KeyCode.Down) elem.y++;
+				if (ui.key == kha.input.KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
+				if (ui.key == kha.input.KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
+				if (ui.key == kha.input.KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
+				if (ui.key == kha.input.KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
 				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x" || ui.key == kha.input.KeyCode.Delete) removeSelectedElem();
 
