@@ -39,6 +39,9 @@ class Elements {
 	var filesDone:String->Void = null;
 	var uimodal:Zui;
 
+	var gridSnapBounds:Bool = false;
+	var gridSnapPos:Bool = true;
+	var gridSize:Int = 20;
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
 
@@ -285,23 +288,24 @@ class Elements {
 	}
 
 	function drawGrid() {
+		var doubleGridSize = gridSize * 2;
 		var ww = kha.System.windowWidth();
 		var wh = kha.System.windowHeight();
-		var w = ww + 40 * 2;
-		var h = wh + 40 * 2;
+		var w = ww + doubleGridSize * 2;
+		var h = wh + doubleGridSize * 2;
 		grid = kha.Image.createRenderTarget(w, h);
 		grid.g2.begin(true, 0xff242424);
-		for (i in 0...Std.int(h / 40) + 1) {
+		for (i in 0...Std.int(h / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(0, i * 40, w, i * 40);
+			grid.g2.drawLine(0, i * doubleGridSize, w, i * doubleGridSize);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(0, i * 40 + 20, w, i * 40 + 20);
+			grid.g2.drawLine(0, i * doubleGridSize + gridSize, w, i * doubleGridSize + gridSize);
 		}
-		for (i in 0...Std.int(w / 40) + 1) {
+		for (i in 0...Std.int(w / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(i * 40, 0, i * 40, h);
+			grid.g2.drawLine(i * doubleGridSize, 0, i * doubleGridSize, h);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(i * 40 + 20, 0, i * 40 + 20, h);
+			grid.g2.drawLine(i * doubleGridSize + gridSize, 0, i * doubleGridSize + gridSize, h);
 		}
 
 		grid.g2.end();
@@ -672,7 +676,12 @@ class Elements {
 			if (ui.tab(htab, "Preferences")) {
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
+				var gsize = Id.handle({value: 20});
+				ui.slider(gsize, "Grid Size", 1, 128, true, 1);
+				gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+				gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
 				if (ui.changed && !ui.inputDown) {
+					gridSize = Std.int(gsize.value);
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
 				}
@@ -690,6 +699,10 @@ class Elements {
 			}
 		}
 		ui.end();
+
+		if (ui.changed && !ui.inputDown) {
+			drawGrid();
+		}
 
 		g.begin(false);
 
@@ -814,6 +827,14 @@ class Elements {
 			}
 			if (ui.inputReleased && drag) {
 				drag = false;
+				if (gridSnapBounds) {
+					elem.width = Math.round(elem.width / gridSize) * gridSize;
+					elem.height = Math.round(elem.height / gridSize) * gridSize;
+				}
+				if (gridSnapPos) {
+					elem.x = Math.round(elem.x / gridSize) * gridSize;
+					elem.y = Math.round(elem.y / gridSize) * gridSize;
+				}
 			}
 
 			if (drag) {
@@ -837,10 +858,10 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
-				if (ui.key == kha.input.KeyCode.Left) elem.x--;
-				if (ui.key == kha.input.KeyCode.Right) elem.x++;
-				if (ui.key == kha.input.KeyCode.Up) elem.y--;
-				if (ui.key == kha.input.KeyCode.Down) elem.y++;
+				if (ui.key == kha.input.KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
+				if (ui.key == kha.input.KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
+				if (ui.key == kha.input.KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
+				if (ui.key == kha.input.KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
 				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x" || ui.key == kha.input.KeyCode.Delete) removeSelectedElem();
 
