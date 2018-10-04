@@ -39,6 +39,8 @@ class Elements {
 	var filesDone:String->Void = null;
 	var uimodal:Zui;
 
+	var gridSnapBounds:Bool = false;
+	var gridSnapPos:Bool = true;
 	var gridSize:Int = 20;
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
@@ -676,6 +678,8 @@ class Elements {
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				var gsize = Id.handle({value: 20});
 				ui.slider(gsize, "Grid Size", 1, 128, true, 1);
+				gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+				gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
 				if (ui.changed && !ui.inputDown) {
 					gridSize = Std.int(gsize.value);
 					ui.setScale(hscale.value);
@@ -823,6 +827,14 @@ class Elements {
 			}
 			if (ui.inputReleased && drag) {
 				drag = false;
+				if (gridSnapBounds) {
+					elem.width = Math.round(elem.width / gridSize) * gridSize;
+					elem.height = Math.round(elem.height / gridSize) * gridSize;
+				}
+				if (gridSnapPos) {
+					elem.x = Math.round(elem.x / gridSize) * gridSize;
+					elem.y = Math.round(elem.y / gridSize) * gridSize;
+				}
 			}
 
 			if (drag) {
