@@ -864,6 +864,7 @@ class Elements {
 				if (ui.key == kha.input.KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
 				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x" || ui.key == kha.input.KeyCode.Delete) removeSelectedElem();
+				if (ui.key == kha.input.KeyCode.D) selectedElem = duplicateElem(elem);
 
 				hwin.redraws = 2;
 			}
