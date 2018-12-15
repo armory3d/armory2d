@@ -24,9 +24,9 @@ class Main {
 		#if kha_krom
 		
 		var c = Krom.getArgCount();
-		// ./krom . . --nosound canvas_path scale_factor
-		if (c > 4) prefs.path = Krom.getArg(4);
-		if (c > 5) prefs.scaleFactor = Std.parseFloat(Krom.getArg(5));
+		// ./krom . . canvas_path scale_factor
+		if (c > 4) prefs.path = Krom.getArg(3);
+		if (c > 5) prefs.scaleFactor = Std.parseFloat(Krom.getArg(4));
 
 		var ar = prefs.path.split("/");
 		ar.pop();
