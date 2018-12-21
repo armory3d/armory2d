@@ -95,9 +95,9 @@ class Elements {
 	function loaded() {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
-		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.DroidSans, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.DroidSans, autoNotifyInput: true, theme: zui.Themes.light});
-		uimodal = new Zui( { font: kha.Assets.fonts.DroidSans, scaleFactor: Main.prefs.scaleFactor } );
+		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: zui.Themes.light});
+		uimodal = new Zui( { font: kha.Assets.fonts.font_default, scaleFactor: Main.prefs.scaleFactor } );
 
 		kha.System.notifyOnDropFiles(function(path:String) {
 			dropPath = StringTools.rtrim(path);
@@ -316,7 +316,7 @@ class Elements {
 		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, Std.int(60 * sc));
 		var g = timeline.g2;
 		g.begin(true, 0xff222222);
-		g.font = kha.Assets.fonts.DroidSans;
+		g.font = kha.Assets.fonts.font_default;
 		g.fontSize = Std.int(16 * sc);
 
 		// Labels
