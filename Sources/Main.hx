@@ -14,10 +14,10 @@ class Main {
 		var h = 900;
 		if (w > kha.Display.primary.width) w = kha.Display.primary.width;
 		if (h > kha.Display.primary.height - 30) h = kha.Display.primary.height - 30;
-		kha.System.init({ title : "Armory2D", width : w, height : h, resizable: true, maximizable: true }, initialized);
+		kha.System.start({ title : "Armory2D", width : w, height : h }, initialized);
 	}
 	
-	static function initialized() {
+	static function initialized(window:kha.Window) {
 
 		prefs = { path: "", scaleFactor: 1.0 };
 
