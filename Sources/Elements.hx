@@ -399,40 +399,38 @@ class Elements {
 		ui.begin(g);
 
 		if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
-			if (ui.tab(Id.handle(), "Tools")) {
-				ui._y = 50;
-				if (ui.button("Empty")) {
-					selectedElem = makeElem(ElementType.Empty);
-				}
-				// ui.button("VLayout");
-				// ui.button("HLayout");
-				if (ui.button("Text")) {
-					selectedElem = makeElem(ElementType.Text);
-				}
-				if (ui.button("Shape")) {
-					selectedElem = makeElem(ElementType.Shape);
-				}
-				if (ui.button("Image")) {
-					selectedElem = makeElem(ElementType.Image);
-				}
-				if (ui.button("Button")) {
-					selectedElem = makeElem(ElementType.Button);
-				}
-				if (ui.button("Check")) {
-					selectedElem = makeElem(ElementType.Check);
-				}
-				if (ui.button("Radio")) {
-					selectedElem = makeElem(ElementType.Radio);
-				}
-				if (ui.button("Combo")) {
-					selectedElem = makeElem(ElementType.Combo);
-				}
-				if (ui.button("Slider")) {
-					selectedElem = makeElem(ElementType.Slider);
-				}
-				if (ui.button("Input")) {
-					selectedElem = makeElem(ElementType.Input);
-				}
+			ui._y = 50;
+			if (ui.button("Empty")) {
+				selectedElem = makeElem(ElementType.Empty);
+			}
+			// ui.button("VLayout");
+			// ui.button("HLayout");
+			if (ui.button("Text")) {
+				selectedElem = makeElem(ElementType.Text);
+			}
+			if (ui.button("Shape")) {
+				selectedElem = makeElem(ElementType.Shape);
+			}
+			if (ui.button("Image")) {
+				selectedElem = makeElem(ElementType.Image);
+			}
+			if (ui.button("Button")) {
+				selectedElem = makeElem(ElementType.Button);
+			}
+			if (ui.button("Check")) {
+				selectedElem = makeElem(ElementType.Check);
+			}
+			if (ui.button("Radio")) {
+				selectedElem = makeElem(ElementType.Radio);
+			}
+			if (ui.button("Combo")) {
+				selectedElem = makeElem(ElementType.Combo);
+			}
+			if (ui.button("Slider")) {
+				selectedElem = makeElem(ElementType.Slider);
+			}
+			if (ui.button("Input")) {
+				selectedElem = makeElem(ElementType.Input);
 			}
 		}
 
@@ -950,8 +948,11 @@ class Elements {
 		var apph = kha.System.windowHeight();
 		var left = appw / 2 - modalW / 2;
 		var top = apph / 2 - modalH / 2;
+
+		g.begin(false);
 		g.color = 0xff202020;
 		g.fillRect(left, top, modalW, modalH);
+		g.end();
 
 		var leftRect = Std.int(appw / 2 - modalRectW / 2);
 		var rightRect = Std.int(appw / 2 + modalRectW / 2);
@@ -959,7 +960,6 @@ class Elements {
 		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
 		topRect += modalHeaderH;
 		
-		g.end();
 		uimodal.begin(g);
 		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
 			var pathHandle = Id.handle();
@@ -967,8 +967,9 @@ class Elements {
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);
+		
 		g.begin(false);
-
+		
 		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
@@ -982,7 +983,7 @@ class Elements {
 		}
 		uimodal.endLayout();
 
-		g.begin(false);
+		g.end();
 	}
 
 	function absx(e:TElement):Float {
