@@ -819,26 +819,30 @@ class Elements {
 			var eh = scaled(elem.height);
 
 			// Drag selected elem
-			// if (ui.inputStarted && ui.char == "g" &&
-			// 	hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
-			// 	drag = true;
-			// 	// Resize
-			// 	dragLeft = dragRight = dragTop = dragBottom = false;
-			// 	if (ui.inputX > canvas.x + ex + ew - 4) dragRight = true;
-			// 	else if (ui.inputX < canvas.x + ex + 4) dragLeft = true;
-			// 	if (ui.inputY > canvas.y + ey + eh - 4) dragBottom = true;
-			// 	else if (ui.inputY < canvas.y + ey + 4) dragTop = true;
+			if (ui.inputStarted && ui.inputDown && 
+			hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
+				drag = true;
+				// Resize
+				dragLeft = dragRight = dragTop = dragBottom = false;
+				if (ui.inputX > canvas.x + ex + ew - 4) dragRight = true;
+				else if (ui.inputX < canvas.x + ex + 4) dragLeft = true;
+				if (ui.inputY > canvas.y + ey + eh - 4) dragBottom = true;
+				else if (ui.inputY < canvas.y + ey + 4) dragTop = true;
 
-			// }
-			if (ui.inputStarted && drag) {
-				drag = false;
-				if (gridSnapBounds) {
-					elem.width = Math.round(elem.width / gridSize) * gridSize;
-					elem.height = Math.round(elem.height / gridSize) * gridSize;
-				}
-				if (gridSnapPos) {
-					elem.x = Math.round(elem.x / gridSize) * gridSize;
-					elem.y = Math.round(elem.y / gridSize) * gridSize;
+			}
+
+			if (ui.inputReleased) {
+				if (grab || drag){
+					drag = false;
+					grab = false;
+					if (gridSnapBounds) {
+						elem.width = Math.round(elem.width / gridSize) * gridSize;
+						elem.height = Math.round(elem.height / gridSize) * gridSize;
+					}
+					if (gridSnapPos) {
+						elem.x = Math.round(elem.x / gridSize) * gridSize;
+						elem.y = Math.round(elem.y / gridSize) * gridSize;
+					}
 				}
 			}
 
@@ -861,6 +865,7 @@ class Elements {
 				}
 			}
 			if(grab){
+				hwin.redraws = 2;
 				size = false;
 				if (!grabX && !grabY){
 					elem.x += Std.int(ui.inputDX); 
@@ -872,6 +877,7 @@ class Elements {
 				}
 			}
 			if(size){
+				hwin.redraws = 2;
 				grab = false;
 				if (!sizeX && !sizeY){
 					elem.height += Std.int(ui.inputDY);
