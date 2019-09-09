@@ -201,7 +201,7 @@ class Elements {
 			rotation: 0,
 			text: "My " + name,
 			asset: "",
-			color: 0xffffffff,
+			color: [0xffffffff, 0xff222222],
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -606,7 +606,33 @@ class Elements {
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
-						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+					}
+					if (ui.panel(Id.handle({selected: false}), "Color")){
+						if (elem.type == ElementType.Text){
+							ui.text("Text:");
+							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+						}else if (elem.type == ElementType.Button){
+							ui.text("Text:");
+							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+							ui.text("Background:");
+							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							ui.text("On Hover:");
+							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							ui.text("On Pressed:");
+							elem.color[3] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+						}else if (elem.type == ElementType.Shape){
+							ui.text("Background:");
+							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);	
+						}else if (elem.type == ElementType.Empty){
+							ui.text("No color for empty");
+						}else{
+							ui.text("Text:");
+							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+							ui.text("Background:");
+							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							ui.text("On Hover:");
+							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+						}
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
