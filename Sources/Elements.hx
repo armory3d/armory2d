@@ -1,5 +1,6 @@
 package ;
 
+import kha.input.KeyCode;
 import zui.*;
 import zui.Zui;
 import zui.Canvas;
@@ -29,6 +30,12 @@ class Elements {
 	var dragTop = false;
 	var dragRight = false;
 	var dragBottom = false;
+	var grab = false;
+	var grabX = false;
+	var grabY = false;
+	var size = false;
+	var sizeX = false;
+	var sizeY = false;
 	var assetNames:Array<String> = [""];
 	var dragAsset:TAsset = null;
 	var resizeCanvas = false;
@@ -812,8 +819,8 @@ class Elements {
 			var eh = scaled(elem.height);
 
 			// Drag selected elem
-			if (ui.inputStarted && ui.inputDown &&
-				hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
+			if (ui.inputStarted && ui.inputDown && 
+			hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
@@ -823,15 +830,19 @@ class Elements {
 				else if (ui.inputY < canvas.y + ey + 4) dragTop = true;
 
 			}
-			if (ui.inputReleased && drag) {
-				drag = false;
-				if (gridSnapBounds) {
-					elem.width = Math.round(elem.width / gridSize) * gridSize;
-					elem.height = Math.round(elem.height / gridSize) * gridSize;
-				}
-				if (gridSnapPos) {
-					elem.x = Math.round(elem.x / gridSize) * gridSize;
-					elem.y = Math.round(elem.y / gridSize) * gridSize;
+
+			if (ui.inputReleased) {
+				if (grab || drag){
+					drag = false;
+					grab = false;
+					if (gridSnapBounds) {
+						elem.width = Math.round(elem.width / gridSize) * gridSize;
+						elem.height = Math.round(elem.height / gridSize) * gridSize;
+					}
+					if (gridSnapPos) {
+						elem.x = Math.round(elem.x / gridSize) * gridSize;
+						elem.y = Math.round(elem.y / gridSize) * gridSize;
+					}
 				}
 			}
 
@@ -853,16 +864,54 @@ class Elements {
 					elem.y += ui.inputDY;
 				}
 			}
+			if(grab){
+				hwin.redraws = 2;
+				size = false;
+				if (!grabX && !grabY){
+					elem.x += Std.int(ui.inputDX); 
+					elem.y += Std.int(ui.inputDY);
+				}else if (grabX){
+					elem.x += Std.int(ui.inputDX);
+				}else if (grabY){
+					elem.y += Std.int(ui.inputDY);
+				}
+			}
+			if(size){
+				hwin.redraws = 2;
+				grab = false;
+				if (!sizeX && !sizeY){
+					elem.height += Std.int(ui.inputDY);
+					elem.width += Std.int(ui.inputDX);
+				}else if (sizeX){
+					elem.width += Std.int(ui.inputDX);
+				}else if (sizeY){
+					elem.height += Std.int(ui.inputDY);
+				}
+			}
+			if (ui.inputStarted){
+				if (grab || size){
+					grab = false; 
+					size = false;
+				}
+			}
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
-				if (ui.key == kha.input.KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
-				if (ui.key == kha.input.KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
-				if (ui.key == kha.input.KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
-				if (ui.key == kha.input.KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
+				if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
+				if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
+				if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
+				if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
-				if (ui.key == kha.input.KeyCode.Backspace || ui.char == "x" || ui.key == kha.input.KeyCode.Delete) removeSelectedElem();
-				if (ui.key == kha.input.KeyCode.D) selectedElem = duplicateElem(elem);
+				if (ui.key == KeyCode.G) {grab = true; grabX = false; grabY = false;}
+				if (grab && ui.key == KeyCode.X){grabX = true; grabY = false;}
+				if (grab && ui.key == KeyCode.Y){grabY = true; grabX = false;}
+
+				if (ui.key == KeyCode.S) {size = true; sizeX = false; sizeY = false;}
+				if (size && ui.key == KeyCode.X){sizeX = true; sizeY = false;}
+				if (size && ui.key == KeyCode.Y){sizeY = true; sizeX = false;}
+
+				if (ui.key == KeyCode.Backspace || ui.key == KeyCode.Delete) removeSelectedElem();
+				if (ui.key == KeyCode.D) selectedElem = duplicateElem(elem);
 
 				hwin.redraws = 2;
 			}
