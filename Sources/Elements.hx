@@ -173,13 +173,17 @@ class Elements {
 			name = unique("Image");
 			height = 100;
 		case ElementType.FRectangle:
-			name = unique("Filled Rectangle");
+			name = unique("Filled_Rectangle");
 			height = 100;
 		case ElementType.FCircle:
-			name = unique("Filled Circle");
+			name = unique("Filled_Circle");
 		case ElementType.Rectangle:
 			name = unique("Rectangle");
 			height = 100;
+		case ElementType.FTriangle:
+			name = unique("Filled_Triangle");
+		case ElementType.Triangle:
+			name = unique("Triangle");
 		case ElementType.Circle:
 			name = unique("Circle");
 		case ElementType.Check:
@@ -385,6 +389,7 @@ class Elements {
 			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
+			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey+eh/2);
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3, 6, 6);
@@ -394,6 +399,7 @@ class Elements {
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh, 6, 6);
+			g.popTransformation();
 		}
 
 		// Timeline
@@ -432,6 +438,12 @@ class Elements {
 				}
 				if (ui.button("Fill Circle")){
 					selectedElem = makeElem(ElementType.FCircle);
+				}
+				if (ui.button("Triangle")){
+					selectedElem = makeElem(ElementType.Triangle);
+				}
+				if (ui.button("Fill Triangle")){
+					selectedElem = makeElem(ElementType.FTriangle);
 				}
 				ui.unindent();
 			}
@@ -626,6 +638,11 @@ class Elements {
 						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
+						if (elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || elem.type == ElementType.Triangle){
+							var handles = Id.handle().nest(id, {text: "1"});
+							var strs = ui.textInput(handles, "Strength", Right);
+							elem.strength = Std.int(Std.parseFloat(strs));
+						}
 						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
@@ -644,11 +661,11 @@ class Elements {
 							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
 							ui.text("On Pressed:");
 							elem.color[3] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || elem.type == ElementType.Rectangle || elem.type == ElementType.Circle){
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
 							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);	
 						}else if (elem.type == ElementType.Empty){
-							ui.text("No color for empty");
+							ui.text("No color for element type empty");
 						}else{
 							ui.text("Text:");
 							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
@@ -749,7 +766,9 @@ class Elements {
 				// ui.text("armory2d");
 
 				if (ui.panel(Id.handle({selected: true}), "Console")) {
-					// ui.text(lastTrace);
+					//ui.text(lastTrace);
+					ui.text("Mouse X: "+ ui.inputX);
+					ui.text("Mouse Y: "+ ui.inputY);
 				}
 			}
 		}
@@ -835,6 +854,7 @@ class Elements {
 	}
 
 	function hitbox(x:Float, y:Float, w:Float, h:Float):Bool {
+		// FIX ME FOR ELEMENT ROTATION
 		return ui.inputX > x && ui.inputX < x + w && ui.inputY > y && ui.inputY < y + h;
 	}
 
@@ -981,6 +1001,7 @@ class Elements {
 				var ey = scaled(absy(elem));
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
+				// FIX ME FOR ELEMENT ROTATION
 				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
 					selectedElem != elem) {
 					selectedElem = elem;
