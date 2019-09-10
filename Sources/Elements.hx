@@ -19,7 +19,7 @@ class Elements {
 	}
 	var toolbarw(get, null):Int;
 	function get_toolbarw():Int {
-		return Std.int(60 * ui.SCALE);
+		return Std.int(90 * ui.SCALE);
 	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
@@ -172,9 +172,16 @@ class Elements {
 		case ElementType.Image:
 			name = unique("Image");
 			height = 100;
-		case ElementType.Shape:
-			name = unique("Shape");
+		case ElementType.FRectangle:
+			name = unique("Filled Rectangle");
 			height = 100;
+		case ElementType.FCircle:
+			name = unique("Filled Circle");
+		case ElementType.Rectangle:
+			name = unique("Rectangle");
+			height = 100;
+		case ElementType.Circle:
+			name = unique("Circle");
 		case ElementType.Check:
 			name = unique("Check");
 		case ElementType.Radio:
@@ -412,11 +419,31 @@ class Elements {
 			}
 			// ui.button("VLayout");
 			// ui.button("HLayout");
-			if (ui.button("Text")) {
-				selectedElem = makeElem(ElementType.Text);
+			if (ui.panel(Id.handle(), "Shapes")){
+				ui.indent();
+				if (ui.button("Rect")) {
+					selectedElem = makeElem(ElementType.Rectangle);
+				}
+				if (ui.button("Fill Rect")) {
+					selectedElem = makeElem(ElementType.FRectangle);
+				}
+				if (ui.button("Circle")){
+					selectedElem = makeElem(ElementType.Circle);
+				}
+				if (ui.button("Fill Circle")){
+					selectedElem = makeElem(ElementType.FCircle);
+				}
+				ui.unindent();
 			}
-			if (ui.button("Shape")) {
-				selectedElem = makeElem(ElementType.Shape);
+			if (ui.panel(Id.handle(), "Texts")){
+				ui.indent();
+				if (ui.button("Text")) {
+					selectedElem = makeElem(ElementType.Text);
+				}
+				if (ui.button("Input")) {
+					selectedElem = makeElem(ElementType.Input);
+				}
+				ui.unindent();
 			}
 			if (ui.button("Image")) {
 				selectedElem = makeElem(ElementType.Image);
@@ -435,9 +462,6 @@ class Elements {
 			}
 			if (ui.button("Slider")) {
 				selectedElem = makeElem(ElementType.Slider);
-			}
-			if (ui.button("Input")) {
-				selectedElem = makeElem(ElementType.Input);
 			}
 		}
 
@@ -620,8 +644,8 @@ class Elements {
 							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
 							ui.text("On Pressed:");
 							elem.color[3] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
-						}else if (elem.type == ElementType.Shape){
-							ui.text("Background:");
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || elem.type == ElementType.Rectangle || elem.type == ElementType.Circle){
+							ui.text("Color:");
 							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);	
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for empty");
