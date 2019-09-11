@@ -19,7 +19,7 @@ class Elements {
 	}
 	var toolbarw(get, null):Int;
 	function get_toolbarw():Int {
-		return Std.int(90 * ui.SCALE);
+		return Std.int(100 * ui.SCALE);
 	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
@@ -196,6 +196,10 @@ class Elements {
 			name = unique("Slider");
 		case ElementType.Input:
 			name = unique("Input");
+		case ElementType.ProgressBar:
+			name = unique("Progress_bar");
+		case ElementType.CProgressBar:
+			name = unique("CProgress_bar");
 		case ElementType.Empty:
 			name = unique("Empty");
 			height = 100;
@@ -212,7 +216,10 @@ class Elements {
 			rotation: 0,
 			text: "My " + name,
 			asset: "",
-			color: [0xffffffff, 0xff222222],
+			color_bg: 0xff484848,
+			color_text: 0xffe8e7e5,
+			color_hover: 0xff3b3b3b,
+			color_press: 0xff1b1b1b,
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -261,7 +268,12 @@ class Elements {
 				rotation: elem.rotation,
 				text: elem.text,
 				asset: elem.asset,
-				color: elem.color,
+				color_bg: elem.color_bg,
+				color_text: elem.color_text,
+				color_hover: elem.color_hover,
+				color_press: elem.color_press,
+				progress_at: elem.progress_at,
+				progress_total: elem.progress_total,
 				anchor: elem.anchor,
 				parent: parentId,
 				children: [],
@@ -457,6 +469,16 @@ class Elements {
 				}
 				ui.unindent();
 			}
+			if (ui.panel(Id.handle(), "ProgressBars")){
+				ui.indent();
+				if (ui.button("RectPB")) {
+					selectedElem = makeElem(ElementType.ProgressBar);
+				}
+				if (ui.button("CircularPB")) {
+					selectedElem = makeElem(ElementType.CProgressBar);
+				}
+				ui.unindent();
+			}
 			if (ui.button("Image")) {
 				selectedElem = makeElem(ElementType.Image);
 			}
@@ -638,10 +660,18 @@ class Elements {
 						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
-						if (elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || elem.type == ElementType.Triangle){
+						if (elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || elem.type == ElementType.Triangle || elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
 							var handles = Id.handle().nest(id, {text: "1"});
-							var strs = ui.textInput(handles, "Strength", Right);
+							var strs = ui.textInput(handles, "Line Strength", Right);
 							elem.strength = Std.int(Std.parseFloat(strs));
+						}
+						if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
+							var handlep = Id.handle().nest(id, {text: "1"});
+							var strp = ui.textInput(handlep, "Progress", Right);
+							var handlespt = Id.handle().nest(id, {text: "1"});
+							var strpt = ui.textInput(handlespt, "Total Progress", Right);
+							elem.progress_total = Std.int(Std.parseFloat(strpt));
+							elem.progress_at = Std.int(Std.parseFloat(strp));
 						}
 						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
@@ -651,28 +681,31 @@ class Elements {
 					if (ui.panel(Id.handle({selected: false}), "Color")){
 						if (elem.type == ElementType.Text){
 							ui.text("Text:");
-							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 						}else if (elem.type == ElementType.Button){
 							ui.text("Text:");
-							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
 							ui.text("On Hover:");
-							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 							ui.text("On Pressed:");
-							elem.color[3] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
+							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || 
+							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
+							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle|| 
+							elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
 							ui.text("Color:");
-							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);	
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
 							ui.text("Text:");
-							elem.color[1] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[1]}), true, null, true);
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color[0] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
 							ui.text("On Hover:");
-							elem.color[2] = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color[0]}), true, null, true);
+							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 						}
 					}
 
