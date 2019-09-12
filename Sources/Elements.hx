@@ -19,7 +19,7 @@ class Elements {
 	}
 	var toolbarw(get, null):Int;
 	function get_toolbarw():Int {
-		return Std.int(60 * ui.SCALE);
+		return Std.int(100 * ui.SCALE);
 	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
@@ -172,9 +172,20 @@ class Elements {
 		case ElementType.Image:
 			name = unique("Image");
 			height = 100;
-		case ElementType.Shape:
-			name = unique("Shape");
+		case ElementType.FRectangle:
+			name = unique("Filled_Rectangle");
 			height = 100;
+		case ElementType.FCircle:
+			name = unique("Filled_Circle");
+		case ElementType.Rectangle:
+			name = unique("Rectangle");
+			height = 100;
+		case ElementType.FTriangle:
+			name = unique("Filled_Triangle");
+		case ElementType.Triangle:
+			name = unique("Triangle");
+		case ElementType.Circle:
+			name = unique("Circle");
 		case ElementType.Check:
 			name = unique("Check");
 		case ElementType.Radio:
@@ -185,6 +196,10 @@ class Elements {
 			name = unique("Slider");
 		case ElementType.Input:
 			name = unique("Input");
+		case ElementType.ProgressBar:
+			name = unique("Progress_bar");
+		case ElementType.CProgressBar:
+			name = unique("CProgress_bar");
 		case ElementType.Empty:
 			name = unique("Empty");
 			height = 100;
@@ -201,7 +216,10 @@ class Elements {
 			rotation: 0,
 			text: "My " + name,
 			asset: "",
-			color: 0xffffffff,
+			color_bg: 0xff484848,
+			color_text: 0xffe8e7e5,
+			color_hover: 0xff3b3b3b,
+			color_press: 0xff1b1b1b,
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -250,7 +268,12 @@ class Elements {
 				rotation: elem.rotation,
 				text: elem.text,
 				asset: elem.asset,
-				color: elem.color,
+				color_bg: elem.color_bg,
+				color_text: elem.color_text,
+				color_hover: elem.color_hover,
+				color_press: elem.color_press,
+				progress_at: elem.progress_at,
+				progress_total: elem.progress_total,
 				anchor: elem.anchor,
 				parent: parentId,
 				children: [],
@@ -378,6 +401,7 @@ class Elements {
 			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
+			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey+eh/2);
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3, 6, 6);
@@ -387,6 +411,7 @@ class Elements {
 			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3 + eh, 6, 6);
 			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh, 6, 6);
+			g.popTransformation();
 		}
 
 		// Timeline
@@ -412,11 +437,47 @@ class Elements {
 			}
 			// ui.button("VLayout");
 			// ui.button("HLayout");
-			if (ui.button("Text")) {
-				selectedElem = makeElem(ElementType.Text);
+			if (ui.panel(Id.handle(), "Shapes")){
+				ui.indent();
+				if (ui.button("Rect")) {
+					selectedElem = makeElem(ElementType.Rectangle);
+				}
+				if (ui.button("Fill Rect")) {
+					selectedElem = makeElem(ElementType.FRectangle);
+				}
+				if (ui.button("Circle")){
+					selectedElem = makeElem(ElementType.Circle);
+				}
+				if (ui.button("Fill Circle")){
+					selectedElem = makeElem(ElementType.FCircle);
+				}
+				if (ui.button("Triangle")){
+					selectedElem = makeElem(ElementType.Triangle);
+				}
+				if (ui.button("Fill Triangle")){
+					selectedElem = makeElem(ElementType.FTriangle);
+				}
+				ui.unindent();
 			}
-			if (ui.button("Shape")) {
-				selectedElem = makeElem(ElementType.Shape);
+			if (ui.panel(Id.handle(), "Texts")){
+				ui.indent();
+				if (ui.button("Text")) {
+					selectedElem = makeElem(ElementType.Text);
+				}
+				if (ui.button("Input")) {
+					selectedElem = makeElem(ElementType.Input);
+				}
+				ui.unindent();
+			}
+			if (ui.panel(Id.handle(), "ProgressBars")){
+				ui.indent();
+				if (ui.button("RectPB")) {
+					selectedElem = makeElem(ElementType.ProgressBar);
+				}
+				if (ui.button("CircularPB")) {
+					selectedElem = makeElem(ElementType.CProgressBar);
+				}
+				ui.unindent();
 			}
 			if (ui.button("Image")) {
 				selectedElem = makeElem(ElementType.Image);
@@ -435,9 +496,6 @@ class Elements {
 			}
 			if (ui.button("Slider")) {
 				selectedElem = makeElem(ElementType.Slider);
-			}
-			if (ui.button("Input")) {
-				selectedElem = makeElem(ElementType.Input);
 			}
 		}
 
@@ -602,11 +660,53 @@ class Elements {
 						var strh = ui.textInput(handleh, "H", Right);
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
+						if (elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || elem.type == ElementType.Triangle || elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
+							var handles = Id.handle().nest(id, {text: "1"});
+							var strs = ui.textInput(handles, "Line Strength", Right);
+							elem.strength = Std.int(Std.parseFloat(strs));
+						}
+						if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
+							var handlep = Id.handle().nest(id, {text: "1"});
+							var strp = ui.textInput(handlep, "Progress", Right);
+							var handlespt = Id.handle().nest(id, {text: "1"});
+							var strpt = ui.textInput(handlespt, "Total Progress", Right);
+							elem.progress_total = Std.int(Std.parseFloat(strpt));
+							elem.progress_at = Std.int(Std.parseFloat(strp));
+						}
 						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
-						elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+					}
+					if (ui.panel(Id.handle({selected: false}), "Color")){
+						if (elem.type == ElementType.Text){
+							ui.text("Text:");
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+						}else if (elem.type == ElementType.Button){
+							ui.text("Text:");
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							ui.text("Background:");
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							ui.text("On Hover:");
+							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							ui.text("On Pressed:");
+							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || 
+							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
+							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle|| 
+							elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
+							ui.text("Color:");
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
+						}else if (elem.type == ElementType.Empty){
+							ui.text("No color for element type empty");
+						}else{
+							ui.text("Text:");
+							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							ui.text("Background:");
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							ui.text("On Hover:");
+							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+						}
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
@@ -699,7 +799,9 @@ class Elements {
 				// ui.text("armory2d");
 
 				if (ui.panel(Id.handle({selected: true}), "Console")) {
-					// ui.text(lastTrace);
+					//ui.text(lastTrace);
+					ui.text("Mouse X: "+ ui.inputX);
+					ui.text("Mouse Y: "+ ui.inputY);
 				}
 			}
 		}
@@ -785,6 +887,7 @@ class Elements {
 	}
 
 	function hitbox(x:Float, y:Float, w:Float, h:Float):Bool {
+		// FIX ME FOR ELEMENT ROTATION
 		return ui.inputX > x && ui.inputX < x + w && ui.inputY > y && ui.inputY < y + h;
 	}
 
@@ -931,6 +1034,7 @@ class Elements {
 				var ey = scaled(absy(elem));
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
+				// FIX ME FOR ELEMENT ROTATION
 				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
 					selectedElem != elem) {
 					selectedElem = elem;
