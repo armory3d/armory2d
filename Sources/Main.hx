@@ -22,7 +22,7 @@ class Main {
 		prefs = { path: "", scaleFactor: 1.0 };
 
 		#if kha_krom
-		
+
 		var c = Krom.getArgCount();
 		// ./krom . . canvas_path scale_factor
 		if (c > 4) prefs.path = Krom.getArg(3);
@@ -37,13 +37,13 @@ class Main {
 			var raw:TCanvas = haxe.Json.parse(cblob.toString());
 			inst = new Elements(raw);
 		});
-		
+
 		#else
 
 		var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, elements: [], assets: [] };
 		inst = new Elements(raw);
 
-		#end		
+		#end
 	}
 }
 
