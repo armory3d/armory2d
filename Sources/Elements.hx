@@ -341,9 +341,13 @@ class Elements {
 		grid.g2.end();
 	}
 
-	function drawTimeline() {
+	function drawTimeline(timelineLabelsHeight:Int, timelineFramesHeight:Int) {
 		var sc = ui.SCALE;
-		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, Std.int(60 * sc));
+	
+		var timelineHeight = timelineLabelsHeight + timelineFramesHeight;
+		
+		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, timelineHeight);
+
 		var g = timeline.g2;
 		g.begin(true, 0xff222222);
 		g.font = kha.Assets.fonts.font_default;
@@ -352,13 +356,16 @@ class Elements {
 		// Labels
 		var frames = Std.int(timeline.width / (11 * sc));
 		for (i in 0...Std.int(frames / 5) + 1) {
-			g.drawString(i * 5 + "", i * 55 * sc, 0);
+			var frame = i * 5;
+
+			var frameTextWidth = kha.Assets.fonts.font_default.width(g.fontSize, frame + "");
+			g.drawString(frame + "", i * 55 * sc + 5 * sc - frameTextWidth / 2, timelineLabelsHeight / 2 - g.fontSize / 2);
 		}
 
 		// Frames
 		for (i in 0...frames) {
 			g.color = i % 5 == 0 ? 0xff444444 : 0xff333333;
-			g.fillRect(i * 11 * sc, 30 * sc, 10 * sc, 30 * sc);
+			g.fillRect(i * 11 * sc, timelineHeight - timelineFramesHeight, 10 * sc, timelineFramesHeight);
 		}
 
 		g.end();
@@ -372,9 +379,13 @@ class Elements {
 			dropPath = "";
 		}
 
-		// Bake
+		var sc = ui.SCALE;
+		var timelineLabelsHeight = Std.int(30 * sc);
+		var timelineFramesHeight = Std.int(40 * sc);
+
+		// Bake and redraw if the UI scale has changed
 		if (grid == null) drawGrid();
-		if (timeline == null) drawTimeline();
+		if (timeline == null || timeline.height != timelineLabelsHeight + timelineFramesHeight) drawTimeline(timelineLabelsHeight, timelineFramesHeight);
 
 		var g = framebuffer.g2;
 		g.begin();
@@ -422,8 +433,26 @@ class Elements {
 			g.drawImage(timeline, toolbarw, ty);
 
 			g.color = 0xff205d9c;
-			var sc = ui.SCALE;
-			g.fillRect(toolbarw + selectedFrame * 11 * sc, ty + 30 * sc, 10 * sc, 30 * sc);
+			g.fillRect(toolbarw + selectedFrame * 11 * sc, ty + timelineLabelsHeight, 10 * sc, timelineFramesHeight);
+
+			// Show selected frame number
+			g.font = kha.Assets.fonts.font_default;
+			g.fontSize = Std.int(16 * sc);
+
+			var frameIndicatorMargin = 4 * sc;
+			var frameIndicatorPadding = 4 * sc;
+			var frameIndicatorWidth = 30 * sc;
+			var frameIndicatorHeight = timelineLabelsHeight - frameIndicatorMargin * 2;
+			var frameTextWidth = kha.Assets.fonts.font_default.width(g.fontSize, "" + selectedFrame);
+
+			// Scale the indicator if the contained text is too long
+			if (frameTextWidth > frameIndicatorWidth + frameIndicatorPadding) {
+				frameIndicatorWidth = frameTextWidth + frameIndicatorPadding;
+			}
+
+			g.fillRect(toolbarw + selectedFrame * 11 * sc + 5 * sc - frameIndicatorWidth / 2, ty + frameIndicatorMargin, frameIndicatorWidth, frameIndicatorHeight);
+			g.color = 0xffffffff;
+			g.drawString("" + selectedFrame, toolbarw + selectedFrame * 11 * sc + 5 * sc - frameTextWidth / 2, ty + timelineLabelsHeight / 2 - g.fontSize / 2);
 		}
 
 		g.end();
