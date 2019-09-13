@@ -429,10 +429,10 @@ class Elements {
 
 					// Hover
 					// Rotate mouse coords in opposite direction as the element
-					var hoverPoint:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
+					var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
 
-					if (hoverPoint.x > hX && hoverPoint.x < hX + handleSize) {
-						if (hoverPoint.y > hY && hoverPoint.y < hY + handleSize) {
+					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize) {
+						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize) {
 							g.color = 0xff205d9c;
 							g.fillRect(hX, hY, handleSize, handleSize);
 							g.color = 0xffffffff;
@@ -923,8 +923,8 @@ class Elements {
 	}
 
 	function hitbox(x:Float, y:Float, w:Float, h:Float, ?rotation:Float):Bool {
-		var hoverPoint:Vector2 = rotatePoint(ui.inputX, ui.inputY, x + w / 2, y + h / 2, -rotation);
-		return hoverPoint.x > x && hoverPoint.x < x + w && hoverPoint.y > y && hoverPoint.y < y + h;
+		var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, x + w / 2, y + h / 2, -rotation);
+		return rotatedInput.x > x && rotatedInput.x < x + w && rotatedInput.y > y && rotatedInput.y < y + h;
 	}
 
 	public function update() {
@@ -961,15 +961,15 @@ class Elements {
 			var hoverAreaSize = 4;
 			if (ui.inputStarted && ui.inputDown && 
 			hitbox(canvas.x + ex - hoverAreaSize, canvas.y + ey - hoverAreaSize, ew + hoverAreaSize * 2, eh + hoverAreaSize * 2, selectedElem.rotation)) {
-				var hoverPoint:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
+				var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
 
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (hoverPoint.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
-				else if (hoverPoint.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
-				if (hoverPoint.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
-				else if (hoverPoint.y < canvas.y + ey + hoverAreaSize) dragTop = true;
+				if (rotatedInput.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
+				else if (rotatedInput.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
+				if (rotatedInput.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
+				else if (rotatedInput.y < canvas.y + ey + hoverAreaSize) dragTop = true;
 
 			}
 
