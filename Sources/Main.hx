@@ -51,4 +51,5 @@ typedef TPrefs = {
 	var path:String;
 	var scaleFactor:Float;
 	@:optional var window_vsync:Bool;
+	@:optional var selectMouseButton:String;
 }

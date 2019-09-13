@@ -779,6 +779,12 @@ class Elements {
 			}
 
 			if (ui.tab(htab, "Preferences")) {
+				var selectMouseHandle = Id.handle({position: 0});
+				ui.combo(selectMouseHandle, ["Left Click", "Right Click"], "Select Elements With", true);
+				if (selectMouseHandle.changed) {
+					Main.prefs.selectMouseButton = ["Left", "Right"][selectMouseHandle.position];
+				}
+
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				var gsize = Id.handle({value: 20});
@@ -790,6 +796,7 @@ class Elements {
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
 				}
+
 				Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
 				// if (ui.button("Save")) {
 				// 	#if kha_krom
@@ -1027,7 +1034,9 @@ class Elements {
 		if (showFiles || ui.inputX > kha.System.windowWidth() - uiw) return;
 
 		// Select elem
-		if (ui.inputStarted && ui.inputDownR) {
+		var selectButton = Main.prefs.selectMouseButton;
+		if ((selectButton == "Left" || selectButton == null) && ui.inputStarted && ui.inputDown ||
+				selectButton == "Right" && ui.inputStartedR && ui.inputDownR) {
 			var i = canvas.elements.length;
 			for (elem in canvas.elements) {
 				var ex = scaled(absx(elem));
