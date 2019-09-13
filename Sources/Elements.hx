@@ -958,17 +958,18 @@ class Elements {
 			var eh = scaled(elem.height);
 
 			// Drag selected elem
+			var hoverAreaSize = 4;
 			if (ui.inputStarted && ui.inputDown && 
-			hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4, selectedElem.rotation)) {
+			hitbox(canvas.x + ex - hoverAreaSize, canvas.y + ey - hoverAreaSize, ew + hoverAreaSize * 2, eh + hoverAreaSize * 2, selectedElem.rotation)) {
 				var hoverPoint:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
 
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (hoverPoint.x > canvas.x + ex + ew - 4) dragRight = true;
-				else if (hoverPoint.x < canvas.x + ex + 4) dragLeft = true;
-				if (hoverPoint.y > canvas.y + ey + eh - 4) dragBottom = true;
-				else if (hoverPoint.y < canvas.y + ey + 4) dragTop = true;
+				if (hoverPoint.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
+				else if (hoverPoint.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
+				if (hoverPoint.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
+				else if (hoverPoint.y < canvas.y + ey + hoverAreaSize) dragTop = true;
 
 			}
 
