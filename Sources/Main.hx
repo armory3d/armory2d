@@ -14,7 +14,7 @@ class Main {
 		var h = 900;
 		if (w > kha.Display.primary.width) w = kha.Display.primary.width;
 		if (h > kha.Display.primary.height - 30) h = kha.Display.primary.height - 30;
-		kha.System.start({ title : "Armory2D", width : w, height : h }, initialized);
+		kha.System.start({ title : "Armory2D", width : w, height : h, framebuffer : {samplesPerPixel : 2}}, initialized);
 	}
 	
 	static function initialized(window:kha.Window) {
