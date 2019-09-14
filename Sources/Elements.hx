@@ -1,5 +1,6 @@
 package ;
 
+import kha.math.Vector2;
 import kha.input.KeyCode;
 import zui.*;
 import zui.Zui;
@@ -412,16 +413,44 @@ class Elements {
 			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
-			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey+eh/2);
+			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
+
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
-			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3, 6, 6);
-			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3, 6, 6);
-			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3, 6, 6);
-			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh / 2, 6, 6);
-			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh / 2, 6, 6);
-			g.drawRect(canvas.x + ex - 3, canvas.y + ey - 3 + eh, 6, 6);
-			g.drawRect(canvas.x + ex - 3 + ew / 2, canvas.y + ey - 3 + eh, 6, 6);
-			g.drawRect(canvas.x + ex - 3 + ew, canvas.y + ey - 3 + eh, 6, 6);
+			g.color = 0xff000000;
+			g.drawRect(canvas.x + ex + 1, canvas.y + ey + 1, ew, eh);
+			g.color = 0xffffffff;
+
+			// Draw corner drag handles
+			var handleSize = 8;
+			for (handlePosX in 0...3) {
+				// 0 = Left, 0.5 = Center, 1 = Right
+				var handlePosX:Float = handlePosX / 2;
+				
+				for (handlePosY in 0...3) {
+					// 0 = Top, 0.5 = Center, 1 = Bottom
+					var handlePosY:Float = handlePosY / 2;
+
+					if (handlePosX == 0.5 && handlePosY == 0.5) {
+						continue;
+					}
+
+					var hX = canvas.x + ex + ew * handlePosX - handleSize / 2;
+					var hY = canvas.y + ey + eh * handlePosY - handleSize / 2;
+					g.drawRect(hX, hY, handleSize, handleSize);
+
+					// Hover
+					// Rotate mouse coords in opposite direction as the element
+					var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
+
+					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize) {
+						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize) {
+							g.color = 0xff205d9c;
+							g.fillRect(hX, hY, handleSize, handleSize);
+							g.color = 0xffffffff;
+						}
+					}
+				}
+			}
 			g.popTransformation();
 		}
 
@@ -808,6 +837,12 @@ class Elements {
 			}
 
 			if (ui.tab(htab, "Preferences")) {
+				var selectMouseHandle = Id.handle({position: 0});
+				ui.combo(selectMouseHandle, ["Left Click", "Right Click"], "Select Elements With", true);
+				if (selectMouseHandle.changed) {
+					Main.prefs.selectMouseButton = ["Left", "Right"][selectMouseHandle.position];
+				}
+
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 				var gsize = Id.handle({value: 20});
@@ -819,6 +854,7 @@ class Elements {
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
 				}
+
 				Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
 				// if (ui.button("Save")) {
 				// 	#if kha_krom
@@ -915,9 +951,9 @@ class Elements {
 		selectedElem = elem;
 	}
 
-	function hitbox(x:Float, y:Float, w:Float, h:Float):Bool {
-		// FIX ME FOR ELEMENT ROTATION
-		return ui.inputX > x && ui.inputX < x + w && ui.inputY > y && ui.inputY < y + h;
+	function hitbox(x:Float, y:Float, w:Float, h:Float, ?rotation:Float):Bool {
+		var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, x + w / 2, y + h / 2, -rotation);
+		return rotatedInput.x > x && rotatedInput.x < x + w && rotatedInput.y > y && rotatedInput.y < y + h;
 	}
 
 	public function update() {
@@ -951,15 +987,18 @@ class Elements {
 			var eh = scaled(elem.height);
 
 			// Drag selected elem
+			var hoverAreaSize = 4;
 			if (ui.inputStarted && ui.inputDown && 
-			hitbox(canvas.x + ex - 4, canvas.y + ey - 4, ew + 4, eh + 4)) {
+			hitbox(canvas.x + ex - hoverAreaSize, canvas.y + ey - hoverAreaSize, ew + hoverAreaSize * 2, eh + hoverAreaSize * 2, selectedElem.rotation)) {
+				var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
+
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (ui.inputX > canvas.x + ex + ew - 4) dragRight = true;
-				else if (ui.inputX < canvas.x + ex + 4) dragLeft = true;
-				if (ui.inputY > canvas.y + ey + eh - 4) dragBottom = true;
-				else if (ui.inputY < canvas.y + ey + 4) dragTop = true;
+				if (rotatedInput.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
+				else if (rotatedInput.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
+				if (rotatedInput.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
+				else if (rotatedInput.y < canvas.y + ey + hoverAreaSize) dragTop = true;
 
 			}
 
@@ -1056,16 +1095,18 @@ class Elements {
 		if (showFiles || ui.inputX > kha.System.windowWidth() - uiw) return;
 
 		// Select elem
-		if (ui.inputStarted && ui.inputDownR) {
+		var selectButton = Main.prefs.selectMouseButton;
+		if ((selectButton == "Left" || selectButton == null) && ui.inputStarted && ui.inputDown ||
+				selectButton == "Right" && ui.inputStartedR && ui.inputDownR) {
 			var i = canvas.elements.length;
 			for (elem in canvas.elements) {
 				var ex = scaled(absx(elem));
 				var ey = scaled(absy(elem));
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
-				// FIX ME FOR ELEMENT ROTATION
-				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh) &&
-					selectedElem != elem) {
+
+				if (hitbox(canvas.x + ex, canvas.y + ey, ew, eh, elem.rotation) &&
+						selectedElem != elem) {
 					selectedElem = elem;
 					break;
 				}
@@ -1176,6 +1217,16 @@ class Elements {
 	function absy(e:TElement):Float {
 		if (e == null) return 0;
 		return e.y + absy(elemById(e.parent));
+	}
+
+	function rotatePoint(pointX: Float, pointY: Float, centerX: Float, centerY: Float, angle:Float): Vector2 {
+		pointX -= centerX;
+		pointY -= centerY;
+
+		var x = pointX * Math.cos(angle) - pointY * Math.sin(angle);
+		var y = pointX * Math.sin(angle) + pointY * Math.cos(angle);
+
+		return new Vector2(centerX + x, centerY + y);
 	}
 
 	inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE); }
