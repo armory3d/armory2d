@@ -12,8 +12,10 @@ class Main {
 
 		var w = 1600;
 		var h = 900;
-		if (w > kha.Display.primary.width) w = kha.Display.primary.width;
-		if (h > kha.Display.primary.height - 30) h = kha.Display.primary.height - 30;
+		if (kha.Display.primary != null) { // TODO: no Display.primary returned on Linux
+			if (w > kha.Display.primary.width) w = kha.Display.primary.width;
+			if (h > kha.Display.primary.height - 30) h = kha.Display.primary.height - 30;
+		}
 		kha.System.start({ title : "Armory2D", width : w, height : h, framebuffer : {samplesPerPixel : 2}}, initialized);
 	}
 	
