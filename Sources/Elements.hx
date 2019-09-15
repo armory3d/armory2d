@@ -217,7 +217,7 @@ class Elements {
 			rotation: 0,
 			text: "My " + name,
 			asset: "",
-			color_bg: 0xff484848,
+			color: 0xff484848,
 			color_text: 0xffe8e7e5,
 			color_hover: 0xff3b3b3b,
 			color_press: 0xff1b1b1b,
@@ -269,7 +269,7 @@ class Elements {
 				rotation: elem.rotation,
 				text: elem.text,
 				asset: elem.asset,
-				color_bg: elem.color_bg,
+				color: elem.color,
 				color_text: elem.color_text,
 				color_hover: elem.color_hover,
 				color_press: elem.color_press,
@@ -744,7 +744,7 @@ class Elements {
 							ui.text("Text:");
 							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
 							ui.text("On Hover:");
 							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 							ui.text("On Pressed:");
@@ -754,14 +754,14 @@ class Elements {
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle|| 
 							elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
 							ui.text("Color:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);	
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
 							ui.text("Text:");
 							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
 							ui.text("On Hover:");
 							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 						}
