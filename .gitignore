@@ -1,3 +1,4 @@
 build/
 korefile.js
 .vscode/
+.DS_Store 

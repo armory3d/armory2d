@@ -273,6 +273,7 @@ class Elements {
 				color_text: elem.color_text,
 				color_hover: elem.color_hover,
 				color_press: elem.color_press,
+				color_progress: elem.color_progress,
 				progress_at: elem.progress_at,
 				progress_total: elem.progress_total,
 				anchor: elem.anchor,
@@ -493,6 +494,7 @@ class Elements {
 			if (ui.button("Empty")) {
 				selectedElem = makeElem(ElementType.Empty);
 			}
+			if (ui.isHovered) ui.tooltip("Creates empty element");
 			// ui.button("VLayout");
 			// ui.button("HLayout");
 			if (ui.panel(Id.handle(), "Shapes")){
@@ -500,21 +502,28 @@ class Elements {
 				if (ui.button("Rect")) {
 					selectedElem = makeElem(ElementType.Rectangle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates rectangle shaped element");
+
 				if (ui.button("Fill Rect")) {
 					selectedElem = makeElem(ElementType.FRectangle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates filled rectangle shaped element");
 				if (ui.button("Circle")){
 					selectedElem = makeElem(ElementType.Circle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates circle shaped element");
 				if (ui.button("Fill Circle")){
 					selectedElem = makeElem(ElementType.FCircle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates filled circle shaped element");
 				if (ui.button("Triangle")){
 					selectedElem = makeElem(ElementType.Triangle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates triangle shaped element");
 				if (ui.button("Fill Triangle")){
 					selectedElem = makeElem(ElementType.FTriangle);
 				}
+				if (ui.isHovered) ui.tooltip("Creates filled triangle shaped element");
 				ui.unindent();
 			}
 			if (ui.panel(Id.handle(), "Texts")){
@@ -522,9 +531,11 @@ class Elements {
 				if (ui.button("Text")) {
 					selectedElem = makeElem(ElementType.Text);
 				}
+				if (ui.isHovered) ui.tooltip("Create text element");
 				if (ui.button("Input")) {
 					selectedElem = makeElem(ElementType.Input);
 				}
+				if (ui.isHovered) ui.tooltip("Creates text input element");
 				ui.unindent();
 			}
 			if (ui.panel(Id.handle(), "ProgressBars")){
@@ -532,29 +543,37 @@ class Elements {
 				if (ui.button("RectPB")) {
 					selectedElem = makeElem(ElementType.ProgressBar);
 				}
+				if (ui.isHovered) ui.tooltip("Creates rectangular progress bar");
 				if (ui.button("CircularPB")) {
 					selectedElem = makeElem(ElementType.CProgressBar);
 				}
+				if (ui.isHovered) ui.tooltip("Creates circular progress bar");
 				ui.unindent();
 			}
 			if (ui.button("Image")) {
 				selectedElem = makeElem(ElementType.Image);
 			}
+			if (ui.isHovered) ui.tooltip("Creates image element");
 			if (ui.button("Button")) {
 				selectedElem = makeElem(ElementType.Button);
 			}
+			if (ui.isHovered) ui.tooltip("Creates button element");
 			if (ui.button("Check")) {
 				selectedElem = makeElem(ElementType.Check);
 			}
+			if (ui.isHovered) ui.tooltip("Creates check box element");
 			if (ui.button("Radio")) {
 				selectedElem = makeElem(ElementType.Radio);
 			}
+			if (ui.isHovered) ui.tooltip("Creates inline-radio element");
 			if (ui.button("Combo")) {
 				selectedElem = makeElem(ElementType.Combo);
 			}
+			if (ui.isHovered) ui.tooltip("Creates combo box element");
 			if (ui.button("Slider")) {
 				selectedElem = makeElem(ElementType.Slider);
 			}
+			if (ui.isHovered) ui.tooltip("Creates slider element");
 		}
 
 		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
@@ -751,10 +770,14 @@ class Elements {
 							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
 						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || 
 							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
-							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle|| 
-							elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
+							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
-							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);	
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
+						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
+							ui.text("Progress:");
+							elem.color_progress = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
+							ui.text("Background:");
+							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
