@@ -22,6 +22,10 @@ class Elements {
 	function get_toolbarw():Int {
 		return Std.int(100 * ui.SCALE);
 	}
+	var handleSize(get, null):Int;
+	inline function get_handleSize():Int {
+		return Std.int(8 * ui.SCALE);
+	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
 
@@ -422,7 +426,6 @@ class Elements {
 			g.color = 0xffffffff;
 
 			// Draw corner drag handles
-			var handleSize = 8;
 			for (handlePosX in 0...3) {
 				// 0 = Left, 0.5 = Center, 1 = Right
 				var handlePosX:Float = handlePosX / 2;
@@ -1008,20 +1011,20 @@ class Elements {
 			var ey = scaled(absy(elem));
 			var ew = scaled(elem.width);
 			var eh = scaled(elem.height);
+			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
 
-			// Drag selected elem
-			var hoverAreaSize = 4;
+			// Drag selected element
 			if (ui.inputStarted && ui.inputDown && 
-			hitbox(canvas.x + ex - hoverAreaSize, canvas.y + ey - hoverAreaSize, ew + hoverAreaSize * 2, eh + hoverAreaSize * 2, selectedElem.rotation)) {
-				var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
-
+			hitbox(canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, selectedElem.rotation)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (rotatedInput.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
-				else if (rotatedInput.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
-				if (rotatedInput.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
-				else if (rotatedInput.y < canvas.y + ey + hoverAreaSize) dragTop = true;
+				if (rotatedInput.x > canvas.x + ex + ew - handleSize) dragRight = true;
+				else if (rotatedInput.x < canvas.x + ex + handleSize) dragLeft = true;
+				if (rotatedInput.y > canvas.y + ey + eh - handleSize) dragBottom = true;
+				else if (rotatedInput.y < canvas.y + ey + handleSize) dragTop = true;
+
+			}
 
 			}
 
