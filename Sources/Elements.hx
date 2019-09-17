@@ -85,18 +85,18 @@ class Elements {
 	static function toRelative(path:String, cwd:String):String {
 		path = haxe.io.Path.normalize(path);
 		cwd = haxe.io.Path.normalize(cwd);
-		
+
 		var ar:Array<String> = [];
 		var ar1 = path.split("/");
 		var ar2 = cwd.split("/");
-		
+
 		var index = 0;
 		while (ar1[index] == ar2[index]) index++;
-		
+
 		for (i in 0...ar2.length - index) ar.push("..");
-		
+
 		for (i in index...ar1.length) ar.push(ar1[i]);
-		
+
 		return ar.join("/");
 	}
 
@@ -130,7 +130,7 @@ class Elements {
 					  StringTools.endsWith(path, ".hdr");
 
 		var isFont = StringTools.endsWith(path, ".ttf");
-		
+
 		var abspath = toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
@@ -300,7 +300,7 @@ class Elements {
 			for(child in elem.children) {
 				duplicateElem(elemById(child), dupe.id);
 			}
-			
+
 			return dupe;
 		}
 		return null;
@@ -352,9 +352,9 @@ class Elements {
 
 	function drawTimeline(timelineLabelsHeight:Int, timelineFramesHeight:Int) {
 		var sc = ui.SCALE;
-	
+
 		var timelineHeight = timelineLabelsHeight + timelineFramesHeight;
-		
+
 		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, timelineHeight);
 
 		var g = timeline.g2;
@@ -438,7 +438,7 @@ class Elements {
 			for (handlePosX in 0...3) {
 				// 0 = Left, 0.5 = Center, 1 = Right
 				var handlePosX:Float = handlePosX / 2;
-				
+
 				for (handlePosY in 0...3) {
 					// 0 = Top, 0.5 = Center, 1 = Bottom
 					var handlePosY:Float = handlePosY / 2;
@@ -650,7 +650,7 @@ class Elements {
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
 					ui.row([1/2, 1/2]);
 
-					
+
 					var handlecw = Id.handle({text: canvas.width + ""});
 					var handlech = Id.handle({text: canvas.height + ""});
 					handlecw.text = canvas.width + "";
@@ -855,7 +855,7 @@ class Elements {
 						importAsset(path);
 					}
 				}
-				
+
 				if (canvas.assets.length > 0) {
 					ui.text("(Drag and drop assets to canvas)", zui.Zui.Align.Center);
 
@@ -1034,8 +1034,8 @@ class Elements {
 			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
 
 			// Drag selected element
-			if (ui.inputStarted && ui.inputDown && 
-			hitbox(canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, selectedElem.rotation)) {
+			if (ui.inputStarted && ui.inputDown &&
+					hitbox(canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, selectedElem.rotation)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
@@ -1079,7 +1079,7 @@ class Elements {
 				else if (dragLeft) { elem.x += Std.int(ui.inputDX); elem.width -= Std.int(ui.inputDX); }
 				if (dragBottom) elem.height += Std.int(ui.inputDY);
 				else if (dragTop) { elem.y += Std.int(ui.inputDY); elem.height -= Std.int(ui.inputDY); }
-			
+
 				if (elem.type != ElementType.Image) {
 					if (elem.width < 1) elem.width = 1;
 					if (elem.height < 1) elem.height = 1;
@@ -1094,7 +1094,7 @@ class Elements {
 				hwin.redraws = 2;
 				size = false;
 				if (!grabX && !grabY){
-					elem.x += Std.int(ui.inputDX); 
+					elem.x += Std.int(ui.inputDX);
 					elem.y += Std.int(ui.inputDY);
 				}else if (grabX){
 					elem.x += Std.int(ui.inputDX);
@@ -1138,7 +1138,7 @@ class Elements {
 
 			if (ui.inputStarted) {
 				if (grab || size){
-					grab = false; 
+					grab = false;
 					size = false;
 				}
 			}
@@ -1261,7 +1261,7 @@ class Elements {
 		var topRect = Std.int(apph / 2 - modalRectH / 2);
 		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
 		topRect += modalHeaderH;
-		
+
 		uimodal.begin(g);
 		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
 			var pathHandle = Id.handle();
@@ -1269,9 +1269,9 @@ class Elements {
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);
-		
+
 		g.begin(false);
-		
+
 		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
