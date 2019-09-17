@@ -793,8 +793,8 @@ class Elements {
 							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 							ui.text("On Pressed:");
 							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || 
-							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
+							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
 							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
