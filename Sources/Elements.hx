@@ -6,6 +6,8 @@ import zui.*;
 import zui.Zui;
 import zui.Canvas;
 
+using kha.graphics2.GraphicsExtension;
+
 @:access(zui.Zui)
 class Elements {
 	var ui:Zui;
@@ -41,6 +43,7 @@ class Elements {
 	var size = false;
 	var sizeX = false;
 	var sizeY = false;
+	var rotate = false;
 	var assetNames:Array<String> = [""];
 	var dragAsset:TAsset = null;
 	var resizeCanvas = false;
@@ -425,6 +428,9 @@ class Elements {
 			g.drawRect(canvas.x + ex + 1, canvas.y + ey + 1, ew, eh);
 			g.color = 0xffffffff;
 
+			// Rotate mouse coords in opposite direction as the element
+			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
+
 			// Draw corner drag handles
 			for (handlePosX in 0...3) {
 				// 0 = Left, 0.5 = Center, 1 = Right
@@ -440,12 +446,8 @@ class Elements {
 
 					var hX = canvas.x + ex + ew * handlePosX - handleSize / 2;
 					var hY = canvas.y + ey + eh * handlePosY - handleSize / 2;
-					g.drawRect(hX, hY, handleSize, handleSize);
 
 					// Hover
-					// Rotate mouse coords in opposite direction as the element
-					var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
-
 					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize) {
 						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize) {
 							g.color = 0xff205d9c;
@@ -453,8 +455,22 @@ class Elements {
 							g.color = 0xffffffff;
 						}
 					}
+
+					g.drawRect(hX, hY, handleSize, handleSize);
 				}
 			}
+
+			// Draw rotation handle
+			g.drawLine(canvas.x + ex + ew / 2, canvas.y + ey, canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+
+			var rotHandleCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2) {
+				g.color = 0xff205d9c;
+				g.fillCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
+				g.color = 0xffffffff;
+			}
+			g.drawCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
+
 			g.popTransformation();
 		}
 
@@ -754,6 +770,7 @@ class Elements {
 							elem.progress_at = Std.int(Std.parseFloat(strp));
 						}
 						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
+						handlerot.value = toDegrees(elem.rotation);
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
@@ -1026,6 +1043,14 @@ class Elements {
 
 			}
 
+			// Rotate selected element
+			if (ui.inputStarted && ui.inputDown) {
+				var rotHandleCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+
+				var inputPos = rotatedInput.sub(rotHandleCenter);
+				if (inputPos.length <= handleSize) {
+					rotate = true;
+				}
 			}
 
 			if (ui.inputReleased) {
@@ -1041,6 +1066,7 @@ class Elements {
 						elem.y = Math.round(elem.y / gridSize) * gridSize;
 					}
 				}
+				rotate = false;
 			}
 
 			if (drag) {
@@ -1061,7 +1087,7 @@ class Elements {
 					elem.y += ui.inputDY;
 				}
 			}
-			if(grab){
+			if (grab) {
 				hwin.redraws = 2;
 				size = false;
 				if (!grabX && !grabY){
@@ -1073,7 +1099,7 @@ class Elements {
 					elem.y += Std.int(ui.inputDY);
 				}
 			}
-			if(size){
+			if (size) {
 				hwin.redraws = 2;
 				grab = false;
 				if (!sizeX && !sizeY){
@@ -1085,7 +1111,29 @@ class Elements {
 					elem.height += Std.int(ui.inputDY);
 				}
 			}
-			if (ui.inputStarted){
+
+			if (rotate) {
+				hwin.redraws = 2;
+
+				var elemCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
+				var inputPos = new Vector2(ui.inputX, ui.inputY).sub(elemCenter);
+
+				// inputPos.x and inputPos.y are both positive when the mouse is in the lower right
+				// corner of the elements center, so the positive x axis used for the angle calculation
+				// in atan2() is equal to the global negative y axis. That's why we have to invert the
+				// angle and add Pi to get the correct rotation. atan2() also returns an angle in the
+				// intervall (-PI, PI], so we don't have to calculate the angle % PI*2 anymore.
+				var inputAngle = -Math.atan2(inputPos.x, inputPos.y) + Math.PI;
+
+				var rotationStepSize = toRadians(10);
+				if (ui.isCtrlDown && !ui.isTyping) {
+					inputAngle = Math.round(inputAngle / rotationStepSize) * rotationStepSize;
+				}
+
+				elem.rotation = inputAngle;
+			}
+
+			if (ui.inputStarted) {
 				if (grab || size){
 					grab = false; 
 					size = false;
