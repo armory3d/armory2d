@@ -56,7 +56,9 @@ class Elements {
 
 	var gridSnapBounds:Bool = false;
 	var gridSnapPos:Bool = true;
+	var useRotationSteps:Bool = false;
 	var gridSize:Int = 20;
+	var rotationSteps:Float = toRadians(15);
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
 
@@ -891,14 +893,30 @@ class Elements {
 
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-				var gsize = Id.handle({value: 20});
-				ui.slider(gsize, "Grid Size", 1, 128, true, 1);
-				gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
-				gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
-				if (ui.changed && !ui.inputDown) {
-					gridSize = Std.int(gsize.value);
+				if (hscale.changed && !ui.inputDown) {
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Grid")) {
+					var gsize = Id.handle({value: 20});
+					ui.slider(gsize, "Grid Size", 1, 128, true, 1);
+					gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+					gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
+
+					if (gsize.changed && !ui.inputDown) {
+						gridSize = Std.int(gsize.value);
+					}
+
+					useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
+					var rotStepHandle = Id.handle({value: 15});
+					if (useRotationSteps) {
+						ui.slider(rotStepHandle, "Rotation Step Size", 1, 180, true, 1);
+					}
+
+					if (rotStepHandle.changed && !ui.inputDown) {
+						rotationSteps = toRadians(rotStepHandle.value);
+					}
 				}
 
 				Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
@@ -1128,9 +1146,9 @@ class Elements {
 				// intervall (-PI, PI], so we don't have to calculate the angle % PI*2 anymore.
 				var inputAngle = -Math.atan2(inputPos.x, inputPos.y) + Math.PI;
 
-				var rotationStepSize = toRadians(10);
-				if (ui.isCtrlDown && !ui.isTyping) {
-					inputAngle = Math.round(inputAngle / rotationStepSize) * rotationStepSize;
+				// Ctrl toggles rotation step mode
+				if (ui.isCtrlDown != useRotationSteps && !ui.isTyping) {
+					inputAngle = Math.round(inputAngle / rotationSteps) * rotationSteps;
 				}
 
 				elem.rotation = inputAngle;
