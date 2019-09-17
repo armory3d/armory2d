@@ -1187,19 +1187,21 @@ class Elements {
 			}
 		}
 
-		// Pan canvas
-		if (ui.inputDownR) {
-			coffX += Std.int(ui.inputDX);
-			coffY += Std.int(ui.inputDY);
-		}
+		if (!drag && !grab && !size && !rotate) {
+			// Pan canvas
+			if (ui.inputDownR && !drag && !grab && !size && !rotate) {
+				coffX += Std.int(ui.inputDX);
+				coffY += Std.int(ui.inputDY);
+			}
 
-		// Zoom canvas
-		if (ui.inputWheelDelta != 0) {
-			zoom += -ui.inputWheelDelta / 10;
-			if (zoom < 0.4) zoom = 0.4;
-			else if (zoom > 1.0) zoom = 1.0;
-			zoom = Math.round(zoom * 10) / 10;
-			cui.SCALE = cui.ops.scaleFactor * zoom;
+			// Zoom canvas
+			if (ui.inputWheelDelta != 0) {
+				zoom += -ui.inputWheelDelta / 10;
+				if (zoom < 0.4) zoom = 0.4;
+				else if (zoom > 1.0) zoom = 1.0;
+				zoom = Math.round(zoom * 10) / 10;
+				cui.SCALE = cui.ops.scaleFactor * zoom;
+			}
 		}
 
 		// Canvas resize
