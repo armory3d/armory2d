@@ -421,7 +421,10 @@ class Elements {
 			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
-			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
+			// Element center
+			var cx = canvas.x + ex + ew / 2;
+			var cy = canvas.y + ey + eh / 2;
+			g.pushRotation(selectedElem.rotation, cx, cy);
 
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.color = 0xff000000;
@@ -429,7 +432,7 @@ class Elements {
 			g.color = 0xffffffff;
 
 			// Rotate mouse coords in opposite direction as the element
-			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
+			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, cx, cy, -selectedElem.rotation);
 
 			// Draw corner drag handles
 			for (handlePosX in 0...3) {
@@ -461,9 +464,9 @@ class Elements {
 			}
 
 			// Draw rotation handle
-			g.drawLine(canvas.x + ex + ew / 2, canvas.y + ey, canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+			g.drawLine(cx, canvas.y + ey, cx, canvas.y + ey - handleSize * 2);
 
-			var rotHandleCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+			var rotHandleCenter = new Vector2(cx, canvas.y + ey - handleSize * 2);
 			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2) {
 				g.color = 0xff205d9c;
 				g.fillCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
