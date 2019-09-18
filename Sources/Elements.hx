@@ -452,9 +452,27 @@ class Elements {
 					var hX = canvas.x + ex + ew * handlePosX - handleSize / 2;
 					var hY = canvas.y + ey + eh * handlePosY - handleSize / 2;
 
+					// Check if the handle is currently dragged (not necessarily hovered!)
+					var dragged = false;
+
+					if (handlePosX == 0 && dragLeft) {
+						if (handlePosY == 0 && dragTop) dragged = true;
+						else if (handlePosY == 0.5 && !(dragTop || dragBottom)) dragged = true;
+						else if (handlePosY == 1 && dragBottom) dragged = true;
+					} else if (handlePosX == 0.5 && !(dragLeft || dragRight)) {
+						if (handlePosY == 0 && dragTop) dragged = true;
+						else if (handlePosY == 1 && dragBottom) dragged = true;
+					} else if (handlePosX == 1 && dragRight) {
+						if (handlePosY == 0 && dragTop) dragged = true;
+						else if (handlePosY == 0.5 && !(dragTop || dragBottom)) dragged = true;
+						else if (handlePosY == 1 && dragBottom) dragged = true;
+					}
+					dragged = dragged && drag;
+
+
 					// Hover
-					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize) {
-						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize) {
+					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize || dragged) {
+						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize || dragged) {
 							g.color = 0xff205d9c;
 							g.fillRect(hX, hY, handleSize, handleSize);
 							g.color = 0xffffffff;
@@ -469,7 +487,7 @@ class Elements {
 			g.drawLine(cx, canvas.y + ey, cx, canvas.y + ey - handleSize * 2);
 
 			var rotHandleCenter = new Vector2(cx, canvas.y + ey - handleSize * 2);
-			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2) {
+			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2 || rotate) {
 				g.color = 0xff205d9c;
 				g.fillCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
 				g.color = 0xffffffff;
