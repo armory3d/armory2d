@@ -772,12 +772,12 @@ class Elements {
 							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);	
 						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
 							ui.text("Progress:");
 							elem.color_progress = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
 							ui.text("Background:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
