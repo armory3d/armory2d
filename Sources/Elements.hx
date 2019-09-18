@@ -624,6 +624,7 @@ class Elements {
 						canvas.elements = [];
 						selectedElem = null;
 					}
+					if (ui.isHovered) ui.tooltip("Create new canvas");
 
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
 					ui.row([1/2, 1/2]);
@@ -696,15 +697,22 @@ class Elements {
 					if (ui.button("Up") && selectedElem != null) {
 						moveElem(1);
 					}
+					if (ui.isHovered) ui.tooltip("Move element up");
+
 					if (ui.button("Down") && selectedElem != null) {
 						moveElem(-1);
 					}
+					if (ui.isHovered) ui.tooltip("Move element down");
+
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
 					}
+					if (ui.isHovered) ui.tooltip("Delete element");
+
 					if (ui.button("Duplicate") && selectedElem != null) {
 						selectedElem = duplicateElem(selectedElem);
 					}
+					if (ui.isHovered) ui.tooltip("Create duplicate of element");
 				}
 
 				if (selectedElem != null) {
