@@ -774,8 +774,10 @@ class Elements {
 							elem.progress_total = Std.int(Std.parseFloat(strpt));
 							elem.progress_at = Std.int(Std.parseFloat(strp));
 						}
-						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
-						handlerot.value = toDegrees(elem.rotation);
+						var handlerot = Id.handle().nest(id, {value: roundPrecision(toDegrees(elem.rotation == null ? 0 : elem.rotation), 2)});
+						handlerot.value = roundPrecision(toDegrees(elem.rotation), 2);
+						// Small fix for radian/degree precision errors
+						if (handlerot.value >= 360) handlerot.value = 0;
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
@@ -1314,6 +1316,15 @@ class Elements {
 	function absy(e:TElement):Float {
 		if (e == null) return 0;
 		return e.y + absy(elemById(e.parent));
+	}
+
+	function roundPrecision(v:Float, ?precision=0):Float {
+		v *= Math.pow(10, precision);
+
+		v = Std.int(v) * 1.0;
+		v /= Math.pow(10, precision);
+
+		return v;
 	}
 
 	function rotatePoint(pointX: Float, pointY: Float, centerX: Float, centerY: Float, angle:Float): Vector2 {
