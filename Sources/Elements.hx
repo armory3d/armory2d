@@ -624,6 +624,7 @@ class Elements {
 						canvas.elements = [];
 						selectedElem = null;
 					}
+					if (ui.isHovered) ui.tooltip("Create new canvas");
 
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
 					ui.row([1/2, 1/2]);
@@ -696,15 +697,22 @@ class Elements {
 					if (ui.button("Up") && selectedElem != null) {
 						moveElem(1);
 					}
+					if (ui.isHovered) ui.tooltip("Move element up");
+
 					if (ui.button("Down") && selectedElem != null) {
 						moveElem(-1);
 					}
+					if (ui.isHovered) ui.tooltip("Move element down");
+
 					if (ui.button("Remove") && selectedElem != null) {
 						removeSelectedElem();
 					}
+					if (ui.isHovered) ui.tooltip("Delete element");
+
 					if (ui.button("Duplicate") && selectedElem != null) {
 						selectedElem = duplicateElem(selectedElem);
 					}
+					if (ui.isHovered) ui.tooltip("Create duplicate of element");
 				}
 
 				if (selectedElem != null) {
@@ -772,12 +780,12 @@ class Elements {
 							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);	
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);	
 						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
 							ui.text("Progress:");
 							elem.color_progress = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
 							ui.text("Background:");
-							elem.color_bg = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_bg}), true, null, true);
+							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
@@ -890,6 +898,15 @@ class Elements {
 					//ui.text(lastTrace);
 					ui.text("Mouse X: "+ ui.inputX);
 					ui.text("Mouse Y: "+ ui.inputY);
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Shortcuts")){
+					ui.row([1/3, 2/3]);
+					ui.text("Grab");
+					Main.prefs.grabKey = ui.textInput(Id.handle({text: "g"}), "Key");
+					ui.row([1/3, 2/3]);
+					ui.text("Size");
+					Main.prefs.sizeKey = ui.textInput(Id.handle({text: "s"}), "Key");
 				}
 			}
 		}
@@ -1091,16 +1108,18 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
+				if(Main.prefs.grabKey == null || Main.prefs.sizeKey == null){Main.prefs.grabKey = "g";Main.prefs.sizeKey = "s";}
+
 				if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
 				if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
 				if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
 				if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
-				if (ui.key == KeyCode.G) {grab = true; grabX = false; grabY = false;}
+				if (ui.char == Main.prefs.grabKey) {grab = true; grabX = false; grabY = false;}
 				if (grab && ui.key == KeyCode.X){grabX = true; grabY = false;}
 				if (grab && ui.key == KeyCode.Y){grabY = true; grabX = false;}
 
-				if (ui.key == KeyCode.S) {size = true; sizeX = false; sizeY = false;}
+				if (ui.char == Main.prefs.sizeKey) {size = true; sizeX = false; sizeY = false;}
 				if (size && ui.key == KeyCode.X){sizeX = true; sizeY = false;}
 				if (size && ui.key == KeyCode.Y){sizeY = true; sizeX = false;}
 
