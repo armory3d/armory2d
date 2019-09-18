@@ -62,6 +62,8 @@ class Elements {
 	var lastCanvasW = 0;
 	var lastCanvasH = 0;
 
+	var abc:Array<String> = "abcdefghijklmnopqrstuvwxyz".split("");
+
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
 
@@ -899,6 +901,15 @@ class Elements {
 					ui.text("Mouse X: "+ ui.inputX);
 					ui.text("Mouse Y: "+ ui.inputY);
 				}
+
+				if (ui.panel(Id.handle({selected: true}), "Shortcuts")){
+					ui.row([1/3, 2/3]);
+					ui.text("Grab");
+					Main.prefs.grabKey = ui.textInput(Id.handle({text: "g"}), "Key");
+					ui.row([1/3, 2/3]);
+					ui.text("Size");
+					Main.prefs.sizeKey = ui.textInput(Id.handle({text: "s"}), "Key");
+				}
 			}
 		}
 		ui.end();
@@ -1099,16 +1110,18 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
+				if(Main.prefs.grabKey == null || Main.prefs.sizeKey == null){Main.prefs.grabKey = "g";Main.prefs.sizeKey = "s";}
+
 				if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
 				if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
 				if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
 				if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
-				if (ui.key == KeyCode.G) {grab = true; grabX = false; grabY = false;}
+				if (ui.char == Main.prefs.grabKey) {grab = true; grabX = false; grabY = false;}
 				if (grab && ui.key == KeyCode.X){grabX = true; grabY = false;}
 				if (grab && ui.key == KeyCode.Y){grabY = true; grabX = false;}
 
-				if (ui.key == KeyCode.S) {size = true; sizeX = false; sizeY = false;}
+				if (ui.char == Main.prefs.sizeKey) {size = true; sizeX = false; sizeY = false;}
 				if (size && ui.key == KeyCode.X){sizeX = true; sizeY = false;}
 				if (size && ui.key == KeyCode.Y){sizeY = true; sizeX = false;}
 
