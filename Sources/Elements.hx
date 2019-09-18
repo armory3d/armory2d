@@ -6,6 +6,8 @@ import zui.*;
 import zui.Zui;
 import zui.Canvas;
 
+using kha.graphics2.GraphicsExtension;
+
 @:access(zui.Zui)
 class Elements {
 	var ui:Zui;
@@ -22,6 +24,10 @@ class Elements {
 	function get_toolbarw():Int {
 		return Std.int(100 * ui.SCALE);
 	}
+	var handleSize(get, null):Int;
+	inline function get_handleSize():Int {
+		return Std.int(8 * ui.SCALE);
+	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
 
@@ -37,6 +43,7 @@ class Elements {
 	var size = false;
 	var sizeX = false;
 	var sizeY = false;
+	var rotate = false;
 	var assetNames:Array<String> = [""];
 	var dragAsset:TAsset = null;
 	var resizeCanvas = false;
@@ -49,7 +56,9 @@ class Elements {
 
 	var gridSnapBounds:Bool = false;
 	var gridSnapPos:Bool = true;
+	var useRotationSteps:Bool = false;
 	var gridSize:Int = 20;
+	var rotationSteps:Float = toRadians(15);
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
 
@@ -78,18 +87,18 @@ class Elements {
 	static function toRelative(path:String, cwd:String):String {
 		path = haxe.io.Path.normalize(path);
 		cwd = haxe.io.Path.normalize(cwd);
-		
+
 		var ar:Array<String> = [];
 		var ar1 = path.split("/");
 		var ar2 = cwd.split("/");
-		
+
 		var index = 0;
 		while (ar1[index] == ar2[index]) index++;
-		
+
 		for (i in 0...ar2.length - index) ar.push("..");
-		
+
 		for (i in index...ar1.length) ar.push(ar1[i]);
-		
+
 		return ar.join("/");
 	}
 
@@ -123,7 +132,7 @@ class Elements {
 					  StringTools.endsWith(path, ".hdr");
 
 		var isFont = StringTools.endsWith(path, ".ttf");
-		
+
 		var abspath = toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
@@ -293,7 +302,7 @@ class Elements {
 			for(child in elem.children) {
 				duplicateElem(elemById(child), dupe.id);
 			}
-			
+
 			return dupe;
 		}
 		return null;
@@ -345,9 +354,9 @@ class Elements {
 
 	function drawTimeline(timelineLabelsHeight:Int, timelineFramesHeight:Int) {
 		var sc = ui.SCALE;
-	
+
 		var timelineHeight = timelineLabelsHeight + timelineFramesHeight;
-		
+
 		timeline = kha.Image.createRenderTarget(kha.System.windowWidth() - uiw - toolbarw, timelineHeight);
 
 		var g = timeline.g2;
@@ -414,19 +423,24 @@ class Elements {
 			var ey = scaled(absy(selectedElem));
 			var ew = scaled(selectedElem.width);
 			var eh = scaled(selectedElem.height);
-			g.pushRotation(selectedElem.rotation, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
+			// Element center
+			var cx = canvas.x + ex + ew / 2;
+			var cy = canvas.y + ey + eh / 2;
+			g.pushRotation(selectedElem.rotation, cx, cy);
 
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.color = 0xff000000;
 			g.drawRect(canvas.x + ex + 1, canvas.y + ey + 1, ew, eh);
 			g.color = 0xffffffff;
 
+			// Rotate mouse coords in opposite direction as the element
+			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, cx, cy, -selectedElem.rotation);
+
 			// Draw corner drag handles
-			var handleSize = 8;
 			for (handlePosX in 0...3) {
 				// 0 = Left, 0.5 = Center, 1 = Right
 				var handlePosX:Float = handlePosX / 2;
-				
+
 				for (handlePosY in 0...3) {
 					// 0 = Top, 0.5 = Center, 1 = Bottom
 					var handlePosY:Float = handlePosY / 2;
@@ -437,12 +451,8 @@ class Elements {
 
 					var hX = canvas.x + ex + ew * handlePosX - handleSize / 2;
 					var hY = canvas.y + ey + eh * handlePosY - handleSize / 2;
-					g.drawRect(hX, hY, handleSize, handleSize);
 
 					// Hover
-					// Rotate mouse coords in opposite direction as the element
-					var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -selectedElem.rotation);
-
 					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize) {
 						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize) {
 							g.color = 0xff205d9c;
@@ -450,8 +460,22 @@ class Elements {
 							g.color = 0xffffffff;
 						}
 					}
+
+					g.drawRect(hX, hY, handleSize, handleSize);
 				}
 			}
+
+			// Draw rotation handle
+			g.drawLine(cx, canvas.y + ey, cx, canvas.y + ey - handleSize * 2);
+
+			var rotHandleCenter = new Vector2(cx, canvas.y + ey - handleSize * 2);
+			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2) {
+				g.color = 0xff205d9c;
+				g.fillCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
+				g.color = 0xffffffff;
+			}
+			g.drawCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
+
 			g.popTransformation();
 		}
 
@@ -629,7 +653,7 @@ class Elements {
 					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
 					ui.row([1/2, 1/2]);
 
-					
+
 					var handlecw = Id.handle({text: canvas.width + ""});
 					var handlech = Id.handle({text: canvas.height + ""});
 					handlecw.text = canvas.width + "";
@@ -758,7 +782,10 @@ class Elements {
 							elem.progress_total = Std.int(Std.parseFloat(strpt));
 							elem.progress_at = Std.int(Std.parseFloat(strp));
 						}
-						var handlerot = Id.handle().nest(id, {value: toDegrees(elem.rotation == null ? 0 : elem.rotation)});
+						var handlerot = Id.handle().nest(id, {value: roundPrecision(toDegrees(elem.rotation == null ? 0 : elem.rotation), 2)});
+						handlerot.value = roundPrecision(toDegrees(elem.rotation), 2);
+						// Small fix for radian/degree precision errors
+						if (handlerot.value >= 360) handlerot.value = 0;
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
@@ -776,8 +803,8 @@ class Elements {
 							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 							ui.text("On Pressed:");
 							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle || 
-							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || 
+						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
+							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
 							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);	
@@ -840,7 +867,7 @@ class Elements {
 						importAsset(path);
 					}
 				}
-				
+
 				if (canvas.assets.length > 0) {
 					ui.text("(Drag and drop assets to canvas)", zui.Zui.Align.Center);
 
@@ -876,14 +903,30 @@ class Elements {
 
 				var hscale = Id.handle({value: 1.0});
 				ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
-				var gsize = Id.handle({value: 20});
-				ui.slider(gsize, "Grid Size", 1, 128, true, 1);
-				gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
-				gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
-				if (ui.changed && !ui.inputDown) {
-					gridSize = Std.int(gsize.value);
+				if (hscale.changed && !ui.inputDown) {
 					ui.setScale(hscale.value);
 					windowW = Std.int(defaultWindowW * hscale.value);
+				}
+
+				if (ui.panel(Id.handle({selected: true}), "Grid")) {
+					var gsize = Id.handle({value: 20});
+					ui.slider(gsize, "Grid Size", 1, 128, true, 1);
+					gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+					gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
+
+					if (gsize.changed && !ui.inputDown) {
+						gridSize = Std.int(gsize.value);
+					}
+
+					useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
+					var rotStepHandle = Id.handle({value: 15});
+					if (useRotationSteps) {
+						ui.slider(rotStepHandle, "Rotation Step Size", 1, 180, true, 1);
+					}
+
+					if (rotStepHandle.changed && !ui.inputDown) {
+						rotationSteps = toRadians(rotStepHandle.value);
+					}
 				}
 
 				Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
@@ -1025,21 +1068,29 @@ class Elements {
 			var ey = scaled(absy(elem));
 			var ew = scaled(elem.width);
 			var eh = scaled(elem.height);
+			var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
 
-			// Drag selected elem
-			var hoverAreaSize = 4;
-			if (ui.inputStarted && ui.inputDown && 
-			hitbox(canvas.x + ex - hoverAreaSize, canvas.y + ey - hoverAreaSize, ew + hoverAreaSize * 2, eh + hoverAreaSize * 2, selectedElem.rotation)) {
-				var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
-
+			// Drag selected element
+			if (ui.inputStarted && ui.inputDown &&
+					hitbox(canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, selectedElem.rotation)) {
 				drag = true;
 				// Resize
 				dragLeft = dragRight = dragTop = dragBottom = false;
-				if (rotatedInput.x > canvas.x + ex + ew - hoverAreaSize) dragRight = true;
-				else if (rotatedInput.x < canvas.x + ex + hoverAreaSize) dragLeft = true;
-				if (rotatedInput.y > canvas.y + ey + eh - hoverAreaSize) dragBottom = true;
-				else if (rotatedInput.y < canvas.y + ey + hoverAreaSize) dragTop = true;
+				if (rotatedInput.x > canvas.x + ex + ew - handleSize) dragRight = true;
+				else if (rotatedInput.x < canvas.x + ex + handleSize) dragLeft = true;
+				if (rotatedInput.y > canvas.y + ey + eh - handleSize) dragBottom = true;
+				else if (rotatedInput.y < canvas.y + ey + handleSize) dragTop = true;
 
+			}
+
+			// Rotate selected element
+			if (ui.inputStarted && ui.inputDown) {
+				var rotHandleCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
+
+				var inputPos = rotatedInput.sub(rotHandleCenter);
+				if (inputPos.length <= handleSize) {
+					rotate = true;
+				}
 			}
 
 			if (ui.inputReleased) {
@@ -1055,6 +1106,7 @@ class Elements {
 						elem.y = Math.round(elem.y / gridSize) * gridSize;
 					}
 				}
+				rotate = false;
 			}
 
 			if (drag) {
@@ -1064,7 +1116,7 @@ class Elements {
 				else if (dragLeft) { elem.x += Std.int(ui.inputDX); elem.width -= Std.int(ui.inputDX); }
 				if (dragBottom) elem.height += Std.int(ui.inputDY);
 				else if (dragTop) { elem.y += Std.int(ui.inputDY); elem.height -= Std.int(ui.inputDY); }
-			
+
 				if (elem.type != ElementType.Image) {
 					if (elem.width < 1) elem.width = 1;
 					if (elem.height < 1) elem.height = 1;
@@ -1075,11 +1127,11 @@ class Elements {
 					elem.y += ui.inputDY;
 				}
 			}
-			if(grab){
+			if (grab) {
 				hwin.redraws = 2;
 				size = false;
 				if (!grabX && !grabY){
-					elem.x += Std.int(ui.inputDX); 
+					elem.x += Std.int(ui.inputDX);
 					elem.y += Std.int(ui.inputDY);
 				}else if (grabX){
 					elem.x += Std.int(ui.inputDX);
@@ -1087,7 +1139,7 @@ class Elements {
 					elem.y += Std.int(ui.inputDY);
 				}
 			}
-			if(size){
+			if (size) {
 				hwin.redraws = 2;
 				grab = false;
 				if (!sizeX && !sizeY){
@@ -1099,9 +1151,31 @@ class Elements {
 					elem.height += Std.int(ui.inputDY);
 				}
 			}
-			if (ui.inputStarted){
+
+			if (rotate) {
+				hwin.redraws = 2;
+
+				var elemCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
+				var inputPos = new Vector2(ui.inputX, ui.inputY).sub(elemCenter);
+
+				// inputPos.x and inputPos.y are both positive when the mouse is in the lower right
+				// corner of the elements center, so the positive x axis used for the angle calculation
+				// in atan2() is equal to the global negative y axis. That's why we have to invert the
+				// angle and add Pi to get the correct rotation. atan2() also returns an angle in the
+				// intervall (-PI, PI], so we don't have to calculate the angle % PI*2 anymore.
+				var inputAngle = -Math.atan2(inputPos.x, inputPos.y) + Math.PI;
+
+				// Ctrl toggles rotation step mode
+				if (ui.isCtrlDown != useRotationSteps && !ui.isTyping) {
+					inputAngle = Math.round(inputAngle / rotationSteps) * rotationSteps;
+				}
+
+				elem.rotation = inputAngle;
+			}
+
+			if (ui.inputStarted) {
 				if (grab || size){
-					grab = false; 
+					grab = false;
 					size = false;
 				}
 			}
@@ -1155,19 +1229,21 @@ class Elements {
 			}
 		}
 
-		// Pan canvas
-		if (ui.inputDownR) {
-			coffX += Std.int(ui.inputDX);
-			coffY += Std.int(ui.inputDY);
-		}
+		if (!drag && !grab && !size && !rotate) {
+			// Pan canvas
+			if (ui.inputDownR && !drag && !grab && !size && !rotate) {
+				coffX += Std.int(ui.inputDX);
+				coffY += Std.int(ui.inputDY);
+			}
 
-		// Zoom canvas
-		if (ui.inputWheelDelta != 0) {
-			zoom += -ui.inputWheelDelta / 10;
-			if (zoom < 0.4) zoom = 0.4;
-			else if (zoom > 1.0) zoom = 1.0;
-			zoom = Math.round(zoom * 10) / 10;
-			cui.SCALE = cui.ops.scaleFactor * zoom;
+			// Zoom canvas
+			if (ui.inputWheelDelta != 0) {
+				zoom += -ui.inputWheelDelta / 10;
+				if (zoom < 0.4) zoom = 0.4;
+				else if (zoom > 1.0) zoom = 1.0;
+				zoom = Math.round(zoom * 10) / 10;
+				cui.SCALE = cui.ops.scaleFactor * zoom;
+			}
 		}
 
 		// Canvas resize
@@ -1224,7 +1300,7 @@ class Elements {
 		var topRect = Std.int(apph / 2 - modalRectH / 2);
 		var bottomRect = Std.int(apph / 2 + modalRectH / 2);
 		topRect += modalHeaderH;
-		
+
 		uimodal.begin(g);
 		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
 			var pathHandle = Id.handle();
@@ -1232,9 +1308,9 @@ class Elements {
 			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
 		}
 		uimodal.end(false);
-		
+
 		g.begin(false);
-		
+
 		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
@@ -1259,6 +1335,15 @@ class Elements {
 	function absy(e:TElement):Float {
 		if (e == null) return 0;
 		return e.y + absy(elemById(e.parent));
+	}
+
+	function roundPrecision(v:Float, ?precision=0):Float {
+		v *= Math.pow(10, precision);
+
+		v = Std.int(v) * 1.0;
+		v /= Math.pow(10, precision);
+
+		return v;
 	}
 
 	function rotatePoint(pointX: Float, pointY: Float, centerX: Float, centerY: Float, angle:Float): Vector2 {
