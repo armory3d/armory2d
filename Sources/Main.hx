@@ -18,7 +18,7 @@ class Main {
 		}
 		kha.System.start({ title : "Armory2D", width : w, height : h, framebuffer : {samplesPerPixel : 2}}, initialized);
 	}
-	
+
 	static function initialized(window:kha.Window) {
 
 		prefs = { path: "", scaleFactor: 1.0 };
