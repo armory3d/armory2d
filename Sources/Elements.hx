@@ -62,8 +62,6 @@ class Elements {
 	var lastCanvasW = 0;
 	var lastCanvasH = 0;
 
-	var abc:Array<String> = "abcdefghijklmnopqrstuvwxyz".split("");
-
 	public function new(canvas:TCanvas) {
 		this.canvas = canvas;
 
