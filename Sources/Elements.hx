@@ -964,10 +964,13 @@ class Elements {
 				if (ui.panel(Id.handle({selected: true}), "Shortcuts")){
 					ui.row([1/3, 2/3]);
 					ui.text("Grab");
-					Main.prefs.grabKey = ui.textInput(Id.handle({text: "g"}), "Key");
+					Main.prefs.keyMap.grabKey = ui.keyInput(Id.handle({value: KeyCode.G), "Key");
+					ui.row([1/3, 2/3]);
+					ui.text("Rotate");
+					Main.prefs.keyMap.rotateKey = ui.keyInput(Id.handle({value: KeyCode.R), "Key");
 					ui.row([1/3, 2/3]);
 					ui.text("Size");
-					Main.prefs.sizeKey = ui.textInput(Id.handle({text: "s"}), "Key");
+					Main.prefs.keyMap.sizeKey = ui.keyInput(Id.handle({value: KeyCode.S), "Key");
 				}
 			}
 		}
@@ -1200,18 +1203,19 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
-				if(Main.prefs.grabKey == null || Main.prefs.sizeKey == null){Main.prefs.grabKey = "g";Main.prefs.sizeKey = "s";}
+				if (Main.prefs.keyMap.grabKey == null) Main.prefs.keyMap.grabKey = KeyCode.G;
+				if (Main.prefs.keyMap.rotateKey == null) Main.prefs.keyMap.rotateKey = KeyCode.R;
+				if (Main.prefs.keyMap.sizeKey == null) Main.prefs.keyMap.sizeKey = KeyCode.S;
 
 				if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
 				if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
 				if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
 				if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
-
-				if (ui.char == Main.prefs.grabKey) {grab = true; grabX = false; grabY = false;}
+				if (ui.key == Main.prefs.keyMap.grabKey){grab = true; grabX = false; grabY = false;}
 				if (grab && ui.key == KeyCode.X){grabX = true; grabY = false;}
 				if (grab && ui.key == KeyCode.Y){grabY = true; grabX = false;}
 
-				if (ui.char == Main.prefs.sizeKey) {size = true; sizeX = false; sizeY = false;}
+				if (ui.key == Main.prefs.keyMap.sizeKey) {size = true; sizeX = false; sizeY = false;}
 				if (size && ui.key == KeyCode.X){sizeX = true; sizeY = false;}
 				if (size && ui.key == KeyCode.Y){sizeY = true; sizeX = false;}
 

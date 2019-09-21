@@ -21,7 +21,7 @@ class Main {
 
 	static function initialized(window:kha.Window) {
 
-		prefs = { path: "", scaleFactor: 1.0 };
+		prefs = { path: "", scaleFactor: 1.0, keyMap: {}};
 
 		#if kha_krom
 
@@ -52,8 +52,13 @@ class Main {
 typedef TPrefs = {
 	var path:String;
 	var scaleFactor:Float;
+	var keyMap:TKeyMap;
 	@:optional var window_vsync:Bool;
 	@:optional var selectMouseButton:String;
-	@:optional var grabKey:String;
-	@:optional var sizeKey:String;
+}
+
+typedef TKeyMap = {
+	@:optional var grabKey:Int;
+	@:optional var rotateKey:Int;
+	@:optional var sizeKey:Int;
 }
