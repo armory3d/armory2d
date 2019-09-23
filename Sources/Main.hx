@@ -56,4 +56,5 @@ typedef TPrefs = {
 	@:optional var selectMouseButton:String;
 	@:optional var grabKey:String;
 	@:optional var sizeKey:String;
+	@:optional var rotateKey:String;
 }

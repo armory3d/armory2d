@@ -950,6 +950,9 @@ class Elements {
 					ui.row([1/3, 2/3]);
 					ui.text("Size");
 					Main.prefs.sizeKey = ui.textInput(Id.handle({text: "s"}), "Key");
+					ui.row([1/3, 2/3]);
+					ui.text("Rotate");
+					Main.prefs.rotateKey = ui.textInput(Id.handle({text: "r"}), "Key");
 				}
 			}
 		}
@@ -1182,8 +1185,12 @@ class Elements {
 
 			// Move with arrows
 			if (ui.isKeyDown && !ui.isTyping) {
-				if(Main.prefs.grabKey == null || Main.prefs.sizeKey == null){Main.prefs.grabKey = "g";Main.prefs.sizeKey = "s";}
-
+				if(Main.prefs.grabKey == null || Main.prefs.sizeKey == null){
+					Main.prefs.grabKey = "g";
+					Main.prefs.sizeKey = "s";
+					Main.prefs.rotateKey = "r";
+				}
+				
 				if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
 				if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
 				if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
@@ -1196,6 +1203,8 @@ class Elements {
 				if (ui.char == Main.prefs.sizeKey) {size = true; sizeX = false; sizeY = false;}
 				if (size && ui.key == KeyCode.X){sizeX = true; sizeY = false;}
 				if (size && ui.key == KeyCode.Y){sizeY = true; sizeX = false;}
+
+				if(ui.char == Main.prefs.rotateKey) rotate = true;
 
 				if (ui.key == KeyCode.Backspace || ui.key == KeyCode.Delete) removeSelectedElem();
 				if (ui.key == KeyCode.D) selectedElem = duplicateElem(elem);
