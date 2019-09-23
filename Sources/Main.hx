@@ -1,5 +1,6 @@
 package ;
 
+import kha.input.KeyCode;
 import zui.Canvas;
 
 class Main {
