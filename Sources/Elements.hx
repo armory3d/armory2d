@@ -22,7 +22,7 @@ class Elements {
 	}
 	var toolbarw(get, null):Int;
 	function get_toolbarw():Int {
-		return Std.int(100 * ui.SCALE);
+		return Std.int(140 * ui.SCALE);
 	}
 	var handleSize(get, null):Int;
 	inline function get_handleSize():Int {
@@ -546,20 +546,77 @@ class Elements {
 		ui.begin(g);
 
 		if (ui.window(Id.handle(), 0, 0, toolbarw, kha.System.windowHeight())) {
-			ui._y = 50;
-			if (ui.button("Empty")) {
-				selectedElem = makeElem(ElementType.Empty);
+			ui.text("Add Elements:");
+
+			if (ui.panel(Id.handle({selected: true}), "Basic")) {
+				ui.indent();
+
+				if (ui.button("Empty")) {
+					selectedElem = makeElem(ElementType.Empty);
+				}
+				if (ui.isHovered) ui.tooltip("Creates empty element");
+				if (ui.button("Text")) {
+					selectedElem = makeElem(ElementType.Text);
+				}
+				if (ui.isHovered) ui.tooltip("Create text element");
+				if (ui.button("Image")) {
+					selectedElem = makeElem(ElementType.Image);
+				}
+				if (ui.isHovered) ui.tooltip("Creates image element");
+
+				ui.unindent();
 			}
-			if (ui.isHovered) ui.tooltip("Creates empty element");
+
 			// ui.button("VLayout");
 			// ui.button("HLayout");
-			if (ui.panel(Id.handle(), "Shapes")){
+			if (ui.panel(Id.handle({selected: true}), "Buttons")){
+				ui.indent();
+
+				if (ui.button("Button")) {
+				selectedElem = makeElem(ElementType.Button);
+				}
+				if (ui.isHovered) ui.tooltip("Creates button element");
+				if (ui.button("Check")) {
+					selectedElem = makeElem(ElementType.Check);
+				}
+				if (ui.isHovered) ui.tooltip("Creates check box element");
+				if (ui.button("Radio")) {
+					selectedElem = makeElem(ElementType.Radio);
+				}
+				if (ui.isHovered) ui.tooltip("Creates inline-radio element");
+
+				ui.unindent();
+			}
+
+			if (ui.panel(Id.handle({selected: true}), "Inputs")){
+				ui.indent();
+
+				if (ui.button("Text Input")) {
+					selectedElem = makeElem(ElementType.TextInput);
+				}
+				if (ui.isHovered) ui.tooltip("Creates text input element");
+				if (ui.button("Key Input")) {
+					selectedElem = makeElem(ElementType.KeyInput);
+				}
+				if (ui.isHovered) ui.tooltip("Creates kye input element");
+				if (ui.button("Combo Box")) {
+					selectedElem = makeElem(ElementType.Combo);
+				}
+				if (ui.isHovered) ui.tooltip("Creates combo box element");
+				if (ui.button("Slider")) {
+					selectedElem = makeElem(ElementType.Slider);
+				}
+				if (ui.isHovered) ui.tooltip("Creates slider element");
+
+				ui.unindent();
+			}
+
+			if (ui.panel(Id.handle({selected: true}), "Shapes")){
 				ui.indent();
 				if (ui.button("Rect")) {
 					selectedElem = makeElem(ElementType.Rectangle);
 				}
 				if (ui.isHovered) ui.tooltip("Creates rectangle shaped element");
-
 				if (ui.button("Fill Rect")) {
 					selectedElem = makeElem(ElementType.FRectangle);
 				}
@@ -580,21 +637,11 @@ class Elements {
 					selectedElem = makeElem(ElementType.FTriangle);
 				}
 				if (ui.isHovered) ui.tooltip("Creates filled triangle shaped element");
+
 				ui.unindent();
 			}
-			if (ui.panel(Id.handle(), "Texts")){
-				ui.indent();
-				if (ui.button("Text")) {
-					selectedElem = makeElem(ElementType.Text);
-				}
-				if (ui.isHovered) ui.tooltip("Create text element");
-				if (ui.button("Input")) {
-					selectedElem = makeElem(ElementType.Input);
-				}
-				if (ui.isHovered) ui.tooltip("Creates text input element");
-				ui.unindent();
-			}
-			if (ui.panel(Id.handle(), "ProgressBars")){
+
+			if (ui.panel(Id.handle({selected: true}), "ProgressBars")){
 				ui.indent();
 				if (ui.button("RectPB")) {
 					selectedElem = makeElem(ElementType.ProgressBar);
@@ -606,30 +653,6 @@ class Elements {
 				if (ui.isHovered) ui.tooltip("Creates circular progress bar");
 				ui.unindent();
 			}
-			if (ui.button("Image")) {
-				selectedElem = makeElem(ElementType.Image);
-			}
-			if (ui.isHovered) ui.tooltip("Creates image element");
-			if (ui.button("Button")) {
-				selectedElem = makeElem(ElementType.Button);
-			}
-			if (ui.isHovered) ui.tooltip("Creates button element");
-			if (ui.button("Check")) {
-				selectedElem = makeElem(ElementType.Check);
-			}
-			if (ui.isHovered) ui.tooltip("Creates check box element");
-			if (ui.button("Radio")) {
-				selectedElem = makeElem(ElementType.Radio);
-			}
-			if (ui.isHovered) ui.tooltip("Creates inline-radio element");
-			if (ui.button("Combo")) {
-				selectedElem = makeElem(ElementType.Combo);
-			}
-			if (ui.isHovered) ui.tooltip("Creates combo box element");
-			if (ui.button("Slider")) {
-				selectedElem = makeElem(ElementType.Slider);
-			}
-			if (ui.isHovered) ui.tooltip("Creates slider element");
 		}
 
 		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
