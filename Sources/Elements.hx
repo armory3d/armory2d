@@ -1012,26 +1012,26 @@ class Elements {
 					ui.separator(8, false);
 					ui.row([1/2, 1/2]);
 					ui.text("Grab");
-					Main.prefs.keyMap.grabKey = ui.keyInput(Id.handle({value: KeyCode.G), "Key");
+					Main.prefs.keyMap.grabKey = ui.keyInput(Id.handle({value: KeyCode.G}), "Key");
 					ui.row([1/2, 1/2]);
 					ui.text("Rotate");
-					Main.prefs.keyMap.rotateKey = ui.keyInput(Id.handle({value: KeyCode.R), "Key");
+					Main.prefs.keyMap.rotateKey = ui.keyInput(Id.handle({value: KeyCode.R}), "Key");
 					ui.row([1/2, 1/2]);
 					ui.text("Size");
-					Main.prefs.keyMap.sizeKey = ui.keyInput(Id.handle({value: KeyCode.S), "Key");
+					Main.prefs.keyMap.sizeKey = ui.keyInput(Id.handle({value: KeyCode.S}), "Key");
 
 					ui.separator(8, false);
 					ui.row([1/2, 1/2]);
 					ui.text("Precision Transform");
-					Main.prefs.keyMap.slowMovement = ui.keyInput(Id.handle({value: KeyCode.Shift), "Key");
+					Main.prefs.keyMap.slowMovement = ui.keyInput(Id.handle({value: KeyCode.Shift}), "Key");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Grid");
-					Main.prefs.keyMap.gridInvert = ui.keyInput(Id.handle({value: KeyCode.Control), "Key");
+					Main.prefs.keyMap.gridInvert = ui.keyInput(Id.handle({value: KeyCode.Control}), "Key");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Rel. Grid");
-					Main.prefs.keyMap.gridInvertRelative = ui.keyInput(Id.handle({value: KeyCode.Alt), "Key");
+					Main.prefs.keyMap.gridInvertRelative = ui.keyInput(Id.handle({value: KeyCode.Alt}), "Key");
 
 					ui.unindent();
 				}
