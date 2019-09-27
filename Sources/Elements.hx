@@ -1197,20 +1197,20 @@ class Elements {
 					endElementManipulation();
 
 				// Reset
-				} else if ((ui.isKeyDown && ui.isEscapeDown) || ui.inputStartedR) {
+				} else if ((ui.isKeyPressed && ui.isEscapeDown) || ui.inputStartedR) {
 					endElementManipulation(true);
 
 				} else if (drag) {
 					var transformDelta = new Vector2(ui.inputX, ui.inputY).sub(transformInitInput);
 
 					if (!transformStartedMouse) {
-						if (ui.isKeyDown && ui.key == KeyCode.X) {
+						if (ui.isKeyPressed && ui.key == KeyCode.X) {
 							elem.width = Std.int(transformInitSize.x);
 							elem.height = Std.int(transformInitSize.y);
 							dragRight = true;
 							dragBottom = !dragBottom;
 						}
-						if (ui.isKeyDown && ui.key == KeyCode.Y) {
+						if (ui.isKeyPressed && ui.key == KeyCode.Y) {
 							elem.width = Std.int(transformInitSize.x);
 							elem.height = Std.int(transformInitSize.y);
 							dragBottom = true;
@@ -1257,13 +1257,13 @@ class Elements {
 				} else if (grab) {
 					var transformDelta = new Vector2(ui.inputX, ui.inputY).sub(transformInitInput);
 
-					if (ui.isKeyDown && ui.key == KeyCode.X) {
+					if (ui.isKeyPressed && ui.key == KeyCode.X) {
 						elem.x = transformInitPos.x;
 						elem.y = transformInitPos.y;
 						grabX = true;
 						grabY = !grabY;
 					}
-					if (ui.isKeyDown && ui.key == KeyCode.Y) {
+					if (ui.isKeyPressed && ui.key == KeyCode.Y) {
 						elem.x = transformInitPos.x;
 						elem.y = transformInitPos.y;
 						grabY = true;
@@ -1297,7 +1297,7 @@ class Elements {
 					var inputAngle = -Math.atan2(inputPos.x, inputPos.y) + Math.PI;
 
 					// Ctrl toggles rotation step mode
-					if ((ui.isKeyPressed && ui.key == Main.prefs.keyMap.gridInvert) != useRotationSteps) {
+					if ((ui.isKeyDown && ui.key == Main.prefs.keyMap.gridInvert) != useRotationSteps) {
 						inputAngle = Math.round(inputAngle / rotationSteps) * rotationSteps;
 					}
 
@@ -1306,7 +1306,7 @@ class Elements {
 				}
 			}
 
-			if (ui.isKeyDown && !ui.isTyping) {
+			if (ui.isKeyPressed && !ui.isTyping) {
 				if (!grab && ui.key == Main.prefs.keyMap.grabKey){startElementManipulation(); grab = true; grabX = true; grabY = true;}
 				if (!drag && ui.key == Main.prefs.keyMap.sizeKey) {startElementManipulation(); drag = true; dragLeft = false; dragTop = false; dragRight = true; dragBottom = true;}
 				if (!rotate && ui.key == Main.prefs.keyMap.rotateKey) {startElementManipulation(); rotate = true;}
@@ -1510,9 +1510,9 @@ class Elements {
 	}
 
 	function calculateTransformDelta(value:Float, ?offset=0.0):Float {
-		var precisionMode = ui.isKeyPressed && ui.key == Main.prefs.keyMap.slowMovement;
-		var enabled = gridSnapPos != (ui.isKeyPressed && (ui.key == Main.prefs.keyMap.gridInvert));
-		var useOffset = gridUseRelative != (ui.isKeyPressed && (ui.key == Main.prefs.keyMap.gridInvertRelative));
+		var precisionMode = ui.isKeyDown && ui.key == Main.prefs.keyMap.slowMovement;
+		var enabled = gridSnapPos != (ui.isKeyDown && (ui.key == Main.prefs.keyMap.gridInvert));
+		var useOffset = gridUseRelative != (ui.isKeyDown && (ui.key == Main.prefs.keyMap.gridInvertRelative));
 
 		if (!enabled) return precisionMode ? value / 2 : value;
 
