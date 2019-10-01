@@ -7,6 +7,7 @@ import zui.Zui;
 import zui.Canvas;
 
 using kha.graphics2.GraphicsExtension;
+using zui.Ext;
 
 @:access(zui.Zui)
 class Elements {
@@ -848,35 +849,35 @@ class Elements {
 					if (ui.panel(Id.handle({selected: false}), "Color")){
 						if (elem.type == ElementType.Text){
 							ui.text("Text:");
-							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 						}else if (elem.type == ElementType.Button){
 							ui.text("Text:");
-							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
 							ui.text("On Hover:");
-							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 							ui.text("On Pressed:");
-							elem.color_press = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_press}), true, null, true);
+							elem.color_press = ui.colorWheel(Id.handle().nest(id, {color: elem.color_press}), true, null, true);
 						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
 							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
 							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
 							ui.text("Color:");
-							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
 						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
 							ui.text("Progress:");
-							elem.color_progress = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
+							elem.color_progress = ui.colorWheel(Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
 							ui.text("Background:");
-							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
 						}else if (elem.type == ElementType.Empty){
 							ui.text("No color for element type empty");
 						}else{
 							ui.text("Text:");
-							elem.color_text = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
 							ui.text("Background:");
-							elem.color = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
 							ui.text("On Hover:");
-							elem.color_hover = Ext.colorWheel(ui, Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 						}
 					}
 
@@ -1012,26 +1013,26 @@ class Elements {
 					ui.separator(8, false);
 					ui.row([1/2, 1/2]);
 					ui.text("Grab");
-					Main.prefs.keyMap.grabKey = Ext.keyInput(ui, Id.handle({value: KeyCode.G}), "Key");
+					Main.prefs.keyMap.grabKey = ui.keyInput(Id.handle({value: KeyCode.G}), "Key");
 					ui.row([1/2, 1/2]);
 					ui.text("Rotate");
-					Main.prefs.keyMap.rotateKey = Ext.keyInput(ui, Id.handle({value: KeyCode.R}), "Key");
+					Main.prefs.keyMap.rotateKey = ui.keyInput(Id.handle({value: KeyCode.R}), "Key");
 					ui.row([1/2, 1/2]);
 					ui.text("Size");
-					Main.prefs.keyMap.sizeKey = Ext.keyInput(ui, Id.handle({value: KeyCode.S}), "Key");
+					Main.prefs.keyMap.sizeKey = ui.keyInput(Id.handle({value: KeyCode.S}), "Key");
 
 					ui.separator(8, false);
 					ui.row([1/2, 1/2]);
 					ui.text("Precision Transform");
-					Main.prefs.keyMap.slowMovement = Ext.keyInput(ui, Id.handle({value: KeyCode.Shift}), "Key");
+					Main.prefs.keyMap.slowMovement = ui.keyInput(Id.handle({value: KeyCode.Shift}), "Key");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Grid");
-					Main.prefs.keyMap.gridInvert = Ext.keyInput(ui, Id.handle({value: KeyCode.Control}), "Key");
+					Main.prefs.keyMap.gridInvert = ui.keyInput(Id.handle({value: KeyCode.Control}), "Key");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Rel. Grid");
-					Main.prefs.keyMap.gridInvertRelative = Ext.keyInput(ui, Id.handle({value: KeyCode.Alt}), "Key");
+					Main.prefs.keyMap.gridInvertRelative = ui.keyInput(Id.handle({value: KeyCode.Alt}), "Key");
 
 					ui.unindent();
 				}
@@ -1458,7 +1459,7 @@ class Elements {
 		if (uimodal.window(Id.handle(), leftRect, topRect, modalRectW, modalRectH - 100)) {
 			var pathHandle = Id.handle();
 			pathHandle.text = uimodal.textInput(pathHandle);
-			path = zui.Ext.fileBrowser(uimodal, pathHandle, foldersOnly);
+			path = uimodal.fileBrowser(pathHandle, foldersOnly);
 		}
 		uimodal.end(false);
 
