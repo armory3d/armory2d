@@ -1,5 +1,6 @@
 package ;
 
+import kha.input.KeyCode;
 import zui.Canvas;
 
 class Main {
@@ -18,10 +19,22 @@ class Main {
 		}
 		kha.System.start({ title : "Armory2D", width : w, height : h, framebuffer : {samplesPerPixel : 2}}, initialized);
 	}
-	
+
 	static function initialized(window:kha.Window) {
 
-		prefs = { path: "", scaleFactor: 1.0 };
+		prefs = {
+			path: "",
+			scaleFactor: 1.0,
+			keyMap: {
+				selectMouseButton: "Left",
+				grabKey: KeyCode.G,
+				rotateKey: KeyCode.R,
+				sizeKey: KeyCode.S,
+				slowMovement: KeyCode.Shift,
+				gridInvert: KeyCode.Control,
+				gridInvertRelative: KeyCode.Alt,
+			}
+		};
 
 		#if kha_krom
 
@@ -47,13 +60,30 @@ class Main {
 
 		#end
 	}
+
+	static function loadDefaultKeyMap() {
+		Main.prefs.keyMap.grabKey = KeyCode.G;
+		Main.prefs.keyMap.rotateKey = KeyCode.R;
+		Main.prefs.keyMap.sizeKey = KeyCode.S;
+		Main.prefs.keyMap.slowMovement = KeyCode.Shift;
+		Main.prefs.keyMap.gridInvert = KeyCode.Control;
+		Main.prefs.keyMap.gridInvertRelative = KeyCode.Alt;
+	}
 }
 
 typedef TPrefs = {
 	var path:String;
 	var scaleFactor:Float;
+	var keyMap:TKeyMap;
 	@:optional var window_vsync:Bool;
-	@:optional var selectMouseButton:String;
-	@:optional var grabKey:String;
-	@:optional var sizeKey:String;
+}
+
+typedef TKeyMap = {
+	var selectMouseButton:String;
+	var grabKey:Int;
+	var rotateKey:Int;
+	var sizeKey:Int;
+	var slowMovement:Int; // Key which slows down manipulation
+	var gridInvert:Int; // Toggles the grid setting during element manipulation
+	var gridInvertRelative:Int; // Make the grid relative to the selected element
 }
