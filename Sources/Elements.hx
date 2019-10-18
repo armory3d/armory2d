@@ -239,6 +239,10 @@ class Elements {
 			color_text: 0xffe8e7e5,
 			color_hover: 0xff3b3b3b,
 			color_press: 0xff1b1b1b,
+			color_progress: 0xffe8e7e5,
+			progress_at: 0,
+			progress_total: 100,
+			strength: 1,
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -294,6 +298,7 @@ class Elements {
 				color_progress: elem.color_progress,
 				progress_at: elem.progress_at,
 				progress_total: elem.progress_total,
+				strength: elem.strength,
 				anchor: elem.anchor,
 				parent: parentId,
 				children: [],
@@ -826,14 +831,14 @@ class Elements {
 						elem.width = Std.int(Std.parseFloat(strw));
 						elem.height = Std.int(Std.parseFloat(strh));
 						if (elem.type == ElementType.Rectangle || elem.type == ElementType.Circle || elem.type == ElementType.Triangle || elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
-							var handles = Id.handle().nest(id, {text: "1"});
+							var handles = Id.handle().nest(id, {text: elem.strength+""});
 							var strs = ui.textInput(handles, "Line Strength", Right);
 							elem.strength = Std.int(Std.parseFloat(strs));
 						}
 						if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
-							var handlep = Id.handle().nest(id, {text: "1"});
+							var handlep = Id.handle().nest(id, {text: elem.progress_at+""});
 							var strp = ui.textInput(handlep, "Progress", Right);
-							var handlespt = Id.handle().nest(id, {text: "1"});
+							var handlespt = Id.handle().nest(id, {text: elem.progress_total+""});
 							var strpt = ui.textInput(handlespt, "Total Progress", Right);
 							elem.progress_total = Std.int(Std.parseFloat(strpt));
 							elem.progress_at = Std.int(Std.parseFloat(strp));
@@ -1252,7 +1257,7 @@ class Elements {
 						if (!dragBottom && !dragTop) transformDelta.y = 0;
 						else if (!dragLeft && !dragRight) transformDelta.y = 0;
 
-						currentOperation = 'x: ${elem.x}  y: ${elem.y}  w: ${elem.width}  h: ${elem.height}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
+						currentOperation = ' x: ${elem.x}  y: ${elem.y}  w: ${elem.width}  h: ${elem.height}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
 					}
 
 				} else if (grab) {
@@ -1284,7 +1289,7 @@ class Elements {
 					if (!grabX) transformDelta.x = 0;
 					else if (!grabY) transformDelta.y = 0;
 
-					currentOperation = 'x: ${elem.x}  y: ${elem.y}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
+					currentOperation = ' x: ${elem.x}  y: ${elem.y}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
 
 				} else if (rotate) {
 					var elemCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
@@ -1303,7 +1308,7 @@ class Elements {
 					}
 
 					elem.rotation = inputAngle;
-					currentOperation = "Rot: " + roundPrecision(toDegrees(inputAngle), 2) + "deg";
+					currentOperation = " Rot: " + roundPrecision(toDegrees(inputAngle), 2) + "deg";
 				}
 			}
 
