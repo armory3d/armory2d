@@ -604,7 +604,7 @@ class Elements {
 				if (ui.button("Key Input")) {
 					selectedElem = makeElem(ElementType.KeyInput);
 				}
-				if (ui.isHovered) ui.tooltip("Creates kye input element");
+				if (ui.isHovered) ui.tooltip("Creates key input element");
 				if (ui.button("Combo Box")) {
 					selectedElem = makeElem(ElementType.Combo);
 				}
