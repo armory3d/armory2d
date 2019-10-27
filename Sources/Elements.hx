@@ -704,6 +704,7 @@ class Elements {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
+					ui.indent();
 
 					if (ui.button("New")) {
 						canvas.elements = [];
@@ -723,9 +724,12 @@ class Elements {
 					var strh = ui.textInput(handlech, "Height", Right);
 					canvas.width = Std.parseInt(strw);
 					canvas.height = Std.parseInt(strh);
+
+					ui.unindent();
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
+					ui.indent();
 
 					function drawList(h:zui.Zui.Handle, elem:TElement) {
 						var b = false;
@@ -798,6 +802,8 @@ class Elements {
 						selectedElem = duplicateElem(selectedElem);
 					}
 					if (ui.isHovered) ui.tooltip("Create duplicate of element");
+
+					ui.unindent();
 				}
 
 				if (selectedElem != null) {
@@ -805,6 +811,7 @@ class Elements {
 					var id = elem.id;
 
 					if (ui.panel(Id.handle({selected: true}), "Properties")) {
+						ui.indent();
 						elem.visible = ui.check(Id.handle().nest(id, {selected: elem.visible == null ? true : elem.visible}), "Visible");
 						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
 						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
@@ -850,8 +857,10 @@ class Elements {
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
+						ui.unindent();
 					}
 					if (ui.panel(Id.handle({selected: false}), "Color")){
+						ui.indent();
 						if (elem.type == ElementType.Text){
 							ui.text("Text:");
 							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
@@ -884,12 +893,14 @@ class Elements {
 							ui.text("On Hover:");
 							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 						}
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Anchor")) {
+						ui.indent();
 						var hanch = Id.handle().nest(id, {position: elem.anchor});
 						ui.row([4/11,3/11,4/11]);
 						ui.radio(hanch, 0, "Top-Left");
@@ -904,16 +915,21 @@ class Elements {
 						ui.radio(hanch, 7, "Bottom");
 						ui.radio(hanch, 8, "Bot-Right");
 						elem.anchor = hanch.position;
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Script")) {
+						ui.indent();
 						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Timeline")) {
+						// ui.indent();
 						// ui.row([1/2,1/2]);
 						// ui.button("Insert");
 						// ui.button("Remove");
+						// ui.unindent();
 					}
 				}
 			}
