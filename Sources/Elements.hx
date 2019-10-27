@@ -181,11 +181,14 @@ class Elements {
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = cui.t.ELEMENT_H;
+		var alignment = Align.Left;
+
 		switch (type) {
 		case ElementType.Text:
 			name = unique("Text");
 		case ElementType.Button:
 			name = unique("Button");
+			alignment = Align.Center;
 		case ElementType.Image:
 			name = unique("Image");
 			height = 100;
@@ -211,6 +214,7 @@ class Elements {
 			name = unique("Combo");
 		case ElementType.Slider:
 			name = unique("Slider");
+			alignment = Align.Right;
 		case ElementType.TextInput:
 			name = unique("TextInput");
 		case ElementType.KeyInput:
@@ -243,6 +247,7 @@ class Elements {
 			progress_at: 0,
 			progress_total: 100,
 			strength: 1,
+			alignment: cast(alignment, Int),
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -897,6 +902,16 @@ class Elements {
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
+						ui.indent();
+
+						var alignmentHandle = Id.handle().nest(id, {position: elem.alignment});
+						ui.row([1/3, 1/3, 1/3]);
+						ui.radio(alignmentHandle, 0, "Left");
+						ui.radio(alignmentHandle, 1, "Center");
+						ui.radio(alignmentHandle, 2, "Right");
+						selectedElem.alignment = alignmentHandle.position;
+
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Anchor")) {
