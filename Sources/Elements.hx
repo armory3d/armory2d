@@ -181,11 +181,14 @@ class Elements {
 	function makeElem(type:ElementType) {
 		var name = "";
 		var height = cui.t.ELEMENT_H;
+		var alignment = Align.Left;
+
 		switch (type) {
 		case ElementType.Text:
 			name = unique("Text");
 		case ElementType.Button:
 			name = unique("Button");
+			alignment = Align.Center;
 		case ElementType.Image:
 			name = unique("Image");
 			height = 100;
@@ -211,6 +214,7 @@ class Elements {
 			name = unique("Combo");
 		case ElementType.Slider:
 			name = unique("Slider");
+			alignment = Align.Right;
 		case ElementType.TextInput:
 			name = unique("TextInput");
 		case ElementType.KeyInput:
@@ -243,6 +247,7 @@ class Elements {
 			progress_at: 0,
 			progress_total: 100,
 			strength: 1,
+			alignment: cast(alignment, Int),
 			anchor: 0,
 			parent: null,
 			children: [],
@@ -704,6 +709,7 @@ class Elements {
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
+					ui.indent();
 
 					if (ui.button("New")) {
 						canvas.elements = [];
@@ -723,9 +729,12 @@ class Elements {
 					var strh = ui.textInput(handlech, "Height", Right);
 					canvas.width = Std.parseInt(strw);
 					canvas.height = Std.parseInt(strh);
+
+					ui.unindent();
 				}
 
 				if (ui.panel(Id.handle({selected: true}), "Outliner")) {
+					ui.indent();
 
 					function drawList(h:zui.Zui.Handle, elem:TElement) {
 						var b = false;
@@ -798,6 +807,8 @@ class Elements {
 						selectedElem = duplicateElem(selectedElem);
 					}
 					if (ui.isHovered) ui.tooltip("Create duplicate of element");
+
+					ui.unindent();
 				}
 
 				if (selectedElem != null) {
@@ -805,6 +816,7 @@ class Elements {
 					var id = elem.id;
 
 					if (ui.panel(Id.handle({selected: true}), "Properties")) {
+						ui.indent();
 						elem.visible = ui.check(Id.handle().nest(id, {selected: elem.visible == null ? true : elem.visible}), "Visible");
 						elem.name = ui.textInput(Id.handle().nest(id, {text: elem.name}), "Name", Right);
 						elem.text = ui.textInput(Id.handle().nest(id, {text: elem.text}), "Text", Right);
@@ -850,8 +862,10 @@ class Elements {
 						elem.rotation = toRadians(ui.slider(handlerot, "Rotation", 0.0, 360.0, true));
 						var assetPos = ui.combo(Id.handle().nest(id, {position: getAssetIndex(elem.asset)}), getEnumTexts(), "Asset", true, Right);
 						elem.asset = getEnumTexts()[assetPos];
+						ui.unindent();
 					}
 					if (ui.panel(Id.handle({selected: false}), "Color")){
+						ui.indent();
 						if (elem.type == ElementType.Text){
 							ui.text("Text:");
 							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
@@ -884,12 +898,24 @@ class Elements {
 							ui.text("On Hover:");
 							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
 						}
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Align")) {
+						ui.indent();
+
+						var alignmentHandle = Id.handle().nest(id, {position: elem.alignment});
+						ui.row([1/3, 1/3, 1/3]);
+						ui.radio(alignmentHandle, 0, "Left");
+						ui.radio(alignmentHandle, 1, "Center");
+						ui.radio(alignmentHandle, 2, "Right");
+						selectedElem.alignment = alignmentHandle.position;
+
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Anchor")) {
+						ui.indent();
 						var hanch = Id.handle().nest(id, {position: elem.anchor});
 						ui.row([4/11,3/11,4/11]);
 						ui.radio(hanch, 0, "Top-Left");
@@ -904,16 +930,21 @@ class Elements {
 						ui.radio(hanch, 7, "Bottom");
 						ui.radio(hanch, 8, "Bot-Right");
 						elem.anchor = hanch.position;
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Script")) {
+						ui.indent();
 						elem.event = ui.textInput(Id.handle().nest(id, {text: elem.event}), "Event", Right);
+						ui.unindent();
 					}
 
 					if (ui.panel(Id.handle({selected: false}), "Timeline")) {
+						// ui.indent();
 						// ui.row([1/2,1/2]);
 						// ui.button("Insert");
 						// ui.button("Remove");
+						// ui.unindent();
 					}
 				}
 			}
