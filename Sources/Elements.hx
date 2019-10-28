@@ -604,7 +604,7 @@ class Elements {
 				if (ui.button("Key Input")) {
 					selectedElem = makeElem(ElementType.KeyInput);
 				}
-				if (ui.isHovered) ui.tooltip("Creates kye input element");
+				if (ui.isHovered) ui.tooltip("Creates key input element");
 				if (ui.button("Combo Box")) {
 					selectedElem = makeElem(ElementType.Combo);
 				}
@@ -976,14 +976,18 @@ class Elements {
 					var gsize = Id.handle({value: 20});
 					ui.slider(gsize, "Grid Size", 1, 128, true, 1);
 					gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+					if (ui.isHovered) ui.tooltip("Snap the element's position to the grid");
 					gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
+					if (ui.isHovered) ui.tooltip("Snap the element's bounds to the grid");
 					gridUseRelative = ui.check(Id.handle({selected: true}), "Use Relative Grid");
+					if (ui.isHovered) ui.tooltip("Use a grid that's relative to the selected element");
 
 					if (gsize.changed && !ui.inputDown) {
 						gridSize = Std.int(gsize.value);
 					}
 
 					useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
+					if (ui.isHovered) ui.tooltip("Rotate elements by a fixed step size");
 					var rotStepHandle = Id.handle({value: 15});
 					if (useRotationSteps) {
 						ui.slider(rotStepHandle, "Rotation Step Size", 1, 180, true, 1);
@@ -1019,25 +1023,33 @@ class Elements {
 					ui.row([1/2, 1/2]);
 					ui.text("Grab");
 					Main.prefs.keyMap.grabKey = ui.keyInput(Id.handle({value: KeyCode.G}), "Key");
+					if (ui.isHovered) ui.tooltip("Key used for grabbing elements");
+
 					ui.row([1/2, 1/2]);
 					ui.text("Rotate");
 					Main.prefs.keyMap.rotateKey = ui.keyInput(Id.handle({value: KeyCode.R}), "Key");
+					if (ui.isHovered) ui.tooltip("Key used for rotating elements");
+
 					ui.row([1/2, 1/2]);
 					ui.text("Size");
 					Main.prefs.keyMap.sizeKey = ui.keyInput(Id.handle({value: KeyCode.S}), "Key");
+					if (ui.isHovered) ui.tooltip("Key used for resizing elements");
 
 					ui.separator(8, false);
 					ui.row([1/2, 1/2]);
 					ui.text("Precision Transform");
 					Main.prefs.keyMap.slowMovement = ui.keyInput(Id.handle({value: KeyCode.Shift}), "Key");
+					if (ui.isHovered) ui.tooltip("More precise transformations");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Grid");
 					Main.prefs.keyMap.gridInvert = ui.keyInput(Id.handle({value: KeyCode.Control}), "Key");
+					if (ui.isHovered) ui.tooltip("Invert the grid setting");
 
 					ui.row([1/2, 1/2]);
 					ui.text("Invert Rel. Grid");
 					Main.prefs.keyMap.gridInvertRelative = ui.keyInput(Id.handle({value: KeyCode.Alt}), "Key");
+					if (ui.isHovered) ui.tooltip("Invert the relative grid setting");
 
 					ui.unindent();
 				}
