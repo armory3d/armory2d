@@ -3,4 +3,4 @@
 	url = https://github.com/armory3d/zui
 [submodule "Kha"]
 	path = Kha
-	url = https://github.com/Kode/Kha
+	url = https://github.com/armory3d/Kha
