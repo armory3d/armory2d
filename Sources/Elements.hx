@@ -23,11 +23,11 @@ class Elements {
 	}
 	var toolbarw(get, null):Int;
 	function get_toolbarw():Int {
-		return Std.int(140 * ui.SCALE);
+		return Std.int(140 * ui.SCALE());
 	}
 	var handleSize(get, null):Int;
 	inline function get_handleSize():Int {
-		return Std.int(8 * ui.SCALE);
+		return Std.int(8 * ui.SCALE());
 	}
 	static var coffX = 70.0;
 	static var coffY = 50.0;
@@ -372,7 +372,7 @@ class Elements {
 	}
 
 	function drawTimeline(timelineLabelsHeight:Int, timelineFramesHeight:Int) {
-		var sc = ui.SCALE;
+		var sc = ui.SCALE();
 
 		var timelineHeight = timelineLabelsHeight + timelineFramesHeight;
 
@@ -409,7 +409,7 @@ class Elements {
 			dropPath = "";
 		}
 
-		var sc = ui.SCALE;
+		var sc = ui.SCALE();
 		var timelineLabelsHeight = Std.int(30 * sc);
 		var timelineFramesHeight = Std.int(40 * sc);
 
@@ -517,7 +517,7 @@ class Elements {
 		}
 
 		if (currentOperation != "") {
-			g.fontSize = Std.int(14 * ui.SCALE);
+			g.fontSize = Std.int(14 * ui.SCALE());
 			g.color = 0xffaaaaaa;
 			g.drawString(currentOperation, toolbarw, kha.System.windowHeight() - timeline.height - g.fontSize);
 		}
@@ -666,7 +666,7 @@ class Elements {
 			}
 		}
 
-		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE))) {
+		if (ui.window(Id.handle(), toolbarw, 0, kha.System.windowWidth() - uiw - toolbarw, Std.int((ui.t.ELEMENT_H + 2) * ui.SCALE()))) {
 			ui.tab(Id.handle(), canvas.name);
 		}
 
@@ -741,7 +741,7 @@ class Elements {
 						// Highlight
 						if (selectedElem == elem) {
 							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE);
+							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
 							ui.g.color = 0xffffffff;
 						}
 						var started = ui.getStarted();
@@ -1201,7 +1201,7 @@ class Elements {
 		if (timeline != null) {
 			var ty = kha.System.windowHeight() - timeline.height;
 			if (ui.inputDown && ui.inputY > ty && ui.inputX < kha.System.windowWidth() - uiw && ui.inputX > toolbarw) {
-				selectedFrame = Std.int((ui.inputX - toolbarw) / 11 / ui.SCALE);
+				selectedFrame = Std.int((ui.inputX - toolbarw) / 11 / ui.SCALE());
 			}
 		}
 
@@ -1444,7 +1444,7 @@ class Elements {
 				if (zoom < 0.4) zoom = 0.4;
 				else if (zoom > 1.0) zoom = 1.0;
 				zoom = Math.round(zoom * 10) / 10;
-				cui.SCALE = cui.ops.scaleFactor * zoom;
+				cui.ops.scaleFactor = zoom;
 			}
 		}
 
@@ -1584,5 +1584,5 @@ class Elements {
 		return value;
 	}
 
-	inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE); }
+	inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE()); }
 }
