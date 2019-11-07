@@ -761,7 +761,7 @@ class Elements {
 						// Draw
 						if (elem.children != null && elem.children.length > 0) {
 							ui.row([1/13, 12/13]);
-							b = ui.panel(h.nest(elem.id, {selected: true}), "", 0, true);
+							b = ui.panel(h.nest(elem.id, {selected: true}), "", true);
 							ui.text(elem.name);
 						}
 						else {
