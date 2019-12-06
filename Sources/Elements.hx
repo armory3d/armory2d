@@ -5,6 +5,8 @@ import kha.input.KeyCode;
 import zui.*;
 import zui.Zui;
 import zui.Canvas;
+import zui.Popup;
+
 
 using kha.graphics2.GraphicsExtension;
 using zui.Ext;
@@ -437,6 +439,18 @@ class Elements {
 
 	public function onFrames(framebuffers: Array<kha.Framebuffer>): Void {
 		var framebuffer = framebuffers[0];
+
+		// Disable UI if a popup is displayed
+		if (Popup.show && ui.inputRegistered) {
+			ui.unregisterInput();
+			cui.unregisterInput();
+		} else if (!Popup.show && !ui.inputRegistered) {
+			ui.registerInput();
+			cui.registerInput();
+		}
+
+		// Update preview when choosing a color
+		if (Popup.show) hwin.redraws = 1;
 
 		if (dropPath != "") {
 			importAsset(dropPath);
@@ -1159,6 +1173,7 @@ class Elements {
 		lastCanvasH = canvas.height;
 
 		if (showFiles) renderFiles(g);
+		if (Popup.show) Popup.render(g);
 	}
 
 	function elemById(id: Int): TElement {
@@ -1408,6 +1423,8 @@ class Elements {
 		} else {
 			endElementManipulation();
 		}
+
+		if (Popup.show) Popup.update();
 
 		updateFiles();
 	}
