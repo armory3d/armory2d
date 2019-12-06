@@ -961,38 +961,63 @@ class Elements {
 						ui.unindent();
 					}
 					if (ui.panel(Id.handle({selected: false}), "Color")){
+						function drawColorSelection(idMult: Int, color:Null<Int>, defaultColor:Int) {
+							ui.row([1/2, 1/2]);
+
+							var handleCol = Id.handle().nest(id).nest(idMult, {color: Canvas.getColor(color, defaultColor)});
+							ui.colorField(handleCol, true);
+
+							if (handleCol.changed) {
+								color = handleCol.color;
+							}
+
+							// Follow theme color
+							if (ui.button("Reset") || color == null) {
+								color = null;
+								handleCol.color = defaultColor;
+								handleCol.changed = false;
+							}
+
+							return color;
+						}
+
 						ui.indent();
-						if (elem.type == ElementType.Text){
+						if (elem.type == ElementType.Text) {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
-						}else if (elem.type == ElementType.Button){
+							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).TEXT_COL);
+
+						} else if (elem.type == ElementType.Button) {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).BUTTON_TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
 							ui.text("On Hover:");
-							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = drawColorSelection(3, elem.color_hover, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
 							ui.text("On Pressed:");
-							elem.color_press = ui.colorWheel(Id.handle().nest(id, {color: elem.color_press}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
-							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
-							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
+							elem.color_press = drawColorSelection(4, elem.color_press, Canvas.getTheme(canvas.theme).BUTTON_PRESSED_COL);
+
+						} else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
+								  elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
+								  elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle) {
 							ui.text("Color:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
-						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
+							elem.color = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+
+						} else if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar) {
 							ui.text("Progress:");
-							elem.color_progress = ui.colorWheel(Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
+							elem.color_progress = drawColorSelection(1, elem.color_progress, Canvas.getTheme(canvas.theme).TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
-						}else if (elem.type == ElementType.Empty){
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+
+						} else if (elem.type == ElementType.Empty) {
 							ui.text("No color for element type empty");
-						}else{
+
+						} else {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
 							ui.text("On Hover:");
-							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = drawColorSelection(3, elem.color, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
 						}
 						ui.unindent();
 					}
