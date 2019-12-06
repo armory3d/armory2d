@@ -1074,6 +1074,96 @@ class Elements {
 				// Must be accesible all over this place because when deleting themes,
 				// the color handle's child handle at that theme index must be reset.
 				var handleThemeColor = Id.handle();
+				var handleThemeName = Id.handle();
+
+				function drawList(h:zui.Zui.Handle, theme:zui.Themes.TTheme) {
+					// Highlight
+					if (selectedTheme == theme) {
+						ui.g.color = 0xff205d9c;
+						ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
+						ui.g.color = 0xffffffff;
+					}
+
+					var started = ui.getStarted();
+					// Select
+					if (started && !ui.inputDownR) {
+						selectedTheme = theme;
+					}
+
+					// Draw
+					ui.text(theme.NAME);
+				}
+
+				for (theme in Canvas.themes) {
+					drawList(Id.handle(), theme);
+				}
+
+				ui.row([1/4, 1/4, 1/4, 1/4]);
+				if (ui.button("Add")) {
+					var newTheme = Reflect.copy(zui.Themes.light);
+					newTheme.NAME = unique("New Theme", Canvas.themes, "NAME");
+
+					Canvas.themes.push(newTheme);
+					selectedTheme = newTheme;
+				}
+
+				if (selectedTheme == null) ui.enabled = false;
+				if (ui.button("Copy")) {
+					var newTheme = Reflect.copy(selectedTheme);
+					newTheme.NAME = unique(newTheme.NAME, Canvas.themes, "NAME");
+
+					Canvas.themes.push(newTheme);
+					selectedTheme = newTheme;
+				}
+				ui.enabled = true;
+
+				if (selectedTheme == null) ui.enabled = false;
+				var hName = handleThemeName.nest(Canvas.themes.indexOf(selectedTheme));
+				if (ui.button("Rename")) {
+					hName.text = selectedTheme.NAME;
+					Popup.showCustom(
+						new Zui(ui.ops),
+						function(ui:Zui) {
+							ui.textInput(hName);
+							if (ui.button("OK")) {
+								Popup.show = false;
+								hwin.redraws = 2;
+							}
+						},
+						Std.int(ui.inputX), Std.int(ui.inputY), 200, 60);
+				}
+				if (selectedTheme != null) {
+					var name = selectedTheme.NAME;
+					if (hName.changed && selectedTheme.NAME != hName.text) {
+						name = unique(hName.text, Canvas.themes, "NAME");
+						if (canvas.theme == selectedTheme.NAME) {
+							canvas.theme = name;
+						}
+						selectedTheme.NAME = name;
+					}
+				}
+				ui.enabled = true;
+
+				if (Canvas.themes.length == 1 || selectedTheme == null) ui.enabled = false;
+				if (ui.button("Delete")) {
+					handleThemeColor.unnest(Canvas.themes.indexOf(selectedTheme));
+					handleThemeName.unnest(Canvas.themes.indexOf(selectedTheme));
+
+					Canvas.themes.remove(selectedTheme);
+
+					// Canvas default theme was deleted
+					if (Canvas.getTheme(canvas.theme) == null) {
+						canvas.theme = Canvas.themes[0].NAME;
+					}
+					selectedTheme = null;
+				}
+				ui.enabled = true;
+
+				if (selectedTheme == null) ui.enabled = false;
+				if (ui.button("Apply to Canvas")) {
+					canvas.theme = selectedTheme.NAME;
+				}
+				ui.enabled = true;
 
 				if (selectedTheme == null) {
 					ui.text("Please select a Theme!");
