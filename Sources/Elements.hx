@@ -72,7 +72,7 @@ class Elements {
 	static var timeline:kha.Image = null;
 
 	var selectedFrame = 0;
-
+	var selectedTheme:zui.Themes.TTheme = null;
 	var selectedElem:TElement = null;
 	var hwin = Id.handle();
 	var lastW = 0;
@@ -1066,6 +1066,45 @@ class Elements {
 						// ui.button("Insert");
 						// ui.button("Remove");
 						// ui.unindent();
+					}
+				}
+			}
+
+			if (ui.tab(htab, "Themes")) {
+				// Must be accesible all over this place because when deleting themes,
+				// the color handle's child handle at that theme index must be reset.
+				var handleThemeColor = Id.handle();
+
+				if (selectedTheme == null) {
+					ui.text("Please select a Theme!");
+				} else {
+					// A Map would be way better, but its order is not guaranteed.
+					var themeColorOptions:Array<Array<String>> = [
+						["Text", "TEXT_COL"],
+						["Elements", "BUTTON_COL", "BUTTON_TEXT_COL", "BUTTON_HOVER_COL", "BUTTON_PRESSED_COL", "ACCENT_COL", "ACCENT_HOVER_COL", "ACCENT_SELECT_COL"],
+					];
+
+					for (idxCategory in 0...themeColorOptions.length) {
+						if (ui.panel(Id.handle().nest(idxCategory, {selected: true}), themeColorOptions[idxCategory][0])) {
+							ui.indent();
+
+							var attributes = themeColorOptions[idxCategory].slice(1);
+
+							for (idxElemAttribs in 0...attributes.length) {
+								var themeColorOption = attributes[idxElemAttribs];
+								// is getField() better?
+								ui.row([2/3, 1/3]);
+								ui.text(themeColorOption);
+
+								var themeColor = Reflect.getProperty(selectedTheme, themeColorOption);
+
+								var handleCol = handleThemeColor.nest(Canvas.themes.indexOf(selectedTheme)).nest(idxCategory).nest(idxElemAttribs, {color: themeColor});
+								var col = ui.colorField(handleCol, true);
+								Reflect.setProperty(selectedTheme, themeColorOption, col);
+							}
+
+							ui.unindent();
+						}
 					}
 				}
 			}
