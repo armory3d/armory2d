@@ -802,7 +802,18 @@ class Elements {
 					}
 					if (ui.isHovered) ui.tooltip("Create new canvas");
 
-					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
+					var handleName = Id.handle({text: canvas.name});
+					ui.textInput(handleName, "Name", Right);
+					if (handleName.changed) {
+						// Themes file is called _themes.json, so canvases should not be named like that
+						if (handleName.text == "_themes") {
+							Popup.showMessage(new Zui(ui.ops), "Sorry!", "\"_themes\" is not a valid canvas name as it is reserved!");
+							handleName.text = canvas.name;
+						} else {
+							canvas.name = handleName.text;
+						}
+					}
+
 					ui.row([1/2, 1/2]);
 
 
