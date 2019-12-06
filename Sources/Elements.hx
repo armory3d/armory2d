@@ -169,12 +169,46 @@ class Elements {
 		}
 	}
 
-	function unique(s:String):String {
-		// for (e in canvas.elements) {
-		// 	if (s == e.name) {
-		// 		return unique(s + '.001');
-		// 	}
-		// }
+	/**
+	 * Generates a unique string for a given array based on the string s.
+	 *
+	 * @param s The string that is returned in a unique form
+	 * @param data The array where the string should be unique
+	 * @param elemAttr The name of the attribute of the data elements to be compared with the string.
+	 * @param counter=-1 Internal use only, do not overwrite!
+	 * @return String A unique string in the given array
+	 */
+	function unique(s:String, data:Array<Dynamic>, elemAttr:String, counter=-1): String {
+		var originalName = s;
+
+		// Reconstruct the original name
+		var split = s.lastIndexOf(".");
+		if (split != -1) {
+			// .001, .002...
+			var suffix = s.substring(split);
+			if (suffix.length == 4) {
+				originalName = s.substring(0, split);
+			}
+		}
+
+		for (elem in data) {
+			if (Reflect.getProperty(elem, elemAttr) == s) {
+				if (counter > -1) {
+					counter++;
+					var counterLen = Std.string(counter).length;
+					if (counterLen > 3) counterLen = 3;
+					var padding = ".";
+					for (i in 0...3 - counterLen) {
+						padding += "0";
+					}
+
+					return unique(originalName + padding + Std.string(counter), data, elemAttr, counter);
+
+				} else {
+					return unique(originalName, data, elemAttr, 0);
+				}
+			}
+		}
 		return s;
 	}
 
@@ -185,46 +219,46 @@ class Elements {
 
 		switch (type) {
 		case ElementType.Text:
-			name = unique("Text");
+			name = unique("Text", canvas.elements, "name");
 		case ElementType.Button:
-			name = unique("Button");
+			name = unique("Button", canvas.elements, "name");
 			alignment = Align.Center;
 		case ElementType.Image:
-			name = unique("Image");
+			name = unique("Image", canvas.elements, "name");
 			height = 100;
 		case ElementType.FRectangle:
-			name = unique("Filled_Rectangle");
+			name = unique("Filled_Rectangle", canvas.elements, "name");
 			height = 100;
 		case ElementType.FCircle:
-			name = unique("Filled_Circle");
+			name = unique("Filled_Circle", canvas.elements, "name");
 		case ElementType.Rectangle:
-			name = unique("Rectangle");
+			name = unique("Rectangle", canvas.elements, "name");
 			height = 100;
 		case ElementType.FTriangle:
-			name = unique("Filled_Triangle");
+			name = unique("Filled_Triangle", canvas.elements, "name");
 		case ElementType.Triangle:
-			name = unique("Triangle");
+			name = unique("Triangle", canvas.elements, "name");
 		case ElementType.Circle:
-			name = unique("Circle");
+			name = unique("Circle", canvas.elements, "name");
 		case ElementType.Check:
-			name = unique("Check");
+			name = unique("Check", canvas.elements, "name");
 		case ElementType.Radio:
-			name = unique("Radio");
+			name = unique("Radio", canvas.elements, "name");
 		case ElementType.Combo:
-			name = unique("Combo");
+			name = unique("Combo", canvas.elements, "name");
 		case ElementType.Slider:
-			name = unique("Slider");
+			name = unique("Slider", canvas.elements, "name");
 			alignment = Align.Right;
 		case ElementType.TextInput:
-			name = unique("TextInput");
+			name = unique("TextInput", canvas.elements, "name");
 		case ElementType.KeyInput:
-			name = unique("KeyInput");
+			name = unique("KeyInput", canvas.elements, "name");
 		case ElementType.ProgressBar:
-			name = unique("Progress_bar");
+			name = unique("Progress_bar", canvas.elements, "name");
 		case ElementType.CProgressBar:
-			name = unique("CProgress_bar");
+			name = unique("CProgress_bar", canvas.elements, "name");
 		case ElementType.Empty:
-			name = unique("Empty");
+			name = unique("Empty", canvas.elements, "name");
 			height = 100;
 		}
 		var elem:TElement = {
