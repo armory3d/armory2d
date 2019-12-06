@@ -1547,18 +1547,18 @@ class Elements {
 
 		g.begin(false);
 
-		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
+		uimodal.beginRegion(g, rightRect - 100, bottomRect - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
 			filesDone(path);
 		}
-		uimodal.endLayout(false);
+		uimodal.endRegion(false);
 
-		uimodal.beginLayout(g, rightRect - 200, bottomRect - 30, 100);
+		uimodal.beginRegion(g, rightRect - 200, bottomRect - 30, 100);
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
 		}
-		uimodal.endLayout();
+		uimodal.endRegion();
 
 		g.end();
 	}
