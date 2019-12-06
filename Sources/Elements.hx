@@ -90,6 +90,9 @@ class Elements {
 			for (a in assets) importAsset(a.file);
 		}
 
+		// Import themes
+		importThemes();
+
 		kha.Assets.loadEverything(loaded);
 	}
 
@@ -122,8 +125,15 @@ class Elements {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: zui.Themes.light});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: Canvas.getTheme(canvas.theme)});
 		uimodal = new Zui( { font: kha.Assets.fonts.font_default, scaleFactor: Main.prefs.scaleFactor } );
+
+		if (Canvas.getTheme(canvas.theme) == null) {
+			Popup.showMessage(new Zui(ui.ops), "Error!",
+				'Theme "${canvas.theme}" was not found!'
+				+ '\nUsing first theme in list instead: "${Canvas.themes[0].NAME}"');
+			canvas.theme = Canvas.themes[0].NAME;
+		}
 
 		kha.System.notifyOnDropFiles(function(path:String) {
 			dropPath = StringTools.rtrim(path);
@@ -169,6 +179,24 @@ class Elements {
 				hwin.redraws = 2;
 			});
 		}
+	}
+
+	function importThemes() {
+		var themesDir = haxe.io.Path.directory(Main.prefs.path);
+		var themesPath = haxe.io.Path.join([themesDir, "_themes.json"]);
+
+		kha.Assets.loadBlobFromPath(themesPath, function(b:kha.Blob) {
+			Canvas.themes = haxe.Json.parse(b.toString());
+
+			if (Canvas.themes.length == 0) {
+				Canvas.themes.push(Reflect.copy(zui.Themes.light));
+			}
+			selectedTheme = Canvas.themes[0];
+
+		}, function(a:kha.AssetError) {
+			Canvas.themes.push(Reflect.copy(zui.Themes.light));
+			selectedTheme = Canvas.themes[0];
+		});
 	}
 
 	/**
@@ -719,10 +747,11 @@ class Elements {
 			if (ui.tab(htab, "Project")) {
 
 				if (ui.button("Save")) {
-
 					// Unpan
 					canvas.x = 0;
 					canvas.y = 0;
+
+					// Save canvas to file
 					#if kha_krom
 					Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
 					#elseif kha_debug_html5
@@ -733,6 +762,7 @@ class Elements {
 					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
+					// Save assets to files
 					var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
 					filesPath += '.files';
 					var filesList = '';
@@ -744,6 +774,18 @@ class Elements {
 					var path = untyped __js__('require("path")');
 					var filePath = path.resolve(untyped __js__('__dirname'), filesPath);
 					try { fs.writeFileSync(filePath, filesList); }
+					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
+					#end
+
+					// Save themes to file
+					var themesPath = haxe.io.Path.join([haxe.io.Path.directory(Main.prefs.path), "_themes.json"]);
+					#if kha_krom
+					Krom.fileSaveBytes(themesPath, haxe.io.Bytes.ofString(haxe.Json.stringify(Canvas.themes)).getData());
+					#elseif kha_debug_html5
+					var fs = untyped __js__('require("fs");');
+					var path = untyped __js__('require("path")');
+					var filePath = path.resolve(untyped __js__('__dirname'), themesPath);
+					try { fs.writeFileSync(filePath, haxe.Json.stringify(Canvas.themes)); }
 					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
