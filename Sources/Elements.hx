@@ -1075,6 +1075,7 @@ class Elements {
 				// the color handle's child handle at that theme index must be reset.
 				var handleThemeColor = Id.handle();
 				var handleThemeName = Id.handle();
+				var iconSize = 16;
 
 				function drawList(h:zui.Zui.Handle, theme:zui.Themes.TTheme) {
 					// Highlight
@@ -1082,6 +1083,11 @@ class Elements {
 						ui.g.color = 0xff205d9c;
 						ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
 						ui.g.color = 0xffffffff;
+					}
+					// Highlight default theme
+					if (theme == Canvas.getTheme(canvas.theme)) {
+						var iconMargin = (ui.t.BUTTON_H - iconSize) / 2;
+						ui.g.drawSubImage(kha.Assets.images.icons, ui._x + iconMargin, ui._y + iconMargin, 0, 0, 16, 16);
 					}
 
 					var started = ui.getStarted();
@@ -1091,7 +1097,9 @@ class Elements {
 					}
 
 					// Draw
+					ui._x += iconSize; // Icon offset
 					ui.text(theme.NAME);
+					ui._x -= iconSize;
 				}
 
 				for (theme in Canvas.themes) {
