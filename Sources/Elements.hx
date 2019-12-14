@@ -90,7 +90,6 @@ class Elements {
 			for (a in assets) importAsset(a.file);
 		}
 
-		// Import themes
 		importThemes();
 
 		kha.Assets.loadEverything(loaded);
