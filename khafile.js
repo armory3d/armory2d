@@ -1,7 +1,8 @@
 let project = new Project('Armory2D');
 
 project.addSources('Sources');
-project.addAssets('Assets/**');
+project.addAssets('Assets/**/*.png');
+project.addAssets('Assets/**/*.ttf');
 project.addLibrary('zui');
 
 resolve(project);
