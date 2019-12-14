@@ -5,6 +5,8 @@ import kha.input.KeyCode;
 import zui.*;
 import zui.Zui;
 import zui.Canvas;
+import zui.Popup;
+
 
 using kha.graphics2.GraphicsExtension;
 using zui.Ext;
@@ -70,7 +72,7 @@ class Elements {
 	static var timeline:kha.Image = null;
 
 	var selectedFrame = 0;
-
+	var selectedTheme:zui.Themes.TTheme = null;
 	var selectedElem:TElement = null;
 	var hwin = Id.handle();
 	var lastW = 0;
@@ -87,6 +89,9 @@ class Elements {
 			canvas.assets = [];
 			for (a in assets) importAsset(a.file);
 		}
+
+		// Import themes
+		importThemes();
 
 		kha.Assets.loadEverything(loaded);
 	}
@@ -120,8 +125,15 @@ class Elements {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel});
-		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: zui.Themes.light});
+		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: Reflect.copy(Canvas.getTheme(canvas.theme))});
 		uimodal = new Zui( { font: kha.Assets.fonts.font_default, scaleFactor: Main.prefs.scaleFactor } );
+
+		if (Canvas.getTheme(canvas.theme) == null) {
+			Popup.showMessage(new Zui(ui.ops), "Error!",
+				'Theme "${canvas.theme}" was not found!'
+				+ '\nUsing first theme in list instead: "${Canvas.themes[0].NAME}"');
+			canvas.theme = Canvas.themes[0].NAME;
+		}
 
 		kha.System.notifyOnDropFiles(function(path:String) {
 			dropPath = StringTools.rtrim(path);
@@ -169,12 +181,64 @@ class Elements {
 		}
 	}
 
-	function unique(s:String):String {
-		// for (e in canvas.elements) {
-		// 	if (s == e.name) {
-		// 		return unique(s + '.001');
-		// 	}
-		// }
+	function importThemes() {
+		var themesDir = haxe.io.Path.directory(Main.prefs.path);
+		var themesPath = haxe.io.Path.join([themesDir, "_themes.json"]);
+
+		kha.Assets.loadBlobFromPath(themesPath, function(b:kha.Blob) {
+			Canvas.themes = haxe.Json.parse(b.toString());
+
+			if (Canvas.themes.length == 0) {
+				Canvas.themes.push(Reflect.copy(zui.Themes.light));
+			}
+			selectedTheme = Canvas.themes[0];
+
+		}, function(a:kha.AssetError) {
+			Canvas.themes.push(Reflect.copy(zui.Themes.light));
+			selectedTheme = Canvas.themes[0];
+		});
+	}
+
+	/**
+	 * Generates a unique string for a given array based on the string s.
+	 *
+	 * @param s The string that is returned in a unique form
+	 * @param data The array where the string should be unique
+	 * @param elemAttr The name of the attribute of the data elements to be compared with the string.
+	 * @param counter=-1 Internal use only, do not overwrite!
+	 * @return String A unique string in the given array
+	 */
+	function unique(s:String, data:Array<Dynamic>, elemAttr:String, counter=-1): String {
+		var originalName = s;
+
+		// Reconstruct the original name
+		var split = s.lastIndexOf(".");
+		if (split != -1) {
+			// .001, .002...
+			var suffix = s.substring(split);
+			if (suffix.length == 4) {
+				originalName = s.substring(0, split);
+			}
+		}
+
+		for (elem in data) {
+			if (Reflect.getProperty(elem, elemAttr) == s) {
+				if (counter > -1) {
+					counter++;
+					var counterLen = Std.string(counter).length;
+					if (counterLen > 3) counterLen = 3;
+					var padding = ".";
+					for (i in 0...3 - counterLen) {
+						padding += "0";
+					}
+
+					return unique(originalName + padding + Std.string(counter), data, elemAttr, counter);
+
+				} else {
+					return unique(originalName, data, elemAttr, 0);
+				}
+			}
+		}
 		return s;
 	}
 
@@ -185,46 +249,46 @@ class Elements {
 
 		switch (type) {
 		case ElementType.Text:
-			name = unique("Text");
+			name = unique("Text", canvas.elements, "name");
 		case ElementType.Button:
-			name = unique("Button");
+			name = unique("Button", canvas.elements, "name");
 			alignment = Align.Center;
 		case ElementType.Image:
-			name = unique("Image");
+			name = unique("Image", canvas.elements, "name");
 			height = 100;
 		case ElementType.FRectangle:
-			name = unique("Filled_Rectangle");
+			name = unique("Filled_Rectangle", canvas.elements, "name");
 			height = 100;
 		case ElementType.FCircle:
-			name = unique("Filled_Circle");
+			name = unique("Filled_Circle", canvas.elements, "name");
 		case ElementType.Rectangle:
-			name = unique("Rectangle");
+			name = unique("Rectangle", canvas.elements, "name");
 			height = 100;
 		case ElementType.FTriangle:
-			name = unique("Filled_Triangle");
+			name = unique("Filled_Triangle", canvas.elements, "name");
 		case ElementType.Triangle:
-			name = unique("Triangle");
+			name = unique("Triangle", canvas.elements, "name");
 		case ElementType.Circle:
-			name = unique("Circle");
+			name = unique("Circle", canvas.elements, "name");
 		case ElementType.Check:
-			name = unique("Check");
+			name = unique("Check", canvas.elements, "name");
 		case ElementType.Radio:
-			name = unique("Radio");
+			name = unique("Radio", canvas.elements, "name");
 		case ElementType.Combo:
-			name = unique("Combo");
+			name = unique("Combo", canvas.elements, "name");
 		case ElementType.Slider:
-			name = unique("Slider");
+			name = unique("Slider", canvas.elements, "name");
 			alignment = Align.Right;
 		case ElementType.TextInput:
-			name = unique("TextInput");
+			name = unique("TextInput", canvas.elements, "name");
 		case ElementType.KeyInput:
-			name = unique("KeyInput");
+			name = unique("KeyInput", canvas.elements, "name");
 		case ElementType.ProgressBar:
-			name = unique("Progress_bar");
+			name = unique("Progress_bar", canvas.elements, "name");
 		case ElementType.CProgressBar:
-			name = unique("CProgress_bar");
+			name = unique("CProgress_bar", canvas.elements, "name");
 		case ElementType.Empty:
-			name = unique("Empty");
+			name = unique("Empty", canvas.elements, "name");
 			height = 100;
 		}
 		var elem:TElement = {
@@ -239,11 +303,6 @@ class Elements {
 			rotation: 0,
 			text: "My " + name,
 			asset: "",
-			color: 0xff484848,
-			color_text: 0xffe8e7e5,
-			color_hover: 0xff3b3b3b,
-			color_press: 0xff1b1b1b,
-			color_progress: 0xffe8e7e5,
 			progress_at: 0,
 			progress_total: 100,
 			strength: 1,
@@ -403,6 +462,18 @@ class Elements {
 
 	public function onFrames(framebuffers: Array<kha.Framebuffer>): Void {
 		var framebuffer = framebuffers[0];
+
+		// Disable UI if a popup is displayed
+		if (Popup.show && ui.inputRegistered) {
+			ui.unregisterInput();
+			cui.unregisterInput();
+		} else if (!Popup.show && !ui.inputRegistered) {
+			ui.registerInput();
+			cui.registerInput();
+		}
+
+		// Update preview when choosing a color
+		if (Popup.show) hwin.redraws = 1;
 
 		if (dropPath != "") {
 			importAsset(dropPath);
@@ -676,10 +747,11 @@ class Elements {
 			if (ui.tab(htab, "Project")) {
 
 				if (ui.button("Save")) {
-
 					// Unpan
 					canvas.x = 0;
 					canvas.y = 0;
+
+					// Save canvas to file
 					#if kha_krom
 					Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
 					#elseif kha_debug_html5
@@ -690,6 +762,7 @@ class Elements {
 					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
+					// Save assets to files
 					var filesPath = Main.prefs.path.substr(0, Main.prefs.path.length - 5); // .json
 					filesPath += '.files';
 					var filesList = '';
@@ -701,6 +774,18 @@ class Elements {
 					var path = untyped __js__('require("path")');
 					var filePath = path.resolve(untyped __js__('__dirname'), filesPath);
 					try { fs.writeFileSync(filePath, filesList); }
+					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
+					#end
+
+					// Save themes to file
+					var themesPath = haxe.io.Path.join([haxe.io.Path.directory(Main.prefs.path), "_themes.json"]);
+					#if kha_krom
+					Krom.fileSaveBytes(themesPath, haxe.io.Bytes.ofString(haxe.Json.stringify(Canvas.themes)).getData());
+					#elseif kha_debug_html5
+					var fs = untyped __js__('require("fs");');
+					var path = untyped __js__('require("path")');
+					var filePath = path.resolve(untyped __js__('__dirname'), themesPath);
+					try { fs.writeFileSync(filePath, haxe.Json.stringify(Canvas.themes)); }
 					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
@@ -717,7 +802,18 @@ class Elements {
 					}
 					if (ui.isHovered) ui.tooltip("Create new canvas");
 
-					canvas.name = ui.textInput(Id.handle({text: canvas.name}), "Name", Right);
+					var handleName = Id.handle({text: canvas.name});
+					ui.textInput(handleName, "Name", Right);
+					if (handleName.changed) {
+						// Themes file is called _themes.json, so canvases should not be named like that
+						if (handleName.text == "_themes") {
+							Popup.showMessage(new Zui(ui.ops), "Sorry!", "\"_themes\" is not a valid canvas name as it is reserved!");
+							handleName.text = canvas.name;
+						} else {
+							canvas.name = handleName.text;
+						}
+					}
+
 					ui.row([1/2, 1/2]);
 
 
@@ -865,38 +961,63 @@ class Elements {
 						ui.unindent();
 					}
 					if (ui.panel(Id.handle({selected: false}), "Color")){
+						function drawColorSelection(idMult: Int, color:Null<Int>, defaultColor:Int) {
+							ui.row([1/2, 1/2]);
+
+							var handleCol = Id.handle().nest(id).nest(idMult, {color: Canvas.getColor(color, defaultColor)});
+							ui.colorField(handleCol, true);
+
+							if (handleCol.changed) {
+								color = handleCol.color;
+							}
+
+							// Follow theme color
+							if (ui.button("Reset") || color == null) {
+								color = null;
+								handleCol.color = defaultColor;
+								handleCol.changed = false;
+							}
+
+							return color;
+						}
+
 						ui.indent();
-						if (elem.type == ElementType.Text){
+						if (elem.type == ElementType.Text) {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
-						}else if (elem.type == ElementType.Button){
+							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).TEXT_COL);
+
+						} else if (elem.type == ElementType.Button) {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).BUTTON_TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
 							ui.text("On Hover:");
-							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = drawColorSelection(3, elem.color_hover, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
 							ui.text("On Pressed:");
-							elem.color_press = ui.colorWheel(Id.handle().nest(id, {color: elem.color_press}), true, null, true);
-						}else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
-							elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
-							elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle){
+							elem.color_press = drawColorSelection(4, elem.color_press, Canvas.getTheme(canvas.theme).BUTTON_PRESSED_COL);
+
+						} else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
+								  elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
+								  elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle) {
 							ui.text("Color:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
-						}else if(elem.type == ElementType.ProgressBar|| elem.type == ElementType.CProgressBar){
+							elem.color = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+
+						} else if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar) {
 							ui.text("Progress:");
-							elem.color_progress = ui.colorWheel(Id.handle().nest(id, {color: elem.color_progress}), true, null, true);
+							elem.color_progress = drawColorSelection(1, elem.color_progress, Canvas.getTheme(canvas.theme).TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
-						}else if (elem.type == ElementType.Empty){
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+
+						} else if (elem.type == ElementType.Empty) {
 							ui.text("No color for element type empty");
-						}else{
+
+						} else {
 							ui.text("Text:");
-							elem.color_text = ui.colorWheel(Id.handle().nest(id, {color: elem.color_text}), true, null, true);
+							elem.color_text = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).TEXT_COL);
 							ui.text("Background:");
-							elem.color = ui.colorWheel(Id.handle().nest(id, {color: elem.color}), true, null, true);
+							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
 							ui.text("On Hover:");
-							elem.color_hover = ui.colorWheel(Id.handle().nest(id, {color: elem.color_hover}), true, null, true);
+							elem.color_hover = drawColorSelection(3, elem.color, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
 						}
 						ui.unindent();
 					}
@@ -945,6 +1066,143 @@ class Elements {
 						// ui.button("Insert");
 						// ui.button("Remove");
 						// ui.unindent();
+					}
+				}
+			}
+
+			if (ui.tab(htab, "Themes")) {
+				// Must be accesible all over this place because when deleting themes,
+				// the color handle's child handle at that theme index must be reset.
+				var handleThemeColor = Id.handle();
+				var handleThemeName = Id.handle();
+				var iconSize = 16;
+
+				function drawList(h:zui.Zui.Handle, theme:zui.Themes.TTheme) {
+					// Highlight
+					if (selectedTheme == theme) {
+						ui.g.color = 0xff205d9c;
+						ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
+						ui.g.color = 0xffffffff;
+					}
+					// Highlight default theme
+					if (theme == Canvas.getTheme(canvas.theme)) {
+						var iconMargin = (ui.t.BUTTON_H - iconSize) / 2;
+						ui.g.drawSubImage(kha.Assets.images.icons, ui._x + iconMargin, ui._y + iconMargin, 0, 0, 16, 16);
+					}
+
+					var started = ui.getStarted();
+					// Select
+					if (started && !ui.inputDownR) {
+						selectedTheme = theme;
+					}
+
+					// Draw
+					ui._x += iconSize; // Icon offset
+					ui.text(theme.NAME);
+					ui._x -= iconSize;
+				}
+
+				for (theme in Canvas.themes) {
+					drawList(Id.handle(), theme);
+				}
+
+				ui.row([1/4, 1/4, 1/4, 1/4]);
+				if (ui.button("Add")) {
+					var newTheme = Reflect.copy(zui.Themes.light);
+					newTheme.NAME = unique("New Theme", Canvas.themes, "NAME");
+
+					Canvas.themes.push(newTheme);
+					selectedTheme = newTheme;
+				}
+
+				if (selectedTheme == null) ui.enabled = false;
+				if (ui.button("Copy")) {
+					var newTheme = Reflect.copy(selectedTheme);
+					newTheme.NAME = unique(newTheme.NAME, Canvas.themes, "NAME");
+
+					Canvas.themes.push(newTheme);
+					selectedTheme = newTheme;
+				}
+				ui.enabled = true;
+
+				if (selectedTheme == null) ui.enabled = false;
+				var hName = handleThemeName.nest(Canvas.themes.indexOf(selectedTheme));
+				if (ui.button("Rename")) {
+					hName.text = selectedTheme.NAME;
+					Popup.showCustom(
+						new Zui(ui.ops),
+						function(ui:Zui) {
+							ui.textInput(hName);
+							if (ui.button("OK")) {
+								Popup.show = false;
+								hwin.redraws = 2;
+							}
+						},
+						Std.int(ui.inputX), Std.int(ui.inputY), 200, 60);
+				}
+				if (selectedTheme != null) {
+					var name = selectedTheme.NAME;
+					if (hName.changed && selectedTheme.NAME != hName.text) {
+						name = unique(hName.text, Canvas.themes, "NAME");
+						if (canvas.theme == selectedTheme.NAME) {
+							canvas.theme = name;
+						}
+						selectedTheme.NAME = name;
+					}
+				}
+				ui.enabled = true;
+
+				if (Canvas.themes.length == 1 || selectedTheme == null) ui.enabled = false;
+				if (ui.button("Delete")) {
+					handleThemeColor.unnest(Canvas.themes.indexOf(selectedTheme));
+					handleThemeName.unnest(Canvas.themes.indexOf(selectedTheme));
+
+					Canvas.themes.remove(selectedTheme);
+
+					// Canvas default theme was deleted
+					if (Canvas.getTheme(canvas.theme) == null) {
+						canvas.theme = Canvas.themes[0].NAME;
+					}
+					selectedTheme = null;
+				}
+				ui.enabled = true;
+
+				if (selectedTheme == null) ui.enabled = false;
+				if (ui.button("Apply to Canvas")) {
+					canvas.theme = selectedTheme.NAME;
+				}
+				ui.enabled = true;
+
+				if (selectedTheme == null) {
+					ui.text("Please select a Theme!");
+				} else {
+					// A Map would be way better, but its order is not guaranteed.
+					var themeColorOptions:Array<Array<String>> = [
+						["Text", "TEXT_COL"],
+						["Elements", "BUTTON_COL", "BUTTON_TEXT_COL", "BUTTON_HOVER_COL", "BUTTON_PRESSED_COL", "ACCENT_COL", "ACCENT_HOVER_COL", "ACCENT_SELECT_COL"],
+					];
+
+					for (idxCategory in 0...themeColorOptions.length) {
+						if (ui.panel(Id.handle().nest(idxCategory, {selected: true}), themeColorOptions[idxCategory][0])) {
+							ui.indent();
+
+							var attributes = themeColorOptions[idxCategory].slice(1);
+
+							for (idxElemAttribs in 0...attributes.length) {
+								var themeColorOption = attributes[idxElemAttribs];
+								// is getField() better?
+								ui.row([2/3, 1/3]);
+								ui.text(themeColorOption);
+
+								var themeColor = Reflect.getProperty(selectedTheme, themeColorOption);
+
+								var handleCol = handleThemeColor.nest(Canvas.themes.indexOf(selectedTheme)).nest(idxCategory).nest(idxElemAttribs, {color: themeColor});
+								var col = ui.colorField(handleCol, true);
+								Reflect.setProperty(selectedTheme, themeColorOption, col);
+							}
+
+							ui.unindent();
+						}
 					}
 				}
 			}
@@ -1125,6 +1383,7 @@ class Elements {
 		lastCanvasH = canvas.height;
 
 		if (showFiles) renderFiles(g);
+		if (Popup.show) Popup.render(g);
 	}
 
 	function elemById(id: Int): TElement {
@@ -1375,6 +1634,8 @@ class Elements {
 			endElementManipulation();
 		}
 
+		if (Popup.show) Popup.update();
+
 		updateFiles();
 	}
 
@@ -1513,18 +1774,18 @@ class Elements {
 
 		g.begin(false);
 
-		uimodal.beginLayout(g, rightRect - 100, bottomRect - 30, 100);
+		uimodal.beginRegion(g, rightRect - 100, bottomRect - 30, 100);
 		if (uimodal.button("OK")) {
 			showFiles = false;
 			filesDone(path);
 		}
-		uimodal.endLayout(false);
+		uimodal.endRegion(false);
 
-		uimodal.beginLayout(g, rightRect - 200, bottomRect - 30, 100);
+		uimodal.beginRegion(g, rightRect - 200, bottomRect - 30, 100);
 		if (uimodal.button("Cancel")) {
 			showFiles = false;
 		}
-		uimodal.endLayout();
+		uimodal.endRegion();
 
 		g.end();
 	}
