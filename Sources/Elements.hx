@@ -184,18 +184,20 @@ class Elements {
 		var themesDir = haxe.io.Path.directory(Main.prefs.path);
 		var themesPath = haxe.io.Path.join([themesDir, "_themes.json"]);
 
-		kha.Assets.loadBlobFromPath(themesPath, function(b:kha.Blob) {
-			Canvas.themes = haxe.Json.parse(b.toString());
+		try {
+			kha.Assets.loadBlobFromPath(themesPath, function(b:kha.Blob) {
+				Canvas.themes = haxe.Json.parse(b.toString());
 
-			if (Canvas.themes.length == 0) {
-				Canvas.themes.push(Reflect.copy(zui.Themes.light));
-			}
-			selectedTheme = Canvas.themes[0];
-
-		}, function(a:kha.AssetError) {
+				if (Canvas.themes.length == 0) {
+					Canvas.themes.push(Reflect.copy(zui.Themes.light));
+				}
+				selectedTheme = Canvas.themes[0];
+			});
+		}
+		catch (e: Dynamic) {
 			Canvas.themes.push(Reflect.copy(zui.Themes.light));
 			selectedTheme = Canvas.themes[0];
-		});
+		}
 	}
 
 	/**
