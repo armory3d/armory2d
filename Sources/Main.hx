@@ -55,8 +55,7 @@ class Main {
 
 		var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
 		kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
-			var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", elements: [], assets: [] };
-			// var raw:TCanvas = haxe.Json.parse(cblob.toString());
+			var raw:TCanvas = haxe.Json.parse(cblob.toString());
 			inst = new Editor(raw);
 		});
 
