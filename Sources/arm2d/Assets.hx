@@ -4,6 +4,7 @@ import zui.Canvas;
 import zui.Canvas.TAsset;
 
 import arm2d.Path;
+import arm2d.ui.UIProperties;
 
 class Assets {
 
@@ -31,7 +32,7 @@ class Assets {
 				Canvas.assetMap.set(asset.id, image);
 
 				Editor.assetNames.push(name);
-				Main.inst.hwin.redraws = 2;
+				UIProperties.hwin.redraws = 2;
 			});
 		}
 		else if (isFont) {
@@ -43,7 +44,7 @@ class Assets {
 				Canvas.assetMap.set(asset.id, font);
 
 				Editor.assetNames.push(name);
-				Main.inst.hwin.redraws = 2;
+				UIProperties.hwin.redraws = 2;
 			});
 		}
 	}

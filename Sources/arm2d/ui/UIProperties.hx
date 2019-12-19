@@ -17,7 +17,9 @@ import arm2d.tools.CanvasTools;
 @:access(zui.Zui)
 class UIProperties {
 
-	public static function renderProperties(ui:Zui, hwin: Handle, width:Int, canvas:TCanvas) {
+	public static var hwin = Id.handle();
+
+	public static function renderProperties(ui:Zui, width:Int, canvas:TCanvas) {
 
 		if (ui.window(hwin, kha.System.windowWidth() - width, 0, width, kha.System.windowHeight())) {
 

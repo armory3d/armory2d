@@ -34,31 +34,11 @@ class Editor {
 	function get_toolbarw():Int {
 		return Std.int(140 * ui.SCALE());
 	}
-	var handleSize(get, null):Int;
-	inline function get_handleSize():Int {
-		return Std.int(8 * ui.SCALE());
-	}
 	public static var coffX = 70.0;
 	public static var coffY = 50.0;
 
 	var dropPath = "";
-	var currentOperation = "";
-	var isManipulating = false;
-	var transformInitInput:Vector2;
-	var transformInitPos:Vector2;
-	var transformInitRot:Float;
-	var transformInitSize:Vector2;
-	// Was the transformation editing started by dragging the mouse
-	var transformStartedMouse = false;
-	var drag = false;
-	var dragLeft = false;
-	var dragTop = false;
-	var dragRight = false;
-	var dragBottom = false;
-	var grab = false;
-	var grabX = false;
-	var grabY = false;
-	var rotate = false;
+	public static var currentOperation = "";
 	public static var assetNames:Array<String> = [""];
 	public static var dragAsset:TAsset = null;
 	var resizeCanvas = false;
@@ -81,7 +61,6 @@ class Editor {
 	var selectedFrame = 0;
 	public static var selectedTheme:zui.Themes.TTheme = null;
 	public static var selectedElem:TElement = null;
-	public var hwin = Id.handle();
 	var lastW = 0;
 	var lastH = 0;
 	var lastCanvasW = 0;
@@ -203,7 +182,7 @@ class Editor {
 		}
 
 		// Update preview when choosing a color
-		if (Popup.show) hwin.redraws = 1;
+		if (Popup.show) UIProperties.hwin.redraws = 1;
 
 		if (dropPath != "") {
 			Assets.importAsset(canvas, dropPath);
@@ -235,87 +214,7 @@ class Editor {
 		Canvas.screenH = canvas.height;
 		Canvas.draw(cui, canvas, g);
 
-		// Outline selected elem
-		if (selectedElem != null) {
-			g.color = 0xffffffff;
-			// Resize rects
-			var ex = scaled(Math.absx(canvas, selectedElem));
-			var ey = scaled(Math.absy(canvas, selectedElem));
-			var ew = scaled(selectedElem.width);
-			var eh = scaled(selectedElem.height);
-			// Element center
-			var cx = canvas.x + ex + ew / 2;
-			var cy = canvas.y + ey + eh / 2;
-			g.pushRotation(selectedElem.rotation, cx, cy);
-
-			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
-			g.color = 0xff000000;
-			g.drawRect(canvas.x + ex + 1, canvas.y + ey + 1, ew, eh);
-			g.color = 0xffffffff;
-
-			// Rotate mouse coords in opposite direction as the element
-			var rotatedInput:Vector2 = Math.rotatePoint(ui.inputX, ui.inputY, cx, cy, -selectedElem.rotation);
-
-			// Draw corner drag handles
-			for (handlePosX in 0...3) {
-				// 0 = Left, 0.5 = Center, 1 = Right
-				var handlePosX:Float = handlePosX / 2;
-
-				for (handlePosY in 0...3) {
-					// 0 = Top, 0.5 = Center, 1 = Bottom
-					var handlePosY:Float = handlePosY / 2;
-
-					if (handlePosX == 0.5 && handlePosY == 0.5) {
-						continue;
-					}
-
-					var hX = canvas.x + ex + ew * handlePosX - handleSize / 2;
-					var hY = canvas.y + ey + eh * handlePosY - handleSize / 2;
-
-					// Check if the handle is currently dragged (not necessarily hovered!)
-					var dragged = false;
-
-					if (handlePosX == 0 && dragLeft) {
-						if (handlePosY == 0 && dragTop) dragged = true;
-						else if (handlePosY == 0.5 && !(dragTop || dragBottom)) dragged = true;
-						else if (handlePosY == 1 && dragBottom) dragged = true;
-					} else if (handlePosX == 0.5 && !(dragLeft || dragRight)) {
-						if (handlePosY == 0 && dragTop) dragged = true;
-						else if (handlePosY == 1 && dragBottom) dragged = true;
-					} else if (handlePosX == 1 && dragRight) {
-						if (handlePosY == 0 && dragTop) dragged = true;
-						else if (handlePosY == 0.5 && !(dragTop || dragBottom)) dragged = true;
-						else if (handlePosY == 1 && dragBottom) dragged = true;
-					}
-					dragged = dragged && drag;
-
-
-					// Hover
-					if (rotatedInput.x > hX && rotatedInput.x < hX + handleSize || dragged) {
-						if (rotatedInput.y > hY && rotatedInput.y < hY + handleSize || dragged) {
-							g.color = 0xff205d9c;
-							g.fillRect(hX, hY, handleSize, handleSize);
-							g.color = 0xffffffff;
-						}
-					}
-
-					g.drawRect(hX, hY, handleSize, handleSize);
-				}
-			}
-
-			// Draw rotation handle
-			g.drawLine(cx, canvas.y + ey, cx, canvas.y + ey - handleSize * 2);
-
-			var rotHandleCenter = new Vector2(cx, canvas.y + ey - handleSize * 2);
-			if (rotatedInput.sub(rotHandleCenter).length <= handleSize / 2 || rotate) {
-				g.color = 0xff205d9c;
-				g.fillCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
-				g.color = 0xffffffff;
-			}
-			g.drawCircle(rotHandleCenter.x, rotHandleCenter.y, handleSize / 2);
-
-			g.popTransformation();
-		}
+		ElementController.render(g, canvas);
 
 		if (currentOperation != "") {
 			g.fontSize = Std.int(14 * ui.SCALE());
@@ -363,7 +262,7 @@ class Editor {
 			ui.tab(Id.handle(), canvas.name);
 		}
 
-		UIProperties.renderProperties(ui, hwin, uiw, canvas);
+		UIProperties.renderProperties(ui, uiw, canvas);
 
 		ui.end();
 
@@ -430,213 +329,11 @@ class Editor {
 			}
 		}
 
-		if (selectedElem != null) {
-			var elem = selectedElem;
-			var ex = scaled(Math.absx(canvas, elem));
-			var ey = scaled(Math.absy(canvas, elem));
-			var ew = scaled(elem.width);
-			var eh = scaled(elem.height);
-			var rotatedInput:Vector2 = Math.rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
-
-			if (ui.inputStarted && ui.inputDown) {
-				// Drag selected element
-				if (Math.hitbox(ui, canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, selectedElem.rotation)) {
-					drag = true;
-					// Resize
-					dragLeft = dragRight = dragTop = dragBottom = false;
-					if (rotatedInput.x > canvas.x + ex + ew - handleSize) dragRight = true;
-					else if (rotatedInput.x < canvas.x + ex + handleSize) dragLeft = true;
-					if (rotatedInput.y > canvas.y + ey + eh - handleSize) dragBottom = true;
-					else if (rotatedInput.y < canvas.y + ey + handleSize) dragTop = true;
-
-					startElementManipulation(true);
-
-				} else {
-					var rotHandleCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey - handleSize * 2);
-					var inputPos = rotatedInput.sub(rotHandleCenter);
-
-					// Rotate selected element
-					if (inputPos.length <= handleSize) {
-						rotate = true;
-						startElementManipulation(true);
-					}
-				}
-			}
-
-			if (isManipulating) {
-				hwin.redraws = 2;
-
-				// Confirm
-				if ((transformStartedMouse && ui.inputReleased) || (!transformStartedMouse && ui.inputStarted)) {
-					endElementManipulation();
-
-				// Reset
-				} else if ((ui.isKeyPressed && ui.isEscapeDown) || ui.inputStartedR) {
-					endElementManipulation(true);
-
-				} else if (drag) {
-					var transformDelta = new Vector2(ui.inputX, ui.inputY).sub(transformInitInput);
-
-					if (!transformStartedMouse) {
-						if (ui.isKeyPressed && ui.key == KeyCode.X) {
-							elem.width = Std.int(transformInitSize.x);
-							elem.height = Std.int(transformInitSize.y);
-							dragRight = true;
-							dragBottom = !dragBottom;
-						}
-						if (ui.isKeyPressed && ui.key == KeyCode.Y) {
-							elem.width = Std.int(transformInitSize.x);
-							elem.height = Std.int(transformInitSize.y);
-							dragBottom = true;
-							dragRight = !dragRight;
-						}
-					}
-
-					if (dragRight) {
-						transformDelta.x = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.x, transformInitPos.x + transformInitSize.x);
-						elem.width = Std.int(transformInitSize.x + transformDelta.x);
-					} else if (dragLeft) {
-						transformDelta.x = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.x, transformInitPos.x);
-						elem.x = transformInitPos.x + transformDelta.x;
-						elem.width = Std.int(transformInitSize.x - transformDelta.x);
-					}
-					if (dragBottom) {
-						transformDelta.y = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.y, transformInitPos.y + transformInitSize.y);
-						elem.height = Std.int(transformInitSize.y + transformDelta.y);
-					}
-					else if (dragTop) {
-						transformDelta.y = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.y, transformInitPos.y);
-						elem.y = transformInitPos.y + transformDelta.y;
-						elem.height = Std.int(transformInitSize.y - transformDelta.y);
-					}
-
-					if (elem.type != ElementType.Image) {
-						if (elem.width < 1) elem.width = 1;
-						if (elem.height < 1) elem.height = 1;
-					}
-
-					if (!dragLeft && !dragRight && !dragBottom && !dragTop) {
-						grab = true;
-						grabX = true;
-						grabY = true;
-						drag = false;
-					} else {
-						// Ensure there the delta is 0 on unused axes
-						if (!dragBottom && !dragTop) transformDelta.y = 0;
-						else if (!dragLeft && !dragRight) transformDelta.y = 0;
-
-						currentOperation = ' x: ${elem.x}  y: ${elem.y}  w: ${elem.width}  h: ${elem.height}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
-					}
-
-				} else if (grab) {
-					var transformDelta = new Vector2(ui.inputX, ui.inputY).sub(transformInitInput);
-
-					if (ui.isKeyPressed && ui.key == KeyCode.X) {
-						elem.x = transformInitPos.x;
-						elem.y = transformInitPos.y;
-						grabX = true;
-						grabY = !grabY;
-					}
-					if (ui.isKeyPressed && ui.key == KeyCode.Y) {
-						elem.x = transformInitPos.x;
-						elem.y = transformInitPos.y;
-						grabY = true;
-						grabX = !grabX;
-					}
-
-					if (grabX) {
-						transformDelta.x = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.x, transformInitPos.x);
-						elem.x = Std.int(transformInitPos.x + transformDelta.x);
-					}
-					if (grabY) {
-						transformDelta.y = Math.calculateTransformDelta(ui, gridSnapPos, gridUseRelative, gridSize, transformDelta.y, transformInitPos.y);
-						elem.y = Std.int(transformInitPos.y + transformDelta.y);
-					}
-
-					// Ensure there the delta is 0 on unused axes
-					if (!grabX) transformDelta.x = 0;
-					else if (!grabY) transformDelta.y = 0;
-
-					currentOperation = ' x: ${elem.x}  y: ${elem.y}  (dx: ${transformDelta.x}  dy: ${transformDelta.y})';
-
-				} else if (rotate) {
-					var elemCenter = new Vector2(canvas.x + ex + ew / 2, canvas.y + ey + eh / 2);
-					var inputPos = new Vector2(ui.inputX, ui.inputY).sub(elemCenter);
-
-					// inputPos.x and inputPos.y are both positive when the mouse is in the lower right
-					// corner of the elements center, so the positive x axis used for the angle calculation
-					// in atan2() is equal to the global negative y axis. That's why we have to invert the
-					// angle and add Pi to get the correct rotation. atan2() also returns an angle in the
-					// intervall (-PI, PI], so we don't have to calculate the angle % PI*2 anymore.
-					var inputAngle = -std.Math.atan2(inputPos.x, inputPos.y) + std.Math.PI;
-
-					// Ctrl toggles rotation step mode
-					if ((ui.isKeyDown && ui.key == Main.prefs.keyMap.gridInvert) != useRotationSteps) {
-						inputAngle = std.Math.round(inputAngle / rotationSteps) * rotationSteps;
-					}
-
-					elem.rotation = inputAngle;
-					currentOperation = " Rot: " + Math.roundPrecision(Math.toDegrees(inputAngle), 2) + "deg";
-				}
-			}
-
-			if (ui.isKeyPressed && !ui.isTyping) {
-				if (!grab && ui.key == Main.prefs.keyMap.grabKey){startElementManipulation(); grab = true; grabX = true; grabY = true;}
-				if (!drag && ui.key == Main.prefs.keyMap.sizeKey) {startElementManipulation(); drag = true; dragLeft = false; dragTop = false; dragRight = true; dragBottom = true;}
-				if (!rotate && ui.key == Main.prefs.keyMap.rotateKey) {startElementManipulation(); rotate = true;}
-
-				if (!isManipulating) {
-					// Move with arrows
-					if (ui.key == KeyCode.Left) gridSnapPos ? elem.x -= gridSize : elem.x--;
-					if (ui.key == KeyCode.Right) gridSnapPos ? elem.x += gridSize : elem.x++;
-					if (ui.key == KeyCode.Up) gridSnapPos ? elem.y -= gridSize : elem.y--;
-					if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
-
-					if (ui.isBackspaceDown || ui.isDeleteDown){
-						CanvasTools.removeElem(canvas, selectedElem);
-		                selectedElem = null;
-					}
-					else if (ui.key == KeyCode.D) selectedElem = CanvasTools.duplicateElem(canvas, elem);
-				}
-			}
-		} else {
-			endElementManipulation();
-		}
+		ElementController.update(ui, cui, canvas);
 
 		if (Popup.show) Popup.update();
 
 		updateFiles();
-	}
-
-	function startElementManipulation(?mousePressed=false) {
-		if (isManipulating) endElementManipulation(true);
-
-		transformInitInput = new Vector2(ui.inputX, ui.inputY);
-		transformInitPos = new Vector2(selectedElem.x, selectedElem.y);
-		transformInitSize = new Vector2(selectedElem.width, selectedElem.height);
-		transformInitRot = selectedElem.rotation;
-		transformStartedMouse = mousePressed;
-
-		isManipulating = true;
-	}
-
-	function endElementManipulation(reset=false) {
-		if (reset) {
-			selectedElem.x = transformInitPos.x;
-			selectedElem.y = transformInitPos.y;
-			selectedElem.width = Std.int(transformInitSize.x);
-			selectedElem.height = Std.int(transformInitSize.y);
-			selectedElem.rotation = transformInitRot;
-		}
-
-		isManipulating = false;
-
-		grab = false;
-		drag = false;
-		rotate = false;
-
-		transformStartedMouse = false;
-		currentOperation = "";
 	}
 
 	function updateCanvas() {
@@ -661,7 +358,7 @@ class Editor {
 			}
 		}
 
-		if (!isManipulating) {
+		if (!ElementController.isManipulating) {
 			// Pan canvas
 			if (ui.inputDownR) {
 				coffX += Std.int(ui.inputDX);
