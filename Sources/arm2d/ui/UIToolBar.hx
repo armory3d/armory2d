@@ -9,9 +9,9 @@ import arm2d.tools.CanvasTools;
 
 class UIToolBar {
 
-    public static function renderToolbar(ui:Zui, cui:Zui, canvas: TCanvas, width:Int) {
+	public static function renderToolbar(ui:Zui, cui:Zui, canvas: TCanvas, width:Int) {
 
-        if (ui.window(Id.handle(), 0, 0, width, kha.System.windowHeight())) {
+		if (ui.window(Id.handle(), 0, 0, width, kha.System.windowHeight())) {
 			ui.text("Add Elements:");
 
 			if (ui.panel(Id.handle({selected: true}), "Basic")) {
@@ -120,5 +120,5 @@ class UIToolBar {
 				ui.unindent();
 			}
 		}
-    }
+	}
 }

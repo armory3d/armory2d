@@ -266,9 +266,7 @@ class Editor {
 
 		ui.end();
 
-		if (ui.changed && !ui.inputDown) {
-			drawGrid();
-		}
+		if (ui.changed && !ui.inputDown) drawGrid();
 
 		g.begin(false);
 

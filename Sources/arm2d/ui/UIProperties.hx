@@ -122,17 +122,11 @@ class UIProperties {
 						}
 						var started = ui.getStarted();
 						// Select
-						if (started && !ui.inputDownR) {
-							Editor.selectedElem = elem;
-						}
+						if (started && !ui.inputDownR) Editor.selectedElem = elem;
 						// Parenting
 						if (started && ui.inputDownR) {
-							if (elem == Editor.selectedElem) {
-								CanvasTools.unparent(canvas, elem);
-							}
-							else {
-								CanvasTools.setParent(canvas, Editor.selectedElem, elem);
-							}
+							if (elem == Editor.selectedElem) CanvasTools.unparent(canvas, elem);
+							else CanvasTools.setParent(canvas, Editor.selectedElem, elem);
 						}
 						// Draw
 						if (elem.children != null && elem.children.length > 0) {
@@ -373,9 +367,7 @@ class UIProperties {
 
 					var started = ui.getStarted();
 					// Select
-					if (started && !ui.inputDownR) {
-						Editor.selectedTheme = theme;
-					}
+					if (started && !ui.inputDownR) Editor.selectedTheme = theme;
 
 					// Draw
 					ui._x += iconSize; // Icon offset
@@ -383,9 +375,7 @@ class UIProperties {
 					ui._x -= iconSize;
 				}
 
-				for (theme in Canvas.themes) {
-					drawList(Id.handle(), theme);
-				}
+				for (theme in Canvas.themes) drawList(Id.handle(), theme);
 
 				ui.row([1/4, 1/4, 1/4, 1/4]);
 				if (ui.button("Add")) {
@@ -449,9 +439,8 @@ class UIProperties {
 				ui.enabled = true;
 
 				if (Editor.selectedTheme == null) ui.enabled = false;
-				if (ui.button("Apply to Canvas")) {
-					canvas.theme = Editor.selectedTheme.NAME;
-				}
+				if (ui.button("Apply to Canvas")) canvas.theme = Editor.selectedTheme.NAME;
+
 				ui.enabled = true;
 
 				if (Editor.selectedTheme == null) {
@@ -520,9 +509,7 @@ class UIProperties {
 						i--;
 					}
 				}
-				else {
-					ui.text("(Drag and drop images and fonts here)", zui.Zui.Align.Center);
-				}
+				else ui.text("(Drag and drop images and fonts here)", zui.Zui.Align.Center);
 			}
 
 			if (ui.tab(htab, "Preferences")) {
