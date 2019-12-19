@@ -19,7 +19,7 @@ import arm2d.Assets;
 import arm2d.Path;
 
 @:access(zui.Zui)
-class Elements {
+class Editor {
 	var ui:Zui;
 	public var cui:Zui;
 	public var canvas:TCanvas;
@@ -593,7 +593,7 @@ class Elements {
 					if (ui.key == KeyCode.Down) gridSnapPos ? elem.y += gridSize : elem.y++;
 
 					if (ui.isBackspaceDown || ui.isDeleteDown){
-						CanvasTools.removeElem(canvas, Elements.selectedElem);
+						CanvasTools.removeElem(canvas, selectedElem);
 		                selectedElem = null;
 					}
 					else if (ui.key == KeyCode.D) selectedElem = CanvasTools.duplicateElem(canvas, elem);

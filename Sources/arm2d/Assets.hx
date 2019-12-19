@@ -30,7 +30,7 @@ class Assets {
 				canvas.assets.push(asset);
 				Canvas.assetMap.set(asset.id, image);
 
-				Elements.assetNames.push(name);
+				Editor.assetNames.push(name);
 				Main.inst.hwin.redraws = 2;
 			});
 		}
@@ -42,7 +42,7 @@ class Assets {
 				canvas.assets.push(asset);
 				Canvas.assetMap.set(asset.id, font);
 
-				Elements.assetNames.push(name);
+				Editor.assetNames.push(name);
 				Main.inst.hwin.redraws = 2;
 			});
 		}
@@ -59,18 +59,18 @@ class Assets {
 				if (Canvas.themes.length == 0) {
 					Canvas.themes.push(Reflect.copy(zui.Themes.light));
 				}
-				if(Main.inst != null) Elements.selectedTheme = Canvas.themes[0];
+				if(Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 			});
 		}
 		catch (e: Dynamic) {
 			Canvas.themes.push(Reflect.copy(zui.Themes.light));
-			if(Main.inst != null) Elements.selectedTheme = Canvas.themes[0];
+			if(Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 		}
 	}
 
 	public static function getEnumTexts():Array<String> {
 		if(Main.inst==null) return [""];
-		return Elements.assetNames.length > 0 ? Elements.assetNames : [""];
+		return Editor.assetNames.length > 0 ? Editor.assetNames : [""];
 	}
 
 	public static function getAssetIndex(canvas:TCanvas, asset:String):Int {

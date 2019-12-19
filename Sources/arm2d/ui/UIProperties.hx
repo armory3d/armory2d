@@ -67,8 +67,8 @@ class UIProperties {
 					catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
 					#end
 
-					canvas.x = Elements.coffX;
-					canvas.y = Elements.coffY;
+					canvas.x = Editor.coffX;
+					canvas.y = Editor.coffY;
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
@@ -76,7 +76,7 @@ class UIProperties {
 
 					if (ui.button("New")) {
 						canvas.elements = [];
-						Elements.selectedElem = null;
+						Editor.selectedElem = null;
 					}
 					if (ui.isHovered) ui.tooltip("Create new canvas");
 
@@ -113,7 +113,7 @@ class UIProperties {
 					function drawList(h:zui.Zui.Handle, elem:TElement) {
 						var b = false;
 						// Highlight
-						if (Elements.selectedElem == elem) {
+						if (Editor.selectedElem == elem) {
 							ui.g.color = 0xff205d9c;
 							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
 							ui.g.color = 0xffffffff;
@@ -121,15 +121,15 @@ class UIProperties {
 						var started = ui.getStarted();
 						// Select
 						if (started && !ui.inputDownR) {
-							Elements.selectedElem = elem;
+							Editor.selectedElem = elem;
 						}
 						// Parenting
 						if (started && ui.inputDownR) {
-							if (elem == Elements.selectedElem) {
+							if (elem == Editor.selectedElem) {
 								CanvasTools.unparent(canvas, elem);
 							}
 							else {
-								CanvasTools.setParent(canvas, Elements.selectedElem, elem);
+								CanvasTools.setParent(canvas, Editor.selectedElem, elem);
 							}
 						}
 						// Draw
@@ -162,32 +162,32 @@ class UIProperties {
 
 					ui.row([1/4, 1/4, 1/4, 1/4]);
 					var elems = canvas.elements;
-					if (ui.button("Up") && Elements.selectedElem != null) {
-						CanvasTools.moveElem(canvas, Elements.selectedElem, 1);
+					if (ui.button("Up") && Editor.selectedElem != null) {
+						CanvasTools.moveElem(canvas, Editor.selectedElem, 1);
 					}
 					if (ui.isHovered) ui.tooltip("Move element up");
 
-					if (ui.button("Down") && Elements.selectedElem != null) {
-						CanvasTools.moveElem(canvas, Elements.selectedElem,-1);
+					if (ui.button("Down") && Editor.selectedElem != null) {
+						CanvasTools.moveElem(canvas, Editor.selectedElem,-1);
 					}
 					if (ui.isHovered) ui.tooltip("Move element down");
 
-					if (ui.button("Remove") && Elements.selectedElem != null) {
-						CanvasTools.removeElem(canvas, Elements.selectedElem);
-						Elements.selectedElem = null;
+					if (ui.button("Remove") && Editor.selectedElem != null) {
+						CanvasTools.removeElem(canvas, Editor.selectedElem);
+						Editor.selectedElem = null;
 					}
 					if (ui.isHovered) ui.tooltip("Delete element");
 
-					if (ui.button("Duplicate") && Elements.selectedElem != null) {
-						Elements.selectedElem = CanvasTools.duplicateElem(canvas, Elements.selectedElem);
+					if (ui.button("Duplicate") && Editor.selectedElem != null) {
+						Editor.selectedElem = CanvasTools.duplicateElem(canvas, Editor.selectedElem);
 					}
 					if (ui.isHovered) ui.tooltip("Create duplicate of element");
 
 					ui.unindent();
 				}
 
-				if (Elements.selectedElem != null) {
-					var elem = Elements.selectedElem;
+				if (Editor.selectedElem != null) {
+					var elem = Editor.selectedElem;
 					var id = elem.id;
 
 					if (ui.panel(Id.handle({selected: true}), "Properties")) {
@@ -309,7 +309,7 @@ class UIProperties {
 						ui.radio(alignmentHandle, 0, "Left");
 						ui.radio(alignmentHandle, 1, "Center");
 						ui.radio(alignmentHandle, 2, "Right");
-						Elements.selectedElem.alignment = alignmentHandle.position;
+						Editor.selectedElem.alignment = alignmentHandle.position;
 
 						ui.unindent();
 					}
@@ -358,7 +358,7 @@ class UIProperties {
 
 				function drawList(h:zui.Zui.Handle, theme:zui.Themes.TTheme) {
 					// Highlight
-					if (Elements.selectedTheme == theme) {
+					if (Editor.selectedTheme == theme) {
 						ui.g.color = 0xff205d9c;
 						ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
 						ui.g.color = 0xffffffff;
@@ -372,7 +372,7 @@ class UIProperties {
 					var started = ui.getStarted();
 					// Select
 					if (started && !ui.inputDownR) {
-						Elements.selectedTheme = theme;
+						Editor.selectedTheme = theme;
 					}
 
 					// Draw
@@ -391,23 +391,23 @@ class UIProperties {
 					newTheme.NAME = CanvasTools.unique("New Theme", Canvas.themes, "NAME");
 
 					Canvas.themes.push(newTheme);
-					Elements.selectedTheme = newTheme;
+					Editor.selectedTheme = newTheme;
 				}
 
-				if (Elements.selectedTheme == null) ui.enabled = false;
+				if (Editor.selectedTheme == null) ui.enabled = false;
 				if (ui.button("Copy")) {
-					var newTheme = Reflect.copy(Elements.selectedTheme);
+					var newTheme = Reflect.copy(Editor.selectedTheme);
 					newTheme.NAME = CanvasTools.unique(newTheme.NAME, Canvas.themes, "NAME");
 
 					Canvas.themes.push(newTheme);
-					Elements.selectedTheme = newTheme;
+					Editor.selectedTheme = newTheme;
 				}
 				ui.enabled = true;
 
-				if (Elements.selectedTheme == null) ui.enabled = false;
-				var hName = handleThemeName.nest(Canvas.themes.indexOf(Elements.selectedTheme));
+				if (Editor.selectedTheme == null) ui.enabled = false;
+				var hName = handleThemeName.nest(Canvas.themes.indexOf(Editor.selectedTheme));
 				if (ui.button("Rename")) {
-					hName.text = Elements.selectedTheme.NAME;
+					hName.text = Editor.selectedTheme.NAME;
 					Popup.showCustom(
 						new Zui(ui.ops),
 						function(ui:Zui) {
@@ -419,40 +419,40 @@ class UIProperties {
 						},
 						Std.int(ui.inputX), Std.int(ui.inputY), 200, 60);
 				}
-				if (Elements.selectedTheme != null) {
-					var name = Elements.selectedTheme.NAME;
-					if (hName.changed && Elements.selectedTheme.NAME != hName.text) {
+				if (Editor.selectedTheme != null) {
+					var name = Editor.selectedTheme.NAME;
+					if (hName.changed && Editor.selectedTheme.NAME != hName.text) {
 						name = CanvasTools.unique(hName.text, Canvas.themes, "NAME");
-						if (canvas.theme == Elements.selectedTheme.NAME) {
+						if (canvas.theme == Editor.selectedTheme.NAME) {
 							canvas.theme = name;
 						}
-						Elements.selectedTheme.NAME = name;
+						Editor.selectedTheme.NAME = name;
 					}
 				}
 				ui.enabled = true;
 
-				if (Canvas.themes.length == 1 || Elements.selectedTheme == null) ui.enabled = false;
+				if (Canvas.themes.length == 1 || Editor.selectedTheme == null) ui.enabled = false;
 				if (ui.button("Delete")) {
-					handleThemeColor.unnest(Canvas.themes.indexOf(Elements.selectedTheme));
-					handleThemeName.unnest(Canvas.themes.indexOf(Elements.selectedTheme));
+					handleThemeColor.unnest(Canvas.themes.indexOf(Editor.selectedTheme));
+					handleThemeName.unnest(Canvas.themes.indexOf(Editor.selectedTheme));
 
-					Canvas.themes.remove(Elements.selectedTheme);
+					Canvas.themes.remove(Editor.selectedTheme);
 
 					// Canvas default theme was deleted
 					if (Canvas.getTheme(canvas.theme) == null) {
 						canvas.theme = Canvas.themes[0].NAME;
 					}
-					Elements.selectedTheme = null;
+					Editor.selectedTheme = null;
 				}
 				ui.enabled = true;
 
-				if (Elements.selectedTheme == null) ui.enabled = false;
+				if (Editor.selectedTheme == null) ui.enabled = false;
 				if (ui.button("Apply to Canvas")) {
-					canvas.theme = Elements.selectedTheme.NAME;
+					canvas.theme = Editor.selectedTheme.NAME;
 				}
 				ui.enabled = true;
 
-				if (Elements.selectedTheme == null) {
+				if (Editor.selectedTheme == null) {
 					ui.text("Please select a Theme!");
 				} else {
 					// A Map would be way better, but its order is not guaranteed.
@@ -473,11 +473,11 @@ class UIProperties {
 								ui.row([2/3, 1/3]);
 								ui.text(themeColorOption);
 
-								var themeColor = Reflect.getProperty(Elements.selectedTheme, themeColorOption);
+								var themeColor = Reflect.getProperty(Editor.selectedTheme, themeColorOption);
 
-								var handleCol = handleThemeColor.nest(Canvas.themes.indexOf(Elements.selectedTheme)).nest(idxCategory).nest(idxElemAttribs, {color: themeColor});
+								var handleCol = handleThemeColor.nest(Canvas.themes.indexOf(Editor.selectedTheme)).nest(idxCategory).nest(idxElemAttribs, {color: themeColor});
 								var col = ui.colorField(handleCol, true);
-								Reflect.setProperty(Elements.selectedTheme, themeColorOption, col);
+								Reflect.setProperty(Editor.selectedTheme, themeColorOption, col);
 							}
 
 							ui.unindent();
@@ -488,9 +488,9 @@ class UIProperties {
 
 			if (ui.tab(htab, "Assets")) {
 				if (ui.button("Import Asset")) {
-					Elements.showFiles = true;
-					Elements.foldersOnly = false;
-					Elements.filesDone = function(path:String) {
+					Editor.showFiles = true;
+					Editor.foldersOnly = false;
+					Editor.filesDone = function(path:String) {
 						path = StringTools.rtrim(path);
 						path = Path.toRelative(path, Main.cwd);
 						Assets.importAsset(canvas, path);
@@ -505,15 +505,15 @@ class UIProperties {
 						var asset = canvas.assets[i];
 						var isFont = StringTools.endsWith(asset.name, ".ttf");
 						if (!isFont && ui.image(Assets.getImage(asset)) == State.Started) {
-							Elements.dragAsset = asset;
+							Editor.dragAsset = asset;
 						}
 						ui.row([7/8, 1/8]);
 						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-						Elements.assetNames[i + 1] = asset.name; // assetNames[0] == ""
+						Editor.assetNames[i + 1] = asset.name; // assetNames[0] == ""
 						if (ui.button("X")) {
 							Assets.getImage(asset).unload();
 							canvas.assets.splice(i, 1);
-							Elements.assetNames.splice(i + 1, 1);
+							Editor.assetNames.splice(i + 1, 1);
 						}
 						i--;
 					}
@@ -531,7 +531,7 @@ class UIProperties {
 					ui.slider(hscale, "UI Scale", 0.5, 4.0, true);
 					if (hscale.changed && !ui.inputDown) {
 						ui.setScale(hscale.value);
-						Elements.windowW = Std.int(Elements.defaultWindowW * hscale.value);
+						Editor.windowW = Std.int(Editor.defaultWindowW * hscale.value);
 					}
 
 					Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
@@ -543,26 +543,26 @@ class UIProperties {
 					ui.indent();
 					var gsize = Id.handle({value: 20});
 					ui.slider(gsize, "Grid Size", 1, 128, true, 1);
-					Elements.gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
+					Editor.gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
 					if (ui.isHovered) ui.tooltip("Snap the element's position to the grid");
-					Elements.gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
+					Editor.gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
 					if (ui.isHovered) ui.tooltip("Snap the element's bounds to the grid");
-					Elements.gridUseRelative = ui.check(Id.handle({selected: true}), "Use Relative Grid");
+					Editor.gridUseRelative = ui.check(Id.handle({selected: true}), "Use Relative Grid");
 					if (ui.isHovered) ui.tooltip("Use a grid that's relative to the selected element");
 
 					if (gsize.changed && !ui.inputDown) {
-						Elements.gridSize = Std.int(gsize.value);
+						Editor.gridSize = Std.int(gsize.value);
 					}
 
-					Elements.useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
+					Editor.useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
 					if (ui.isHovered) ui.tooltip("Rotate elements by a fixed step size");
 					var rotStepHandle = Id.handle({value: 15});
-					if (Elements.useRotationSteps) {
+					if (Editor.useRotationSteps) {
 						ui.slider(rotStepHandle, "Rotation Step Size", 1, 180, true, 1);
 					}
 
 					if (rotStepHandle.changed && !ui.inputDown) {
-						Elements.rotationSteps = Math.toRadians(rotStepHandle.value);
+						Editor.rotationSteps = Math.toRadians(rotStepHandle.value);
 					}
 
 					ui.unindent();
