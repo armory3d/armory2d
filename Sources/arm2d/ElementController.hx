@@ -1,15 +1,20 @@
 package arm2d;
 
-import arm2d.ui.UIProperties;
-import arm2d.tools.CanvasTools;
-import kha.input.KeyCode;
-import zui.Canvas.ElementType;
-import arm2d.tools.Math;
+// Kha
 import kha.math.Vector2;
-import zui.Zui;
-import zui.Canvas.TCanvas;
+import kha.input.KeyCode;
 import kha.graphics2.Graphics;
 using kha.graphics2.GraphicsExtension;
+
+// Zui
+import zui.Zui;
+import zui.Canvas.ElementType;
+import zui.Canvas.TCanvas;
+
+// Editor
+import arm2d.tools.Math;
+import arm2d.ui.UIProperties;
+import arm2d.tools.CanvasTools;
 
 class ElementController {
 

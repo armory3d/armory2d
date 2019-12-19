@@ -1,10 +1,12 @@
 package arm2d.ui;
 
-import zui.Canvas.TCanvas;
-import zui.Canvas.ElementType;
+// Zui
 import zui.Id;
 import zui.Zui;
+import zui.Canvas.TCanvas;
+import zui.Canvas.ElementType;
 
+// Editor
 import arm2d.tools.CanvasTools;
 
 class UIToolBar {

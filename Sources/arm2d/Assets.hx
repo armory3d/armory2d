@@ -1,8 +1,9 @@
 package arm2d;
 
+// Zui
 import zui.Canvas;
-import zui.Canvas.TAsset;
 
+// Editor
 import arm2d.Path;
 import arm2d.ui.UIProperties;
 

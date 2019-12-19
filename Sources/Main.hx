@@ -1,7 +1,12 @@
 package;
 
+// Kha
 import kha.input.KeyCode;
+
+// Zui
 import zui.Canvas;
+
+// Editor
 import arm2d.Editor;
 
 class Main {

@@ -1,16 +1,16 @@
 package arm2d.ui;
 
+// Kha
 import kha.input.KeyCode;
 
-import zui.Canvas.ElementType;
-import zui.Popup;
-import zui.Canvas.TElement;
-import zui.Canvas.TCanvas;
-import zui.Zui;
+// Zui
 import zui.Id;
+import zui.Zui;
+import zui.Popup;
 import zui.Canvas;
 using zui.Ext;
 
+// Editor
 import arm2d.tools.Math;
 import arm2d.tools.CanvasTools;
 

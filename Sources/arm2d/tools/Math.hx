@@ -1,10 +1,12 @@
 package arm2d.tools;
 
+// Kha
 import kha.math.Vector2;
 
+// Zui
+import zui.Zui;
 import zui.Canvas.TCanvas;
 import zui.Canvas.TElement;
-import zui.Zui;
 
 class Math {
 

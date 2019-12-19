@@ -1,22 +1,23 @@
 package arm2d;
 
+// Kha
 import kha.math.Vector2;
 import kha.input.KeyCode;
 using kha.graphics2.GraphicsExtension;
 
-import zui.*;
+// Zui
 import zui.Zui;
-import zui.Canvas;
 import zui.Popup;
+import zui.Canvas;
 using zui.Ext;
 
-
+// Editor
+import arm2d.Path;
+import arm2d.Assets;
+import arm2d.tools.Math;
 import arm2d.ui.UIToolBar;
 import arm2d.ui.UIProperties;
 import arm2d.tools.CanvasTools;
-import arm2d.tools.Math;
-import arm2d.Assets;
-import arm2d.Path;
 
 @:access(zui.Zui)
 class Editor {

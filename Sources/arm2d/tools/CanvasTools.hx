@@ -1,11 +1,8 @@
 package arm2d.tools;
 
-import zui.Canvas;
-import zui.Canvas.TElement;
-import zui.Canvas.TCanvas;
+// Zui
 import zui.Zui;
-import zui.Zui.Align;
-import zui.Canvas.ElementType;
+import zui.Canvas;
 
 class CanvasTools {
 
