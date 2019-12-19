@@ -39,6 +39,27 @@ class ElementController {
 		return Std.int(8 * ui.SCALE());
 	}
 
+	public static function selectElement(canvas:TCanvas) {
+		// Select elem
+		var selectButton = Main.prefs.keyMap.selectMouseButton;
+		if (selectButton == "Left" && ui.inputStarted && ui.inputDown ||
+				selectButton == "Right" && ui.inputStartedR && ui.inputDownR) {
+			var i = canvas.elements.length;
+			for (elem in canvas.elements) {
+				var ex = scaled(Math.absx(canvas, elem));
+				var ey = scaled(Math.absy(canvas, elem));
+				var ew = scaled(elem.width);
+				var eh = scaled(elem.height);
+
+				if (Math.hitbox(ui, canvas.x + ex, canvas.y + ey, ew, eh, elem.rotation) &&
+						Editor.selectedElem != elem) {
+					Editor.selectedElem = elem;
+					break;
+				}
+			}
+		}
+	}
+
     public static function render(g:Graphics, canvas:TCanvas) {
 
         // Outline selected elem
