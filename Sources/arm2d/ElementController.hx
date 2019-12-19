@@ -40,6 +40,7 @@ class ElementController {
 	}
 
 	public static function selectElement(canvas:TCanvas) {
+		if(ui==null) return;
 		// Select elem
 		var selectButton = Main.prefs.keyMap.selectMouseButton;
 		if (selectButton == "Left" && ui.inputStarted && ui.inputDown ||
@@ -150,7 +151,7 @@ class ElementController {
         arm2d.ElementController.ui = ui;
         arm2d.ElementController.cui = cui;
 
-        if (Editor.selectedElem == null) {
+        if (Editor.selectedElem != null) {
 			var elem = Editor.selectedElem;
 			var ex = scaled(Math.absx(canvas, elem));
 			var ey = scaled(Math.absy(canvas, elem));
