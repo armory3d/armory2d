@@ -50,6 +50,10 @@ class Assets {
 		}
 	}
 
+	/**
+	 * Imports all themes from '_themes.json'. If the file doesn't exist, the
+	 * default light theme is used instead.
+	 */
 	public static function importThemes() {
 		var themesDir = haxe.io.Path.directory(Main.prefs.path);
 		var themesPath = haxe.io.Path.join([themesDir, "_themes.json"]);
@@ -61,9 +65,16 @@ class Assets {
 				if (Canvas.themes.length == 0) {
 					Canvas.themes.push(Reflect.copy(zui.Themes.light));
 				}
-				if(Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
+				if (Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
+
+			// Error handling for HTML5 target
+			}, function(a:kha.AssetError) {
+				Canvas.themes.push(Reflect.copy(zui.Themes.light));
+				if (Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 			});
 		}
+		// Error handling for Krom, as the failed callback for loadBlobFromPath()
+		// is currently not implemented in Krom
 		catch (e: Dynamic) {
 			Canvas.themes.push(Reflect.copy(zui.Themes.light));
 			if(Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
