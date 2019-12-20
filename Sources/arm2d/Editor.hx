@@ -37,8 +37,11 @@ class Editor {
 	function get_toolbarw():Int {
 		return Std.int(140 * ui.SCALE());
 	}
-	public static var coffX = 70.0;
-	public static var coffY = 50.0;
+
+	// Canvas offset from the editor window
+	// Should be a multiple of gridSize to ensure visual grid alignment
+	public static var coffX = 160.0;
+	public static var coffY = 40.0;
 
 	var dropPath = "";
 	public static var currentOperation = "";
@@ -120,24 +123,28 @@ class Editor {
 	}
 
 	function drawGrid() {
-		var doubleGridSize = gridSize * 2;
+		var scaledGridSize = scaled(gridSize);
+		var doubleGridSize = scaled(gridSize * 2);
+
 		var ww = kha.System.windowWidth();
 		var wh = kha.System.windowHeight();
 		var w = ww + doubleGridSize * 2;
 		var h = wh + doubleGridSize * 2;
+
 		grid = kha.Image.createRenderTarget(w, h);
 		grid.g2.begin(true, 0xff242424);
+
 		for (i in 0...Std.int(h / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(0, i * doubleGridSize, w, i * doubleGridSize);
+			grid.g2.drawLine(0, i * doubleGridSize + scaledGridSize, w, i * doubleGridSize + scaledGridSize);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(0, i * doubleGridSize + gridSize, w, i * doubleGridSize + gridSize);
+			grid.g2.drawLine(0, i * doubleGridSize, w, i * doubleGridSize);
 		}
 		for (i in 0...Std.int(w / doubleGridSize) + 1) {
 			grid.g2.color = 0xff282828;
-			grid.g2.drawLine(i * doubleGridSize, 0, i * doubleGridSize, h);
+			grid.g2.drawLine(i * doubleGridSize + scaledGridSize, 0, i * doubleGridSize + scaledGridSize, h);
 			grid.g2.color = 0xff323232;
-			grid.g2.drawLine(i * doubleGridSize + gridSize, 0, i * doubleGridSize + gridSize, h);
+			grid.g2.drawLine(i * doubleGridSize, 0, i * doubleGridSize, h);
 		}
 
 		grid.g2.end();
@@ -205,7 +212,8 @@ class Editor {
 		g.begin();
 
 		g.color = 0xffffffff;
-		g.drawImage(grid, coffX % 40 - 40, coffY % 40 - 40);
+		var doubleGridSize = scaled(gridSize * 2);
+		g.drawImage(grid, coffX % doubleGridSize - doubleGridSize, coffY % doubleGridSize - doubleGridSize);
 
 		// Canvas outline
 		canvas.x = coffX;
@@ -359,11 +367,17 @@ class Editor {
 
 			// Zoom canvas
 			if (ui.inputWheelDelta != 0) {
+				var prevZoom = zoom;
 				zoom += -ui.inputWheelDelta / 10;
 				if (zoom < 0.4) zoom = 0.4;
 				else if (zoom > 1.0) zoom = 1.0;
 				zoom = std.Math.round(zoom * 10) / 10;
-				cui.ops.scaleFactor = zoom;
+				cui.setScale(zoom);
+
+				// Update the grid only when necessary, this prevents lag from scrolling too fast
+				if (prevZoom != zoom) {
+					drawGrid();
+				}
 			}
 		}
 
