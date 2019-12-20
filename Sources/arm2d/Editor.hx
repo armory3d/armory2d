@@ -211,8 +211,15 @@ class Editor {
 		canvas.x = coffX;
 		canvas.y = coffY;
 		g.drawRect(canvas.x, canvas.y, scaled(canvas.width), scaled(canvas.height), 1.0);
+
 		// Canvas resize
-		g.drawRect(canvas.x + scaled(canvas.width) - 3, canvas.y + scaled(canvas.height) - 3, 6, 6, 1);
+		var handleSize = ElementController.handleSize;
+		if (Math.hitbox(cui, canvas.x + scaled(canvas.width) - handleSize / 2, canvas.y + scaled(canvas.height) - handleSize / 2, handleSize, handleSize)) {
+			g.color = 0xff205d9c;
+			g.fillRect(canvas.x + scaled(canvas.width) - handleSize / 2, canvas.y + scaled(canvas.height) - handleSize / 2, handleSize, handleSize);
+			g.color = 0xffffffff;
+		}
+		g.drawRect(canvas.x + scaled(canvas.width) - handleSize / 2, canvas.y + scaled(canvas.height) - handleSize / 2, handleSize, handleSize, 1);
 
 		Canvas.screenW = canvas.width;
 		Canvas.screenH = canvas.height;
@@ -361,7 +368,8 @@ class Editor {
 		}
 
 		// Canvas resize
-		if (ui.inputStarted && Math.hitbox(ui, canvas.x + scaled(canvas.width) - 3, canvas.y + scaled(canvas.height) - 3, 6, 6)) {
+		var handleSize = ElementController.handleSize;
+		if (ui.inputStarted && Math.hitbox(cui, canvas.x + scaled(canvas.width) - handleSize / 2, canvas.y + scaled(canvas.height) - handleSize / 2, handleSize, handleSize)) {
 			resizeCanvas = true;
 		}
 		if (ui.inputReleased && resizeCanvas) {
