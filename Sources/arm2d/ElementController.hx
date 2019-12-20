@@ -38,10 +38,9 @@ class ElementController {
 	static var grabY = false;
 	static var rotate = false;
 
-    static var handleSize(get, null):Int;
+    public static var handleSize(get, null):Int;
+	static inline function get_handleSize():Int { return Std.int(8 * ui.SCALE()); }
 
-	static inline function get_handleSize():Int {
-		return Std.int(8 * ui.SCALE());
 	}
 
 	public static function selectElement(canvas:TCanvas) {
@@ -149,7 +148,7 @@ class ElementController {
 
 			g.popTransformation();
 		}
-        
+
     }
 
     public static function update(ui:Zui, cui:Zui, canvas:TCanvas) {
