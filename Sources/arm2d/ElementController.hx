@@ -41,6 +41,9 @@ class ElementController {
     public static var handleSize(get, null):Int;
 	static inline function get_handleSize():Int { return Std.int(8 * ui.SCALE()); }
 
+	public static function initialize(ui: Zui, cui: Zui) {
+		ElementController.ui = ui;
+        ElementController.cui = cui;
 	}
 
 	public static function selectElement(canvas:TCanvas) {

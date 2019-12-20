@@ -90,6 +90,7 @@ class Editor {
 		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel});
 		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: Reflect.copy(Canvas.getTheme(canvas.theme))});
 		uimodal = new Zui( { font: kha.Assets.fonts.font_default, scaleFactor: Main.prefs.scaleFactor } );
+		ElementController.initialize(ui, cui);
 
 		if (Canvas.getTheme(canvas.theme) == null) {
 			Popup.showMessage(new Zui(ui.ops), "Error!",
