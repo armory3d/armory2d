@@ -13,7 +13,18 @@ class Math {
     public static inline function toDegrees(radians:Float):Float { return radians * 57.29578; }
 	public static inline function toRadians(degrees:Float):Float { return degrees * 0.0174532924; }
 
-    public static function hitbox(ui:Zui, x:Float, y:Float, w:Float, h:Float, ?rotation:Float):Bool {
+	/**
+	 * Calculates if the mouse is in the given hitbox rectangle.
+	 *
+	 * @param ui The Zui object of which this function should take the mouse position
+	 * @param x The x position of the hitbox
+	 * @param y The y position of the hitbox
+	 * @param w The width of the hitbox
+	 * @param h The width of the hitbox
+	 * @param rotation The rotation of the hitbox in radians, default = 0.0
+	 * @return Bool
+	 */
+    public static function hitbox(ui: Zui, x: Float, y: Float, w: Float, h: Float, rotation: Float = 0.0):Bool {
 		var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, x + w / 2, y + h / 2, -rotation);
 		return rotatedInput.x > x && rotatedInput.x < x + w && rotatedInput.y > y && rotatedInput.y < y + h;
 	}
@@ -72,5 +83,5 @@ class Math {
 		}
 		return value;
 	}
-    
+
 }

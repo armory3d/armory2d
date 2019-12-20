@@ -219,12 +219,12 @@ class UIProperties {
 							elem.strength = Std.int(Std.parseFloat(strs));
 						}
 						if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar){
-							var handlep = Id.handle().nest(id, {text: elem.progress_at+""});
-							var strp = ui.textInput(handlep, "Progress", Right);
+							var handlep = Id.handle().nest(id, {value: elem.progress_at});
+							var slp = ui.slider(handlep, "Progress", 0.0, elem.progress_total, true, 1);
 							var handlespt = Id.handle().nest(id, {text: elem.progress_total+""});
 							var strpt = ui.textInput(handlespt, "Total Progress", Right);
 							elem.progress_total = Std.int(Std.parseFloat(strpt));
-							elem.progress_at = Std.int(Std.parseFloat(strp));
+							elem.progress_at = Std.int(slp);
 						}
 						var handlerot = Id.handle().nest(id, {value: Math.roundPrecision(Math.toDegrees(elem.rotation == null ? 0 : elem.rotation), 2)});
 						handlerot.value = Math.roundPrecision(Math.toDegrees(elem.rotation), 2);

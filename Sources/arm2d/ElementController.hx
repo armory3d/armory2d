@@ -38,27 +38,36 @@ class ElementController {
 	static var grabY = false;
 	static var rotate = false;
 
-    static var handleSize(get, null):Int;
+    public static var handleSize(get, null):Int;
+	static inline function get_handleSize():Int { return Std.int(8 * ui.SCALE()); }
 
-	static inline function get_handleSize():Int {
-		return Std.int(8 * ui.SCALE());
+	public static function initialize(ui: Zui, cui: Zui) {
+		ElementController.ui = ui;
+        ElementController.cui = cui;
 	}
 
 	public static function selectElement(canvas:TCanvas) {
-		if(ui==null) return;
-		// Select elem
+		if (ui == null) return;
+
 		var selectButton = Main.prefs.keyMap.selectMouseButton;
 		if (selectButton == "Left" && ui.inputStarted && ui.inputDown ||
 				selectButton == "Right" && ui.inputStartedR && ui.inputDownR) {
-			var i = canvas.elements.length;
-			for (elem in canvas.elements) {
+
+			// Deselect
+			Editor.selectedElem = null;
+
+			// Elements are sorted by z position (descending), so the topmost element will get
+			// selected if multiple elements overlap each other at the mouse position
+			var sorted_elements = canvas.elements.copy();
+			sorted_elements.reverse();
+			for (elem in sorted_elements) {
 				var ex = scaled(Math.absx(canvas, elem));
 				var ey = scaled(Math.absy(canvas, elem));
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
 
-				if (Math.hitbox(ui, canvas.x + ex, canvas.y + ey, ew, eh, elem.rotation) &&
-						Editor.selectedElem != elem) {
+				if (Math.hitbox(cui, canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, elem.rotation)
+						&& Editor.selectedElem != elem) {
 					Editor.selectedElem = elem;
 					break;
 				}
@@ -149,7 +158,7 @@ class ElementController {
 
 			g.popTransformation();
 		}
-        
+
     }
 
     public static function update(ui:Zui, cui:Zui, canvas:TCanvas) {
