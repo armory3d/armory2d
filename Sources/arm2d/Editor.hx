@@ -9,6 +9,8 @@ using kha.graphics2.GraphicsExtension;
 import zui.Zui;
 import zui.Popup;
 import zui.Canvas;
+import zui.Themes;
+import zui.Id;
 using zui.Ext;
 
 // Editor
