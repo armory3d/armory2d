@@ -1,13 +1,19 @@
-package ;
+package;
 
+// Kha
 import kha.input.KeyCode;
+
+// Zui
 import zui.Canvas;
+
+// Editor
+import arm2d.Editor;
 
 class Main {
 
 	public static var prefs:TPrefs = null;
 	public static var cwd = ""; // Canvas path
-	static var inst:Elements;
+	public static var inst:Editor;
 
 	public static function main() {
 
@@ -50,13 +56,13 @@ class Main {
 		var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
 		kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
 			var raw:TCanvas = haxe.Json.parse(cblob.toString());
-			inst = new Elements(raw);
+			inst = new Editor(raw);
 		});
 
 		#else
 
 		var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", elements: [], assets: [] };
-		inst = new Elements(raw);
+		inst = new Editor(raw);
 
 		#end
 	}
