@@ -20,12 +20,19 @@ class Math {
 	 * @param x The x position of the hitbox
 	 * @param y The y position of the hitbox
 	 * @param w The width of the hitbox
-	 * @param h The width of the hitbox
+	 * @param h The height of the hitbox
 	 * @param rotation The rotation of the hitbox in radians, default = 0.0
+	 * @param center (Optional) The [x, y] coordinates of the center of rotation. If not given or null, use the center of the rectangle given by (x, y, w, h)
 	 * @return Bool
 	 */
-    public static function hitbox(ui: Zui, x: Float, y: Float, w: Float, h: Float, rotation: Float = 0.0):Bool {
-		var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, x + w / 2, y + h / 2, -rotation);
+    public static function hitbox(ui: Zui, x: Float, y: Float, w: Float, h: Float, rotation: Float = 0.0, ?center: Array<Float>):Bool {
+		if (center != null && center.length != 2) {
+			throw "arm2d.tools.Math.hitbox(): 'center' argument must consist of two values!";
+		}
+
+		if (center == null) center = [x + w / 2, y + h / 2];
+
+		var rotatedInput:Vector2 = rotatePoint(ui.inputX, ui.inputY, center[0], center[1], -rotation);
 		return rotatedInput.x > x && rotatedInput.x < x + w && rotatedInput.y > y && rotatedInput.y < y + h;
 	}
 
