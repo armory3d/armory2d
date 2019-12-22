@@ -1,10 +1,5 @@
 package arm2d;
 
-// Kha
-import kha.math.Vector2;
-import kha.input.KeyCode;
-using kha.graphics2.GraphicsExtension;
-
 // Zui
 import zui.Zui;
 import zui.Popup;
