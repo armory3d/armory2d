@@ -8,8 +8,7 @@ using kha.graphics2.GraphicsExtension;
 
 // Zui
 import zui.Zui;
-import zui.Canvas.ElementType;
-import zui.Canvas.TCanvas;
+import zui.Canvas;
 
 // Editor
 import arm2d.tools.Math;
@@ -54,6 +53,7 @@ class ElementController {
 				selectButton == "Right" && ui.inputStartedR && ui.inputDownR) {
 
 			// Deselect
+			var lastSelected = Editor.selectedElem;
 			Editor.selectedElem = null;
 
 			// Elements are sorted by z position (descending), so the topmost element will get
@@ -61,13 +61,22 @@ class ElementController {
 			var sorted_elements = canvas.elements.copy();
 			sorted_elements.reverse();
 			for (elem in sorted_elements) {
-				var ex = scaled(Math.absx(canvas, elem));
-				var ey = scaled(Math.absy(canvas, elem));
+				var anchorOffset = Canvas.getAnchorOffset(canvas, elem);
+				var ex = scaled(Math.absx(canvas, elem)) + anchorOffset[0];
+				var ey = scaled(Math.absy(canvas, elem)) + anchorOffset[1];
 				var ew = scaled(elem.width);
 				var eh = scaled(elem.height);
+				// Element center
+				var cx = canvas.x + ex + ew / 2;
+				var cy = canvas.y + ey + eh / 2;
+
+				var rotHandleX = cx - handleSize / 2;
+				var rotHandleY = canvas.y + ey - handleSize * 2 - handleSize / 2;
+				var rotHandleH = handleSize * 2 + handleSize / 2;
 
 				if (Math.hitbox(cui, canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, elem.rotation)
-						&& Editor.selectedElem != elem) {
+						|| (Math.hitbox(cui, rotHandleX, rotHandleY, handleSize, rotHandleH, elem.rotation, [cx, cy]) // Rotation handle hitbox
+						    && lastSelected == elem)) { // Don't select elements other than the currently selected by their rotation handle
 					Editor.selectedElem = elem;
 					break;
 				}
@@ -79,10 +88,11 @@ class ElementController {
 
         // Outline selected elem
 		if (Editor.selectedElem != null) {
-			g.color = 0xffffffff;
+			var anchorOffset = Canvas.getAnchorOffset(canvas, Editor.selectedElem);
+
 			// Resize rects
-			var ex = scaled(Math.absx(canvas, Editor.selectedElem));
-			var ey = scaled(Math.absy(canvas, Editor.selectedElem));
+			var ex = scaled(Math.absx(canvas, Editor.selectedElem)) + anchorOffset[0];
+			var ey = scaled(Math.absy(canvas, Editor.selectedElem)) + anchorOffset[1];
 			var ew = scaled(Editor.selectedElem.width);
 			var eh = scaled(Editor.selectedElem.height);
 			// Element center
@@ -90,6 +100,8 @@ class ElementController {
 			var cy = canvas.y + ey + eh / 2;
 			g.pushRotation(Editor.selectedElem.rotation, cx, cy);
 
+			// Draw element outline
+			g.color = 0xffffffff;
 			g.drawRect(canvas.x + ex, canvas.y + ey, ew, eh);
 			g.color = 0xff000000;
 			g.drawRect(canvas.x + ex + 1, canvas.y + ey + 1, ew, eh);
@@ -167,8 +179,10 @@ class ElementController {
 
         if (Editor.selectedElem != null) {
 			var elem = Editor.selectedElem;
-			var ex = scaled(Math.absx(canvas, elem));
-			var ey = scaled(Math.absy(canvas, elem));
+			var anchorOffset = Canvas.getAnchorOffset(canvas, elem);
+
+			var ex = scaled(Math.absx(canvas, elem)) + anchorOffset[0];
+			var ey = scaled(Math.absy(canvas, elem)) + anchorOffset[1];
 			var ew = scaled(elem.width);
 			var eh = scaled(elem.height);
 			var rotatedInput:Vector2 = Math.rotatePoint(ui.inputX, ui.inputY, canvas.x + ex + ew / 2, canvas.y + ey + eh / 2, -elem.rotation);
