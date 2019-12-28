@@ -451,8 +451,7 @@ class UIProperties {
 					var i = canvas.assets.length - 1;
 					while (i >= 0) {
 						var asset = canvas.assets[i];
-						var isFont = StringTools.endsWith(asset.name, ".ttf");
-						if (!isFont && ui.image(Assets.getImage(asset)) == State.Started) {
+						if (!Assets.isPathFont(asset.name) && ui.image(Assets.getImage(asset)) == State.Started) {
 							Editor.dragAsset = asset;
 						}
 						ui.row([7/8, 1/8]);

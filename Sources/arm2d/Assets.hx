@@ -14,17 +14,10 @@ class Assets {
 	}
 
 	public static function importAsset(canvas:TCanvas, path:String) {
-		var isImage = StringTools.endsWith(path, ".jpg") ||
-					  StringTools.endsWith(path, ".png") ||
-					  StringTools.endsWith(path, ".k") ||
-					  StringTools.endsWith(path, ".hdr");
-
-		var isFont = StringTools.endsWith(path, ".ttf");
-
 		var abspath = Path.toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
 
-		if (isImage) {
+		if (isPathImage(path)) {
 			kha.Assets.loadImageFromPath(abspath, false, function(image:kha.Image) {
 				var ar = path.split("/");
 				var name = ar[ar.length - 1];
@@ -36,7 +29,7 @@ class Assets {
 				UIProperties.hwin.redraws = 2;
 			});
 		}
-		else if (isFont) {
+		else if (isPathFont(path)) {
 			kha.Assets.loadFontFromPath(abspath, function(font:kha.Font) {
 				var ar = path.split("/");
 				var name = ar[ar.length - 1];
@@ -149,5 +142,23 @@ class Assets {
 	public static function getAssetIndex(canvas:TCanvas, asset:String):Int {
 		for (i in 0...canvas.assets.length) if (asset == canvas.assets[i].name) return i + 1; // assetNames[0] = ""
 		return 0;
+	}
+
+	/**
+	 * Returns if the given path is a path to an image file.
+	 * @param path The path of the asset
+	 * @return Bool
+	 */
+	public static function isPathImage(path: String): Bool {
+		var extension = haxe.io.Path.extension(path).toLowerCase();
+		return extension == "jpg" || extension == "png" || extension == "k" || extension == "hdr";
+	}
+	/**
+	 * Returns if the given path is a path to a font file.
+	 * @param path The path of the asset
+	 * @return Bool
+	 */
+	public static inline function isPathFont(path: String): Bool {
+		return haxe.io.Path.extension(path).toLowerCase() == "ttf";
 	}
 }
