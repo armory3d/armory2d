@@ -57,6 +57,7 @@ class Assets {
 	public static function importThemes() {
 		var themesDir = haxe.io.Path.directory(Main.prefs.path);
 		var themesPath = haxe.io.Path.join([themesDir, "_themes.json"]);
+		themesPath = kha.System.systemId == "Windows" ? StringTools.replace(themesPath, "/", "\\") : themesPath;
 
 		try {
 			kha.Assets.loadBlobFromPath(themesPath, function(b:kha.Blob) {
