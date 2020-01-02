@@ -448,21 +448,35 @@ class UIProperties {
 				if (canvas.assets.length > 0) {
 					ui.text("(Drag and drop assets to canvas)", zui.Zui.Align.Center);
 
-					var i = canvas.assets.length - 1;
-					while (i >= 0) {
-						var asset = canvas.assets[i];
-						if (!Assets.isPathFont(asset.name) && ui.image(Assets.getImage(asset)) == State.Started) {
-							Editor.dragAsset = asset;
+					if (ui.panel(Id.handle({selected: true}), "Imported Assets")) {
+						ui.indent();
+
+						var i = canvas.assets.length - 1;
+						while (i >= 0) {
+							var asset = canvas.assets[i];
+							if (!Assets.isPathFont(asset.name) && ui.image(Assets.getImage(asset)) == State.Started) {
+								Editor.dragAsset = asset;
+							} else if (Assets.isPathFont(asset.name)) {
+								var oldFont = ui.ops.font;
+								var oldFontSize = ui.fontSize;
+								ui.ops.font = Assets.getFont(asset);
+								ui.fontSize = Std.int(32 * ui.SCALE());
+								ui.text(asset.name);
+								ui.ops.font = oldFont;
+								ui.fontSize = oldFontSize;
+							}
+							ui.row([7/8, 1/8]);
+							asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
+							Editor.assetNames[i + 1] = asset.name; // assetNames[0] == ""
+							if (ui.button("X")) {
+								Assets.getImage(asset).unload();
+								canvas.assets.splice(i, 1);
+								Editor.assetNames.splice(i + 1, 1);
+							}
+							i--;
 						}
-						ui.row([7/8, 1/8]);
-						asset.name = ui.textInput(Id.handle().nest(asset.id, {text: asset.name}), "", Right);
-						Editor.assetNames[i + 1] = asset.name; // assetNames[0] == ""
-						if (ui.button("X")) {
-							Assets.getImage(asset).unload();
-							canvas.assets.splice(i, 1);
-							Editor.assetNames.splice(i + 1, 1);
-						}
-						i--;
+
+						ui.unindent();
 					}
 				}
 				else ui.text("(Drag and drop images and fonts here)", zui.Zui.Align.Center);

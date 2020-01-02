@@ -13,6 +13,10 @@ class Assets {
 		return Canvas.assetMap.get(asset.id);
 	}
 
+	public static function getFont(asset:TAsset):kha.Font {
+		return Canvas.assetMap.get(asset.id);
+	}
+
 	public static function importAsset(canvas:TCanvas, path:String) {
 		var abspath = Path.toAbsolute(path, Main.cwd);
 		abspath = kha.System.systemId == "Windows" ? StringTools.replace(abspath, "/", "\\") : abspath;
