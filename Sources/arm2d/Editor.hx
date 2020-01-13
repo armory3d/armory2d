@@ -91,7 +91,7 @@ class Editor {
 		ElementController.initialize(ui, cui);
 
 		if (Canvas.getTheme(canvas.theme) == null) {
-			Popup.showMessage(new Zui(ui.ops), "Error!",
+			Popup.showMessage(new Zui(ui.ops), "Warning!",
 				'Theme "${canvas.theme}" was not found!'
 				+ '\nUsing first theme in list instead: "${Canvas.themes[0].NAME}"');
 			canvas.theme = Canvas.themes[0].NAME;
