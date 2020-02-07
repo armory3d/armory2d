@@ -86,7 +86,7 @@ class UIProperties {
 						// Draw
 						if (elem.children != null && elem.children.length > 0) {
 							ui.row([1/13, 12/13]);
-							b = ui.panel(h.nest(elem.id, {selected: true}), "", true);
+							b = ui.panel(h.nest(elem.id, {selected: true}), "", true, false, false);
 							ui.text(elem.name);
 						}
 						else {
