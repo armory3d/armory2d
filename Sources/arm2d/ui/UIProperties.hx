@@ -52,8 +52,6 @@ class UIProperties {
 					}
 
 					ui.row([1/2, 1/2]);
-
-
 					var handlecw = Id.handle({text: canvas.width + ""});
 					var handlech = Id.handle({text: canvas.height + ""});
 					handlecw.text = canvas.width + "";
@@ -74,7 +72,7 @@ class UIProperties {
 						// Highlight
 						if (Editor.selectedElem == elem) {
 							ui.g.color = 0xff205d9c;
-							ui.g.fillRect(0, ui._y, ui._windowW, ui.t.ELEMENT_H * ui.SCALE());
+							ui.g.fillRect(ui._x, ui._y, ui._w, ui.t.ELEMENT_H * ui.SCALE());
 							ui.g.color = 0xffffffff;
 						}
 						var started = ui.getStarted();
@@ -108,33 +106,35 @@ class UIProperties {
 							}
 						}
 					}
-					for (i in 0...canvas.elements.length) {
-						var elem = canvas.elements[canvas.elements.length - 1 - i];
-						if (elem.parent == null) drawList(Id.handle(), elem);
-					}
 
-					ui.row([1/4, 1/4, 1/4, 1/4]);
-					var elems = canvas.elements;
-					if (ui.button("Up") && Editor.selectedElem != null) {
-						CanvasTools.moveElem(canvas, Editor.selectedElem, 1);
-					}
-					if (ui.isHovered) ui.tooltip("Move element up");
+					if (canvas.elements.length > 0) {
+						for (i in 0...canvas.elements.length) {
+							var elem = canvas.elements[canvas.elements.length - 1 - i];
+							if (elem.parent == null) drawList(Id.handle(), elem);
+						}
 
-					if (ui.button("Down") && Editor.selectedElem != null) {
-						CanvasTools.moveElem(canvas, Editor.selectedElem,-1);
-					}
-					if (ui.isHovered) ui.tooltip("Move element down");
+						ui.row([1/4, 1/4, 1/4, 1/4]);
+						if (ui.button("Up") && Editor.selectedElem != null) {
+							CanvasTools.moveElem(canvas, Editor.selectedElem, 1);
+						}
+						if (ui.isHovered) ui.tooltip("Move element up");
 
-					if (ui.button("Remove") && Editor.selectedElem != null) {
-						CanvasTools.removeElem(canvas, Editor.selectedElem);
-						Editor.selectedElem = null;
-					}
-					if (ui.isHovered) ui.tooltip("Delete element");
+						if (ui.button("Down") && Editor.selectedElem != null) {
+							CanvasTools.moveElem(canvas, Editor.selectedElem,-1);
+						}
+						if (ui.isHovered) ui.tooltip("Move element down");
 
-					if (ui.button("Duplicate") && Editor.selectedElem != null) {
-						Editor.selectedElem = CanvasTools.duplicateElem(canvas, Editor.selectedElem);
+						if (ui.button("Remove") && Editor.selectedElem != null) {
+							CanvasTools.removeElem(canvas, Editor.selectedElem);
+							Editor.selectedElem = null;
+						}
+						if (ui.isHovered) ui.tooltip("Delete element");
+
+						if (ui.button("Duplicate") && Editor.selectedElem != null) {
+							Editor.selectedElem = CanvasTools.duplicateElem(canvas, Editor.selectedElem);
+						}
+						if (ui.isHovered) ui.tooltip("Create duplicate of element");
 					}
-					if (ui.isHovered) ui.tooltip("Create duplicate of element");
 
 					ui.unindent();
 				}
@@ -407,6 +407,7 @@ class UIProperties {
 					var themeColorOptions:Array<Array<String>> = [
 						["Text", "TEXT_COL"],
 						["Elements", "BUTTON_COL", "BUTTON_TEXT_COL", "BUTTON_HOVER_COL", "BUTTON_PRESSED_COL", "ACCENT_COL", "ACCENT_HOVER_COL", "ACCENT_SELECT_COL"],
+						["Other", "PANEL_BG_COL"],
 					];
 
 					for (idxCategory in 0...themeColorOptions.length) {
