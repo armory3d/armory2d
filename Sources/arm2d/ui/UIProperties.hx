@@ -60,7 +60,9 @@ class UIProperties {
 					var strh = ui.textInput(handlech, "Height", Right);
 					canvas.width = Std.parseInt(strw);
 					canvas.height = Std.parseInt(strh);
-
+					
+					canvas.fullscreen = ui.check(Id.handle({selected: canvas.fullscreen == null ? false : canvas.fullscreen}), "Fullscreen");
+					
 					ui.unindent();
 				}
 
@@ -86,7 +88,7 @@ class UIProperties {
 						// Draw
 						if (elem.children != null && elem.children.length > 0) {
 							ui.row([1/13, 12/13]);
-							b = ui.panel(h.nest(elem.id, {selected: true}), "", true, false, false);
+							b = ui.panel(h.nest(elem.id, {selected: true}), "", false);
 							ui.text(elem.name);
 						}
 						else {
