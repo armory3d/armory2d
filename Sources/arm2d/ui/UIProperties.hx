@@ -245,11 +245,11 @@ class UIProperties {
 
 						} else {
 							ui.text("Text:");
-							elem.color_text = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).TEXT_COL);
+							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).TEXT_COL);
 							ui.text("Background:");
 							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
 							ui.text("On Hover:");
-							elem.color_hover = drawColorSelection(3, elem.color, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
+							elem.color_hover = drawColorSelection(3, elem.color_hover, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
 						}
 						ui.unindent();
 					}
