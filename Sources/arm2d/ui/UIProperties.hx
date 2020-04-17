@@ -251,7 +251,7 @@ class UIProperties {
 								elem.color_hover = drawColorSelection(3, elem.color_hover, canvasTheme.BUTTON_HOVER_COL);
 
 							default:
-								ui.text("No color for element type empty");
+								ui.text("This element type has no color settings!");
 
 						}
 						ui.unindent();
