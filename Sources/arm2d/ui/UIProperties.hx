@@ -193,6 +193,8 @@ class UIProperties {
 						ui.unindent();
 					}
 					if (ui.panel(Id.handle({selected: false}), "Color")){
+						ui.indent();
+
 						function drawColorSelection(idMult: Int, color:Null<Int>, defaultColor:Int) {
 							ui.row([1/2, 1/2]);
 
@@ -213,43 +215,44 @@ class UIProperties {
 							return color;
 						}
 
-						ui.indent();
-						if (elem.type == ElementType.Text) {
-							ui.text("Text:");
-							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).TEXT_COL);
+						var canvasTheme = Canvas.getTheme(canvas.theme);
 
-						} else if (elem.type == ElementType.Button) {
-							ui.text("Text:");
-							elem.color_text = drawColorSelection(1, elem.color_text, Canvas.getTheme(canvas.theme).BUTTON_TEXT_COL);
-							ui.text("Background:");
-							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
-							ui.text("On Hover:");
-							elem.color_hover = drawColorSelection(3, elem.color_hover, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
-							ui.text("On Pressed:");
-							elem.color_press = drawColorSelection(4, elem.color_press, Canvas.getTheme(canvas.theme).BUTTON_PRESSED_COL);
+						switch(elem.type) {
+							case Text:
+								ui.text("Text:");
+								elem.color_text = drawColorSelection(1, elem.color_text, canvasTheme.TEXT_COL);
 
-						} else if (elem.type == ElementType.FRectangle || elem.type == ElementType.FCircle ||
-									elem.type == ElementType.Rectangle || elem.type == ElementType.Circle ||
-									elem.type == ElementType.Triangle || elem.type == ElementType.FTriangle) {
-							ui.text("Color:");
-							elem.color = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+							case Button:
+								ui.text("Text:");
+								elem.color_text = drawColorSelection(1, elem.color_text, canvasTheme.BUTTON_TEXT_COL);
+								ui.text("Background:");
+								elem.color = drawColorSelection(2, elem.color, canvasTheme.BUTTON_COL);
+								ui.text("On Hover:");
+								elem.color_hover = drawColorSelection(3, elem.color_hover, canvasTheme.BUTTON_HOVER_COL);
+								ui.text("On Pressed:");
+								elem.color_press = drawColorSelection(4, elem.color_press, canvasTheme.BUTTON_PRESSED_COL);
 
-						} else if (elem.type == ElementType.ProgressBar || elem.type == ElementType.CProgressBar) {
-							ui.text("Progress:");
-							elem.color_progress = drawColorSelection(1, elem.color_progress, Canvas.getTheme(canvas.theme).TEXT_COL);
-							ui.text("Background:");
-							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
+							case Rectangle, FRectangle, Circle, FCircle, Triangle, FTriangle:
+								ui.text("Color:");
+								elem.color = drawColorSelection(1, elem.color, canvasTheme.BUTTON_COL);
 
-						} else if (elem.type == ElementType.Empty) {
-							ui.text("No color for element type empty");
+							case ProgressBar, CProgressBar:
+								ui.text("Progress:");
+								elem.color_progress = drawColorSelection(1, elem.color_progress, canvasTheme.TEXT_COL);
+								ui.text("Background:");
+								elem.color = drawColorSelection(2, elem.color, canvasTheme.BUTTON_COL);
 
-						} else {
-							ui.text("Text:");
-							elem.color_text = drawColorSelection(1, elem.color, Canvas.getTheme(canvas.theme).TEXT_COL);
-							ui.text("Background:");
-							elem.color = drawColorSelection(2, elem.color, Canvas.getTheme(canvas.theme).BUTTON_COL);
-							ui.text("On Hover:");
-							elem.color_hover = drawColorSelection(3, elem.color, Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL);
+							case Check, TextInput, KeyInput, Combo, Slider:
+								ui.text("Text:");
+								elem.color_text = drawColorSelection(1, elem.color_text, canvasTheme.TEXT_COL);
+								ui.text("Background:");
+								elem.color = drawColorSelection(2, elem.color, canvasTheme.BUTTON_COL);
+								ui.text("On Hover:");
+								elem.color_hover = drawColorSelection(3, elem.color_hover, canvasTheme.BUTTON_HOVER_COL);
+
+							default:
+								ui.text("This element type has no color settings!");
+
 						}
 						ui.unindent();
 					}
