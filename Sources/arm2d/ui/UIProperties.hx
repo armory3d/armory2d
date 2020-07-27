@@ -499,6 +499,13 @@ class UIProperties {
 
 					Main.prefs.window_vsync = ui.check(Id.handle({selected: true}), "VSync");
 
+					var hpath = Id.handle({text:""});
+					ui.text("Current working file:");
+					ui.textInput(hpath);
+					if(hpath.changed){
+						Main.prefs.path = hpath.text;
+					}
+
 					ui.unindent();
 				}
 
