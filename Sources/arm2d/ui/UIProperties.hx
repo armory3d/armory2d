@@ -26,8 +26,21 @@ class UIProperties {
 			var htab = Id.handle();
 			if (ui.tab(htab, "Project")) {
 
+				var hpath = Id.handle({text:""});
+				ui.textInput(hpath,"Current file");
+				if(hpath.changed){
+					Main.prefs.path = hpath.text;
+				}
+
 				if (ui.button("Save")) {
 					Assets.save(canvas);
+				}
+
+				if(ui.button("Load")){
+					Assets.load(function(c:TCanvas){
+						Main.inst.canvas = c;
+						hwin.redraws = 2;
+					});
 				}
 
 				if (ui.panel(Id.handle({selected: false}), "Canvas")) {
@@ -40,6 +53,7 @@ class UIProperties {
 					if (ui.isHovered) ui.tooltip("Create new canvas");
 
 					var handleName = Id.handle({text: canvas.name});
+					handleName.text = canvas.name;
 					ui.textInput(handleName, "Name", Right);
 					if (handleName.changed) {
 						// Themes file is called _themes.json, so canvases should not be named like that
