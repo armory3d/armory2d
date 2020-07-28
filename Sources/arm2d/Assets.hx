@@ -92,6 +92,13 @@ class Assets {
 		canvas.y = Editor.coffY;
 	}
 
+	public static function load(done:TCanvas->Void){
+		kha.Assets.loadBlobFromPath(Main.prefs.path,function(b:kha.Blob){
+			var canvas:TCanvas = haxe.Json.parse(b.toString());
+			done(canvas);
+		});
+	}
+	
 	static function saveCanvas(canvas: TCanvas) {
 		#if kha_krom
 		Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());
