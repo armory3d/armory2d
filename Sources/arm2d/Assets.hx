@@ -136,10 +136,10 @@ class Assets {
 
 	#if kha_debug_html5
 	static function html5WriteFile(filePath: String, data: String) {
-		var fs = untyped __js__('require("fs");');
-		var path = untyped __js__('require("path")');
+		var fs = js.Syntax.code('require("fs");');
+		var path = js.Syntax.code('require("path")');
 
-		var filePath = path.resolve(untyped __js__('__dirname'), filePath);
+		var filePath = path.resolve(js.Syntax.code('__dirname'), filePath);
 
 		try { fs.writeFileSync(filePath, data); }
 		catch (x: Dynamic) { trace('saving "${filePath}" failed'); }
