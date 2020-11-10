@@ -52,18 +52,21 @@ class Main {
 		var ar = prefs.path.split("/");
 		ar.pop();
 		cwd = ar.join("/");
-
-		var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
-		kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
-			var raw:TCanvas = haxe.Json.parse(cblob.toString());
+		
+		if(cwd != ""){
+			var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
+			kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
+				var raw:TCanvas = haxe.Json.parse(cblob.toString());
+				inst = new Editor(raw);
+			});
+		}
+		else {
+			prefs.path = Krom.getFilesLocation();
+		#end
+			var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", elements: [], assets: [] };
 			inst = new Editor(raw);
-		});
-
-		#else
-
-		var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", elements: [], assets: [] };
-		inst = new Editor(raw);
-
+		#if kha_krom
+		}
 		#end
 	}
 
