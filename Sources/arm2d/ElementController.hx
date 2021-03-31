@@ -81,6 +81,8 @@ class ElementController {
 					break;
 				}
 			}
+			// force properties redraw to show selection
+			UIProperties.hwin.redraws = 2;
 		}
 	}
 
