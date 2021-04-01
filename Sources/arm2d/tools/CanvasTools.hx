@@ -47,6 +47,8 @@ class CanvasTools {
 			name = unique("TextInput", canvas.elements, "name");
 		case ElementType.KeyInput:
 			name = unique("KeyInput", canvas.elements, "name");
+		case ElementType.TextArea:
+			name = unique("TextArea", canvas.elements, "name");
 		case ElementType.ProgressBar:
 			name = unique("Progress_bar", canvas.elements, "name");
 		case ElementType.CProgressBar:
