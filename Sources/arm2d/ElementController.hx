@@ -36,6 +36,7 @@ class ElementController {
 	static var grabX = false;
 	static var grabY = false;
 	static var rotate = false;
+	static var newElementSelected = false;
 
     public static var handleSize(get, null):Int;
 	static inline function get_handleSize():Int { return Std.int(8 * ui.SCALE()); }
@@ -55,6 +56,8 @@ class ElementController {
 			// Deselect
 			var lastSelected = Editor.selectedElem;
 			Editor.selectedElem = null;
+
+			newElementSelected = false;
 
 			// Elements are sorted by z position (descending), so the topmost element will get
 			// selected if multiple elements overlap each other at the mouse position
@@ -78,6 +81,9 @@ class ElementController {
 						|| (Math.hitbox(cui, rotHandleX, rotHandleY, handleSize, rotHandleH, elem.rotation, [cx, cy]) // Rotation handle hitbox
 						    && lastSelected == elem)) { // Don't select elements other than the currently selected by their rotation handle
 					Editor.selectedElem = elem;
+
+					if (lastSelected != elem)
+						newElementSelected = true;
 					break;
 				}
 			}
@@ -176,6 +182,9 @@ class ElementController {
     public static function update(ui:Zui, cui:Zui, canvas:TCanvas) {
         arm2d.ElementController.ui = ui;
         arm2d.ElementController.cui = cui;
+
+		if (newElementSelected)
+			return;
 
         if (Editor.selectedElem != null) {
 			var elem = Editor.selectedElem;
