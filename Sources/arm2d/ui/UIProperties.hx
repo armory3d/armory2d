@@ -354,7 +354,7 @@ class UIProperties {
 
 				ui.row([1/4, 1/4, 1/4, 1/4]);
 				if (ui.button("Add")) {
-					var newTheme = Reflect.copy(zui.Themes.light);
+					var newTheme = Reflect.copy(armory.ui.Themes.light);
 					newTheme.NAME = CanvasTools.unique("New Theme", Canvas.themes, "NAME");
 
 					Canvas.themes.push(newTheme);

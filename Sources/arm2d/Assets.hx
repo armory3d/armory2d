@@ -61,20 +61,20 @@ class Assets {
 				Canvas.themes = haxe.Json.parse(b.toString());
 
 				if (Canvas.themes.length == 0) {
-					Canvas.themes.push(Reflect.copy(zui.Themes.light));
+					Canvas.themes.push(Reflect.copy(armory.ui.Themes.light));
 				}
 				if (Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 
 			// Error handling for HTML5 target
 			}, function(a:kha.AssetError) {
-				Canvas.themes.push(Reflect.copy(zui.Themes.light));
+				Canvas.themes.push(Reflect.copy(armory.ui.Themes.light));
 				if (Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 			});
 		}
 		// Error handling for Krom, as the failed callback for loadBlobFromPath()
 		// is currently not implemented in Krom
 		catch (e: Dynamic) {
-			Canvas.themes.push(Reflect.copy(zui.Themes.light));
+			Canvas.themes.push(Reflect.copy(armory.ui.Themes.light));
 			if(Main.inst != null) Editor.selectedTheme = Canvas.themes[0];
 		}
 	}
