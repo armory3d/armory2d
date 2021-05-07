@@ -2,11 +2,11 @@ package arm2d;
 
 // Zui
 import zui.Zui;
-import zui.Popup;
-import zui.Canvas;
 import zui.Themes;
 import zui.Id;
 using zui.Ext;
+import armory.ui.Popup;
+import armory.ui.Canvas;
 
 // Editor
 import arm2d.Path;

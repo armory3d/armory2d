@@ -5,8 +5,8 @@ import kha.math.Vector2;
 
 // Zui
 import zui.Zui;
-import zui.Canvas.TCanvas;
-import zui.Canvas.TElement;
+import armory.ui.Canvas.TCanvas;
+import armory.ui.Canvas.TElement;
 
 class Math {
 

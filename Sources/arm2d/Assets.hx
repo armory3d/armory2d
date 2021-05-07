@@ -1,7 +1,7 @@
 package arm2d;
 
 // Zui
-import zui.Canvas;
+import armory.ui.Canvas;
 
 // Editor
 import arm2d.Path;
@@ -98,7 +98,7 @@ class Assets {
 			done(canvas);
 		});
 	}
-	
+
 	static function saveCanvas(canvas: TCanvas) {
 		#if kha_krom
 		Krom.fileSaveBytes(Main.prefs.path, haxe.io.Bytes.ofString(haxe.Json.stringify(canvas)).getData());

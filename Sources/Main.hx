@@ -4,7 +4,7 @@ package;
 import kha.input.KeyCode;
 
 // Zui
-import zui.Canvas;
+import armory.ui.Canvas;
 
 // Editor
 import arm2d.Editor;
@@ -52,7 +52,7 @@ class Main {
 		var ar = prefs.path.split("/");
 		ar.pop();
 		cwd = ar.join("/");
-		
+
 		if(cwd != ""){
 			var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
 			kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {

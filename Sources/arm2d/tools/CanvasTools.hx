@@ -2,7 +2,7 @@ package arm2d.tools;
 
 // Zui
 import zui.Zui;
-import zui.Canvas;
+import armory.ui.Canvas;
 
 class CanvasTools {
 

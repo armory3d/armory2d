@@ -3,8 +3,8 @@ package arm2d.ui;
 // Zui
 import zui.Id;
 import zui.Zui;
-import zui.Canvas.TCanvas;
-import zui.Canvas.ElementType;
+import armory.ui.Canvas.TCanvas;
+import armory.ui.Canvas.ElementType;
 
 // Editor
 import arm2d.tools.CanvasTools;

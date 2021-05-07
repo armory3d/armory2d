@@ -8,7 +8,7 @@ using kha.graphics2.GraphicsExtension;
 
 // Zui
 import zui.Zui;
-import zui.Canvas;
+import armory.ui.Canvas;
 
 // Editor
 import arm2d.tools.Math;

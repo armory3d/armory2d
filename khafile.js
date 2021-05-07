@@ -4,5 +4,6 @@ project.addSources('Sources');
 project.addAssets('Assets/**/*.png');
 project.addAssets('Assets/**/*.ttf');
 project.addLibrary('zui');
+project.addLibrary('armory');
 
 resolve(project);

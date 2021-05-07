@@ -6,9 +6,10 @@ import kha.input.KeyCode;
 // Zui
 import zui.Id;
 import zui.Zui;
-import zui.Popup;
-import zui.Canvas;
+import armory.ui.Popup;
+import armory.ui.Canvas;
 using zui.Ext;
+using armory.ui.Ext;
 
 // Editor
 import arm2d.tools.Math;
