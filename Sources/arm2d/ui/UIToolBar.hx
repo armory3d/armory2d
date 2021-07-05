@@ -19,18 +19,9 @@ class UIToolBar {
 			if (ui.panel(Id.handle({selected: true}), "Basic")) {
 				ui.indent();
 
-				if (ui.button("Empty")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Empty);
-				}
-				if (ui.isHovered) ui.tooltip("Creates empty element");
-				if (ui.button("Text")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Text);
-				}
-				if (ui.isHovered) ui.tooltip("Create text element");
-				if (ui.button("Image")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Image);
-				}
-				if (ui.isHovered) ui.tooltip("Creates image element");
+				drawToolbarItem(ui, cui, canvas, "Empty", Empty, "Create an empty element");
+				drawToolbarItem(ui, cui, canvas, "Text", Text, "Create a text element");
+				drawToolbarItem(ui, cui, canvas, "Image", Image, "Create an image element");
 
 				ui.unindent();
 			}
@@ -40,18 +31,9 @@ class UIToolBar {
 			if (ui.panel(Id.handle({selected: true}), "Buttons")){
 				ui.indent();
 
-				if (ui.button("Button")) {
-				Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Button);
-				}
-				if (ui.isHovered) ui.tooltip("Creates button element");
-				if (ui.button("Check")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Check);
-				}
-				if (ui.isHovered) ui.tooltip("Creates check box element");
-				if (ui.button("Radio")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Radio);
-				}
-				if (ui.isHovered) ui.tooltip("Creates inline-radio element");
+				drawToolbarItem(ui, cui, canvas, "Button", Button, "Create a button element");
+				drawToolbarItem(ui, cui, canvas, "Check", Check, "Create a checkbox element");
+				drawToolbarItem(ui, cui, canvas, "Radio", Radio, "Create a inline-radio element");
 
 				ui.unindent();
 			}
@@ -59,72 +41,44 @@ class UIToolBar {
 			if (ui.panel(Id.handle({selected: true}), "Inputs")){
 				ui.indent();
 
-				if (ui.button("Text Input")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.TextInput);
-				}
-				if (ui.isHovered) ui.tooltip("Creates text input element");
-				if (ui.button("Text Area")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.TextArea);
-				}
-				if (ui.isHovered) ui.tooltip("Creates text area element");
-				if (ui.button("Key Input")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.KeyInput);
-				}
-				if (ui.isHovered) ui.tooltip("Creates key input element");
-				if (ui.button("Combo Box")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Combo);
-				}
-				if (ui.isHovered) ui.tooltip("Creates combo box element");
-				if (ui.button("Slider")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Slider);
-				}
-				if (ui.isHovered) ui.tooltip("Creates slider element");
+				drawToolbarItem(ui, cui, canvas, "Text Input", TextInput, "Create a text input element");
+				drawToolbarItem(ui, cui, canvas, "Text Area", TextArea, "Create a text area element");
+				drawToolbarItem(ui, cui, canvas, "Key Input", KeyInput, "Create a key input element");
+				drawToolbarItem(ui, cui, canvas, "Combo Box", Combo, "Create a combo box element");
+				drawToolbarItem(ui, cui, canvas, "Slider", Slider, "Create a slider element");
 
 				ui.unindent();
 			}
 
 			if (ui.panel(Id.handle({selected: true}), "Shapes")){
 				ui.indent();
-				if (ui.button("Rect")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Rectangle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates rectangle shaped element");
-				if (ui.button("Fill Rect")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.FRectangle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates filled rectangle shaped element");
-				if (ui.button("Circle")){
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Circle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates circle shaped element");
-				if (ui.button("Fill Circle")){
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.FCircle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates filled circle shaped element");
-				if (ui.button("Triangle")){
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.Triangle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates triangle shaped element");
-				if (ui.button("Fill Triangle")){
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.FTriangle);
-				}
-				if (ui.isHovered) ui.tooltip("Creates filled triangle shaped element");
+
+				drawToolbarItem(ui, cui, canvas, "Rect", Rectangle, "Create a rectangle shape element");
+				drawToolbarItem(ui, cui, canvas, "Fill Rect", FRectangle, "Create a filled rectangle shape element");
+				drawToolbarItem(ui, cui, canvas, "Circle", Circle, "Create a circle shape element");
+				drawToolbarItem(ui, cui, canvas, "Fill Circle", FCircle, "Create a filled circle shape element");
+				drawToolbarItem(ui, cui, canvas, "Triangle", Triangle, "Create a triangle shape element");
+				drawToolbarItem(ui, cui, canvas, "Fill Triangle", FTriangle, "Create a filled triangle shape element");
 
 				ui.unindent();
 			}
 
-			if (ui.panel(Id.handle({selected: true}), "ProgressBars")){
+			if (ui.panel(Id.handle({selected: true}), "Progress Bars")){
 				ui.indent();
-				if (ui.button("RectPB")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.ProgressBar);
-				}
-				if (ui.isHovered) ui.tooltip("Creates rectangular progress bar");
-				if (ui.button("CircularPB")) {
-					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.CProgressBar);
-				}
-				if (ui.isHovered) ui.tooltip("Creates circular progress bar");
+
+				drawToolbarItem(ui, cui, canvas, "RectPB", ProgressBar, "Create a rectangular progress bar");
+				drawToolbarItem(ui, cui, canvas, "CircularPB", CProgressBar, "Create a circular progress bar");
+
 				ui.unindent();
 			}
 		}
+	}
+
+	static function drawToolbarItem(ui: Zui, cui: Zui, canvas: TCanvas, label: String, elemType: ElementType, tooltip: String) {
+		if (ui.button(label)) {
+			Editor.selectedElem = CanvasTools.makeElem(cui, canvas, elemType);
+		}
+
+		if (ui.isHovered) ui.tooltip(tooltip);
 	}
 }
