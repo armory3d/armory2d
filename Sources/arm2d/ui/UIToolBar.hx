@@ -63,6 +63,10 @@ class UIToolBar {
 					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.TextInput);
 				}
 				if (ui.isHovered) ui.tooltip("Creates text input element");
+				if (ui.button("Text Area")) {
+					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.TextArea);
+				}
+				if (ui.isHovered) ui.tooltip("Creates text area element");
 				if (ui.button("Key Input")) {
 					Editor.selectedElem = CanvasTools.makeElem(cui, canvas, ElementType.KeyInput);
 				}
