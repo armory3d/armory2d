@@ -176,6 +176,9 @@ class Editor {
 	}
 
 	public function onFrames(framebuffers: Array<kha.Framebuffer>): Void {
+		// Prevent crash when minimizing window
+		if (kha.System.windowWidth() == 0 || kha.System.windowHeight() == 0) return;
+
 		var framebuffer = framebuffers[0];
 
 		// Disable UI if a popup is displayed
