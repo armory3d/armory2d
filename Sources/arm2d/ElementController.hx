@@ -17,10 +17,10 @@ import arm2d.tools.CanvasTools;
 
 class ElementController {
 
-    static var ui:Zui;
-    static var cui:Zui;
+	static var ui:Zui;
+	static var cui:Zui;
 
-    public static var isManipulating = false;
+	public static var isManipulating = false;
 	static var transformInitInput:Vector2;
 	static var transformInitPos:Vector2;
 	static var transformInitRot:Float;
@@ -38,12 +38,12 @@ class ElementController {
 	static var rotate = false;
 	static var newElementSelected = false;
 
-    public static var handleSize(get, null):Int;
+	public static var handleSize(get, null):Int;
 	static inline function get_handleSize():Int { return Std.int(8 * ui.SCALE()); }
 
 	public static function initialize(ui: Zui, cui: Zui) {
 		ElementController.ui = ui;
-        ElementController.cui = cui;
+		ElementController.cui = cui;
 	}
 
 	public static function selectElement(canvas:TCanvas) {
@@ -79,7 +79,7 @@ class ElementController {
 
 				if (Math.hitbox(cui, canvas.x + ex - handleSize / 2, canvas.y + ey - handleSize / 2, ew + handleSize, eh + handleSize, elem.rotation)
 						|| (Math.hitbox(cui, rotHandleX, rotHandleY, handleSize, rotHandleH, elem.rotation, [cx, cy]) // Rotation handle hitbox
-						    && lastSelected == elem)) { // Don't select elements other than the currently selected by their rotation handle
+							&& lastSelected == elem)) { // Don't select elements other than the currently selected by their rotation handle
 					Editor.selectedElem = elem;
 
 					if (lastSelected != elem)
@@ -92,9 +92,9 @@ class ElementController {
 		}
 	}
 
-    public static function render(g:Graphics, canvas:TCanvas) {
+	public static function render(g:Graphics, canvas:TCanvas) {
 
-        // Outline selected elem
+		// Outline selected elem
 		if (Editor.selectedElem != null) {
 			var anchorOffset = Canvas.getAnchorOffset(canvas, Editor.selectedElem);
 
@@ -179,16 +179,16 @@ class ElementController {
 			g.popTransformation();
 		}
 
-    }
+	}
 
-    public static function update(ui:Zui, cui:Zui, canvas:TCanvas) {
-        arm2d.ElementController.ui = ui;
-        arm2d.ElementController.cui = cui;
+	public static function update(ui:Zui, cui:Zui, canvas:TCanvas) {
+		arm2d.ElementController.ui = ui;
+		arm2d.ElementController.cui = cui;
 
 		if (newElementSelected)
 			return;
 
-        if (Editor.selectedElem != null) {
+		if (Editor.selectedElem != null) {
 			var elem = Editor.selectedElem;
 			var anchorOffset = Canvas.getAnchorOffset(canvas, elem);
 
@@ -354,7 +354,7 @@ class ElementController {
 
 					if (ui.isBackspaceDown || ui.isDeleteDown){
 						CanvasTools.removeElem(canvas, Editor.selectedElem);
-		                Editor.selectedElem = null;
+						Editor.selectedElem = null;
 					}
 					else if (ui.key == KeyCode.D) Editor.selectedElem = CanvasTools.duplicateElem(canvas, elem);
 				}
@@ -362,9 +362,9 @@ class ElementController {
 		} else {
 			endElementManipulation();
 		}
-    }
+	}
 
-    static function startElementManipulation(?mousePressed=false) {
+	static function startElementManipulation(?mousePressed=false) {
 		if (isManipulating) endElementManipulation(true);
 
 		transformInitInput = new Vector2(ui.inputX, ui.inputY);
@@ -395,5 +395,5 @@ class ElementController {
 		Editor.currentOperation = "";
 	}
 
-    static inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE()); }
+	static inline function scaled(f: Float): Int { return Std.int(f * cui.SCALE()); }
 }
