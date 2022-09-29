@@ -521,6 +521,11 @@ class UIProperties {
 					ui.indent();
 					var gsize = Id.handle({value: 20});
 					ui.slider(gsize, "Grid Size", 1, 128, true, 1);
+					if (gsize.changed) {
+						Editor.gridSize = Std.int(gsize.value);
+						Editor.redrawGrid = true;
+					}
+
 					Editor.gridSnapPos = ui.check(Id.handle({selected: true}), "Grid Snap Position");
 					if (ui.isHovered) ui.tooltip("Snap the element's position to the grid");
 					Editor.gridSnapBounds = ui.check(Id.handle({selected: false}), "Grid Snap Bounds");
@@ -528,19 +533,14 @@ class UIProperties {
 					Editor.gridUseRelative = ui.check(Id.handle({selected: true}), "Use Relative Grid");
 					if (ui.isHovered) ui.tooltip("Use a grid that's relative to the selected element");
 
-					if (gsize.changed && !ui.inputDown) {
-						Editor.gridSize = Std.int(gsize.value);
-					}
-
 					Editor.useRotationSteps = ui.check(Id.handle({selected: false}), "Use Fixed Rotation Steps");
 					if (ui.isHovered) ui.tooltip("Rotate elements by a fixed step size");
 					var rotStepHandle = Id.handle({value: 15});
 					if (Editor.useRotationSteps) {
 						ui.slider(rotStepHandle, "Rotation Step Size", 1, 180, true, 1);
-					}
-
-					if (rotStepHandle.changed && !ui.inputDown) {
-						Editor.rotationSteps = Math.toRadians(rotStepHandle.value);
+						if (rotStepHandle.changed) {
+							Editor.rotationSteps = Math.toRadians(rotStepHandle.value);
+						}
 					}
 
 					ui.unindent();

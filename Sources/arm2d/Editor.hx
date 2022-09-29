@@ -54,8 +54,9 @@ class Editor {
 	public static var gridSnapPos:Bool = true;
 	public static var gridUseRelative:Bool = true;
 	public static var useRotationSteps:Bool = false;
-	public static var gridSize:Int = 20;
 	public static var rotationSteps:Float = Math.toRadians(15);
+	public static var gridSize:Int = 20;
+	public static var redrawGrid = false;
 	static var grid:kha.Image = null;
 	static var timeline:kha.Image = null;
 
@@ -118,6 +119,8 @@ class Editor {
 	}
 
 	function drawGrid() {
+		redrawGrid = false;
+
 		var scaledGridSize = scaled(gridSize);
 		var doubleGridSize = scaled(gridSize * 2);
 
@@ -126,7 +129,9 @@ class Editor {
 		var w = ww + doubleGridSize * 2;
 		var h = wh + doubleGridSize * 2;
 
-		grid = kha.Image.createRenderTarget(w, h);
+		if (grid == null) {
+			grid = kha.Image.createRenderTarget(w, h);
+		}
 		grid.g2.begin(true, 0xff242424);
 
 		for (i in 0...Std.int(h / doubleGridSize) + 1) {
@@ -203,7 +208,7 @@ class Editor {
 		var timelineFramesHeight = Std.int(40 * sc);
 
 		// Bake and redraw if the UI scale has changed
-		if (grid == null) drawGrid();
+		if (grid == null || redrawGrid) drawGrid();
 		if (timeline == null || timeline.height != timelineLabelsHeight + timelineFramesHeight) drawTimeline(timelineLabelsHeight, timelineFramesHeight);
 
 		var g = framebuffer.g2;
