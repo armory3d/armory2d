@@ -86,7 +86,7 @@ class Editor {
 	function loaded() {
 		var t = Reflect.copy(Themes.dark);
 		t.FILL_WINDOW_BG = true;
-		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel});
+		ui = new Zui({scaleFactor: Main.prefs.scaleFactor, font: kha.Assets.fonts.font_default, theme: t, color_wheel: kha.Assets.images.color_wheel, black_white_gradient: kha.Assets.images.black_white_gradient});
 		cui = new Zui({scaleFactor: 1.0, font: kha.Assets.fonts.font_default, autoNotifyInput: true, theme: Reflect.copy(Canvas.getTheme(canvas.theme))});
 		uimodal = new Zui( { font: kha.Assets.fonts.font_default, scaleFactor: Main.prefs.scaleFactor } );
 		ElementController.initialize(ui, cui);
