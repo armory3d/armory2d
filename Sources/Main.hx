@@ -56,14 +56,13 @@ class Main {
 		if(cwd != ""){
 			var path = kha.System.systemId == "Windows" ? StringTools.replace(prefs.path, "/", "\\") : prefs.path;
 			kha.Assets.loadBlobFromPath(path, function(cblob:kha.Blob) {
-				var raw:TCanvas = haxe.Json.parse(cblob.toString());
-				inst = new Editor(raw);
+				inst = new Editor(Canvas.parseCanvasFromBlob(cblob));
 			});
 		}
 		else {
 			prefs.path = Krom.getFilesLocation();
 		#end
-			var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", elements: [], assets: [] };
+			var raw:TCanvas = { name: "untitled", x: 0, y: 0, width: 1280, height: 720, theme: "Default Light", visible: true, elements: [], assets: [] };
 			inst = new Editor(raw);
 		#if kha_krom
 		}

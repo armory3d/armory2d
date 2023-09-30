@@ -92,10 +92,9 @@ class Assets {
 		canvas.y = Editor.coffY;
 	}
 
-	public static function load(done:TCanvas->Void){
-		kha.Assets.loadBlobFromPath(Main.prefs.path,function(b:kha.Blob){
-			var canvas:TCanvas = haxe.Json.parse(b.toString());
-			done(canvas);
+	public static function load(done: TCanvas->Void) {
+		kha.Assets.loadBlobFromPath(Main.prefs.path, function(b: kha.Blob) {
+			done(Canvas.parseCanvasFromBlob(b));
 		});
 	}
 
